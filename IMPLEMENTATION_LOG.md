@@ -45,12 +45,12 @@ Unknown infrastructure is never represented as verified implementation.
 - Added direct PostgreSQL crash-window characterization for before-commit and after-commit termination windows.
 - Detected and fixed nondeterministic assumptions in the live outbox test; final verification uses one destination and deterministic sequencing.
 - Detected and fixed SQL syntax in crash-window verification queries.
-- GitHub Actions run 143 passed final-head build, unit tests, schema bootstrap, 4/4 live PostgreSQL scenarios, and crash-window characterization on commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`.
-- Reconciled README, 360° state, verification matrix, architecture, roadmap, implementation status, and release evidence with the final verified state.
+- GitHub Actions run 169 passed final verified candidate build, unit tests, schema bootstrap, 4/4 live PostgreSQL scenarios, and crash-window characterization on code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`.
+- Reconciled README, 360° state, verification matrix, architecture, roadmap, implementation status, and release evidence with the verified final implementation evidence.
 
 ### Final verification state
 
-The implementation-level 0.6 persistence milestone is verified on real PostgreSQL 16. The current candidate remains unmerged and the package version remains `0.5.0`.
+The implementation-level 0.6 persistence milestone is verified on real PostgreSQL 16.15 for code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`. Documentation-only reconciliation commits after that verification do not change the implementation behavior; they require fresh CI before the documentation-updated branch is treated as the final candidate.
 
 ### Release Boundary
 

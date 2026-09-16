@@ -126,5 +126,5 @@ test("concurrent deliveries of the same logical message produce one accepted rec
 
   assert.equal(results.filter((result) => result.accepted).length, 1);
   assert.equal(results.filter((result) => result.duplicate).length, 15);
-  assert.equal(inbox.list("consumer-a").length, 1);
+  assert.deepEqual(inbox.get("consumer-a", "msg-001"), results[0]?.record);
 });

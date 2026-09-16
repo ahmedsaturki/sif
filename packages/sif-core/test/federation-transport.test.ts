@@ -8,6 +8,7 @@ import {
   createUnsignedFederationEnvelope,
   negotiateFederationCapabilities,
   type FederationNegotiationProfile,
+  type FederationTransportAdapter,
 } from "../src/index.js";
 
 const profile: FederationNegotiationProfile = {
@@ -46,6 +47,10 @@ function envelope() {
   };
 }
 
+function scope(sessionId: string) {
+  return { peerId: peer.domain, sessionId, protocolVersion: "0.1" };
+}
+
 async function expectFederationError(action: () => Promise<unknown> | unknown, code: FederationProtocolError["code"]): Promise<void> {
   let caught = false;
   try {
@@ -59,17 +64,18 @@ async function expectFederationError(action: () => Promise<unknown> | unknown, c
 }
 
 test("transport boundary binds session identity and local domain", async () => {
-  const negotiated = negotiateFederationCapabilities(profile, profile, { peerId: peer.domain, sessionId: "session-001", protocolVersion: "0.1" });
+  const negotiated = negotiateFederationCapabilities(profile, profile, scope("session-001"));
   const adapter = new InMemoryFederationTransportAdapter("2026-09-16T06:00:02.000Z");
   const boundary = new FederationTransportBoundary(adapter);
   const session = await boundary.open("domain-b", peer, negotiated.scope, negotiated);
   assert.equal(session.localDomain, "domain-b");
   assert.equal(session.peerIdentity.domain, "domain-a");
   assert.equal(session.authenticated, true);
+  assert.equal(session.encrypted, false);
 });
 
 test("matching envelope is delivered and preserved", async () => {
-  const negotiated = negotiateFederationCapabilities(profile, profile, { peerId: peer.domain, sessionId: "session-002", protocolVersion: "0.1" });
+  const negotiated = negotiateFederationCapabilities(profile, profile, scope("session-002"));
   const adapter = new InMemoryFederationTransportAdapter("2026-09-16T06:00:02.000Z");
   const boundary = new FederationTransportBoundary(adapter);
   const session = await boundary.open("domain-b", peer, negotiated.scope, negotiated);
@@ -80,7 +86,7 @@ test("matching envelope is delivered and preserved", async () => {
 });
 
 test("sender/session mismatch fails before provider send", async () => {
-  const negotiated = negotiateFederationCapabilities(profile, profile, { peerId: peer.domain, sessionId: "session-003", protocolVersion: "0.1" });
+  const negotiated = negotiateFederationCapabilities(profile, profile, scope("session-003"));
   const adapter = new InMemoryFederationTransportAdapter("2026-09-16T06:00:02.000Z");
   const boundary = new FederationTransportBoundary(adapter);
   const session = await boundary.open("domain-b", peer, negotiated.scope, negotiated);
@@ -90,15 +96,44 @@ test("sender/session mismatch fails before provider send", async () => {
 });
 
 test("oversized message is rejected before provider send", async () => {
-  const negotiated = negotiateFederationCapabilities(profile, profile, { peerId: peer.domain, sessionId: "session-004", protocolVersion: "0.1" });
+  const negotiated = negotiateFederationCapabilities(profile, profile, scope("session-004"));
   const adapter = new InMemoryFederationTransportAdapter("2026-09-16T06:00:02.000Z");
   const boundary = new FederationTransportBoundary(adapter);
   const session = await boundary.open("domain-b", peer, negotiated.scope, negotiated);
   await expectFederationError(() => boundary.send(session, envelope(), 1025, 0), "RESOURCE_EXHAUSTED");
 });
 
+test("F3-050: encrypted transport without authenticated peer is still rejected", async () => {
+  const negotiated = negotiateFederationCapabilities(profile, profile, scope("session-050"));
+  const encryptedUnauthenticatedAdapter: FederationTransportAdapter = {
+    async open(context) {
+      return {
+        sessionId: context.scope.sessionId,
+        localDomain: context.localDomain,
+        peerIdentity: { ...context.peer },
+        establishedAt: "2026-09-16T06:00:02.000Z",
+        encrypted: true,
+        authenticated: false,
+        negotiated: context.negotiated,
+      };
+    },
+    async send(context) {
+      return {
+        outcome: "DELIVERED",
+        sessionId: context.session.sessionId,
+        messageId: context.envelope.messageId,
+        idempotencyKey: `${context.envelope.sender.domain}\u0000${context.envelope.replayNonce}`,
+        observedAt: "2026-09-16T06:00:02.000Z",
+      };
+    },
+    async close() {},
+  };
+  const boundary = new FederationTransportBoundary(encryptedUnauthenticatedAdapter);
+  await expectFederationError(() => boundary.open("domain-b", peer, negotiated.scope, negotiated), "AUTHENTICATION_FAILURE");
+});
+
 test("closed provider session reports peer unavailable", async () => {
-  const negotiated = negotiateFederationCapabilities(profile, profile, { peerId: peer.domain, sessionId: "session-005", protocolVersion: "0.1" });
+  const negotiated = negotiateFederationCapabilities(profile, profile, scope("session-005"));
   const adapter = new InMemoryFederationTransportAdapter("2026-09-16T06:00:02.000Z");
   const boundary = new FederationTransportBoundary(adapter);
   const session = await boundary.open("domain-b", peer, negotiated.scope, negotiated);

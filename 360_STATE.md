@@ -33,7 +33,7 @@ Implemented and tested:
 
 ## Live PostgreSQL 0.6 Verification
 
-GitHub Actions run 93 verified the committed integration against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and a direct SQL crash-window characterization.
+GitHub Actions run 93 verified the implementation commit against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and a direct SQL crash-window characterization.
 
 Verified live scenarios:
 
@@ -41,7 +41,7 @@ Verified live scenarios:
 2. Atomic rollback: a constraint failure rolls back the event, stream head, and outbox together with no partial commit.
 3. Projection checkpoint persistence: checkpoint state survives through the PostgreSQL store and round-trips deterministically.
 4. Outbox worker lifecycle: one worker claims the item, another is blocked while the lease is valid, the item is reclaimed after expiry, stale-owner delivery is fenced, and the new owner can mark it delivered.
-5. Crash-window characterization: terminating the PostgreSQL backend before commit leaves no partial state and permits retry; terminating it after commit but before client acknowledgement preserves the committed event and stream head, with no outbox row in the direct SQL scenario.
+5. Crash-window characterization: terminating the PostgreSQL backend before commit leaves no partial state and permits retry; terminating it after commit but before client acknowledgement preserves the committed event and stream head.
 
 ## Evidence State
 
@@ -52,6 +52,8 @@ Verified live scenarios:
 - PostgreSQL schema bootstrap: PASS
 - GitHub Actions live PostgreSQL integration: 4/4 PASS
 - GitHub Actions crash-window characterization: PASS
+
+Run 93 is the implementation verification baseline. Final documentation/evidence commits were added afterward, so fresh CI on the final branch HEAD is required before promotion.
 
 ## Explicit Unknown / Not Claimed
 
@@ -69,8 +71,8 @@ Verified live scenarios:
 ## Release / Promotion State
 
 `feat/sif-core-0.5.0` remains the verified kernel baseline.
-`feat/sif-core-0.6.0-live-postgres` contains the completed core live-persistence verification milestone.
-Binary package versioning remains 0.5.0 until a new 0.6.0 release artifact is built, hashed, preserved, and independently verified. No merge or binary publication is implied by CI success alone.
+`feat/sif-core-0.6.0-live-postgres` contains the completed core live-persistence verification milestone plus evidence/documentation updates.
+Binary package versioning remains 0.5.0 until a new 0.6.0 release artifact is built, hashed, preserved, and independently verified from the final promotion commit. No merge or binary publication is implied by CI success alone.
 
 ## Governing Laws
 

@@ -3,6 +3,8 @@ import type { ISODate } from "./types.js";
 
 export const FEDERATION_PROTOCOL = "sif-federation" as const;
 export const FEDERATION_SIGNATURE_ALGORITHM = "Ed25519" as const;
+export const FEDERATION_SIGNATURE_ENCODING = "base64" as const;
+export const FEDERATION_CANONICALIZATION_VERSION = "sif-json-c14n-v1" as const;
 
 export type FederationFailureCode =
   | "AUTHENTICATION_FAILURE"
@@ -47,6 +49,7 @@ export interface FederationEnvelope {
   targetDomain: string;
   messageId: string;
   eventId?: string;
+  evidenceId?: string;
   correlationId?: string;
   provenanceId: string;
   time: FederationTime;
@@ -54,7 +57,10 @@ export interface FederationEnvelope {
   payload: FederationEnvelopePayload;
   replayNonce: string;
   payloadDigest: string;
+  canonicalizationVersion: typeof FEDERATION_CANONICALIZATION_VERSION;
   signatureAlgorithm: typeof FEDERATION_SIGNATURE_ALGORITHM;
+  signatureEncoding: typeof FEDERATION_SIGNATURE_ENCODING;
+  keyId: string;
   signature: string;
 }
 
@@ -65,6 +71,7 @@ export type UnsignedFederationEnvelope = Omit<FederationEnvelope, "signature">;
  * deterministic signing bytes and accepts an implementation-provided signature.
  */
 export interface FederationSigner {
+  keyId: string;
   sign(data: string): string;
 }
 export interface FederationVerifier {
@@ -122,8 +129,15 @@ export function validateFederationEnvelope(envelope: FederationEnvelope): void {
   assertNonEmpty("provenanceId", envelope.provenanceId);
   assertNonEmpty("replayNonce", envelope.replayNonce);
   assertNonEmpty("payload.type", envelope.payload.type);
+  assertNonEmpty("keyId", envelope.keyId);
+  if (envelope.canonicalizationVersion !== FEDERATION_CANONICALIZATION_VERSION) {
+    throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation canonicalization version: ${envelope.canonicalizationVersion}`);
+  }
   if (envelope.signatureAlgorithm !== FEDERATION_SIGNATURE_ALGORITHM) {
     throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation signature algorithm: ${envelope.signatureAlgorithm}`);
+  }
+  if (envelope.signatureEncoding !== FEDERATION_SIGNATURE_ENCODING) {
+    throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation signature encoding: ${envelope.signatureEncoding}`);
   }
   assertNonEmpty("signature", envelope.signature);
   assertIso("time.occurredAt", envelope.time.occurredAt);
@@ -132,6 +146,8 @@ export function validateFederationEnvelope(envelope: FederationEnvelope): void {
     assertIso("time.expiresAt", envelope.time.expiresAt);
     if (Date.parse(envelope.time.expiresAt) <= Date.parse(envelope.time.observedAt)) throw new TypeError("time.expiresAt must be after time.observedAt");
   }
+  if (envelope.eventId !== undefined) assertNonEmpty("eventId", envelope.eventId);
+  if (envelope.evidenceId !== undefined) assertNonEmpty("evidenceId", envelope.evidenceId);
   if (envelope.eventId !== undefined && envelope.eventId === envelope.messageId) {
     throw new FederationProtocolError("INTEGRITY_FAILURE", "MESSAGE IDENTITY must remain distinct from EVENT IDENTITY");
   }
@@ -144,22 +160,33 @@ export function validateFederationEnvelope(envelope: FederationEnvelope): void {
   }
 }
 
-export function createUnsignedFederationEnvelope(input: Omit<UnsignedFederationEnvelope, "payloadDigest" | "signatureAlgorithm">): UnsignedFederationEnvelope {
+export function createUnsignedFederationEnvelope(
+  input: Omit<UnsignedFederationEnvelope, "payloadDigest" | "canonicalizationVersion" | "signatureAlgorithm" | "signatureEncoding">,
+): UnsignedFederationEnvelope {
   if (input.protocol !== FEDERATION_PROTOCOL) throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", "Unsupported federation protocol");
   const result: UnsignedFederationEnvelope = {
     ...input,
     capabilities: sortCapabilities(input.capabilities),
     payloadDigest: federationPayloadDigest(input.payload),
+    canonicalizationVersion: FEDERATION_CANONICALIZATION_VERSION,
     signatureAlgorithm: FEDERATION_SIGNATURE_ALGORITHM,
+    signatureEncoding: FEDERATION_SIGNATURE_ENCODING,
   };
   validateUnsignedFederationEnvelope(result);
   return result;
 }
 
 function validateUnsignedFederationEnvelope(envelope: UnsignedFederationEnvelope): void {
+  if (envelope.canonicalizationVersion !== FEDERATION_CANONICALIZATION_VERSION) {
+    throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation canonicalization version: ${envelope.canonicalizationVersion}`);
+  }
   if (envelope.signatureAlgorithm !== FEDERATION_SIGNATURE_ALGORITHM) {
     throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation signature algorithm: ${envelope.signatureAlgorithm}`);
   }
+  if (envelope.signatureEncoding !== FEDERATION_SIGNATURE_ENCODING) {
+    throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation signature encoding: ${envelope.signatureEncoding}`);
+  }
+  assertNonEmpty("keyId", envelope.keyId);
   if (federationPayloadDigest(envelope.payload) !== envelope.payloadDigest) {
     throw new FederationProtocolError("INTEGRITY_FAILURE", "payloadDigest does not match the canonical payload");
   }
@@ -169,6 +196,10 @@ function validateUnsignedFederationEnvelope(envelope: UnsignedFederationEnvelope
 
 export function signFederationEnvelope(envelope: UnsignedFederationEnvelope, signer: FederationSigner): FederationEnvelope {
   validateUnsignedFederationEnvelope(envelope);
+  assertNonEmpty("signer.keyId", signer.keyId);
+  if (envelope.keyId !== signer.keyId) {
+    throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Signing key identity does not match envelope keyId", "peer");
+  }
   return { ...envelope, signature: signer.sign(federationSigningBytes(envelope)) };
 }
 

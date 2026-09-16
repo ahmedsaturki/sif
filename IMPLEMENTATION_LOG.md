@@ -45,13 +45,25 @@ Unknown infrastructure is never represented as verified implementation.
 - Added direct PostgreSQL crash-window characterization for before-commit and after-commit termination windows.
 - Detected and fixed nondeterministic assumptions in the live outbox test; final verification uses one destination and deterministic sequencing.
 - Detected and fixed SQL syntax in crash-window verification queries.
-- GitHub Actions run 169 passed final verified candidate build, unit tests, schema bootstrap, 4/4 live PostgreSQL scenarios, and crash-window characterization on code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`.
-- Reconciled README, 360° state, verification matrix, architecture, roadmap, implementation status, and release evidence with the verified final implementation evidence.
+- Final candidate verification is tied to an exact checked-out commit and artifact manifest; pull-request merge refs are not used as candidate provenance.
 
 ### Final verification state
 
-The implementation-level 0.6 persistence milestone is verified on real PostgreSQL 16.15 for code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`. Documentation-only reconciliation commits after that verification do not change the implementation behavior; they require fresh CI before the documentation-updated branch is treated as the final candidate.
+The implementation-level 0.6 persistence milestone is verified through the latest successful CI candidate line. The package version remains `0.5.0`; the 0.6 milestone is an integration-verification boundary, not a published package release.
+
+### 0.7 Secure Federation — SPEC / CONTRACT START
+
+- Defined `PHASE_3_FEDERATION_SPEC.md` as the normative Phase 3 boundary.
+- Defined `PHASE_3_IMPLEMENTATION_CONTRACT.md` with component boundaries, typed failures, processing state machine, security/resource/provenance invariants, implementation order, and promotion gates.
+- Defined `PHASE_3_TEST_MATRIX.md` with 60 required acceptance scenarios spanning identity, trust, signatures, capability negotiation, authority, inbox/idempotency, retry/recovery, reconciliation, resource abuse, time semantics, provenance, concurrency, fault injection, and artifact provenance.
+- Created dedicated branch `feat/sif-core-0.7.0-secure-federation` from the exact verified Phase 2 candidate.
+- Opened draft PR #3 against `feat/sif-core-0.6.0-live-postgres` to keep Phase 3 isolated from `main` and from the unpublished Phase 2 release boundary.
+- No Phase 3 runtime implementation, package version bump, registry publication, or merge is claimed.
 
 ### Release Boundary
 
 A future `0.6.0` artifact release requires fresh artifacts built from the promotion commit, SHA-256 identities, byte-preserving preservation, and independent verification. CI success does not imply merge or binary publication.
+
+Phase 3 follows the same evidence-gated sequence:
+
+`SPEC → CONTRACT → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

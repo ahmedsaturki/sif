@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import net from 'node:net';
 import { randomUUID } from 'node:crypto';
-import { PostgresTransactionalEventStore, PostgresProjectionCheckpointStore } from '../dist/src/postgres.js';
+import { PostgresTransactionalEventStore, PostgresProjectionCheckpointStore, PostgresFederatedInbox } from '../dist/src/index.js';
 import { PostgresOutboxWorker } from '../dist/src/worker.js';
 import { digest } from '../dist/src/core.js';
 
@@ -185,6 +185,27 @@ function event(streamId, version, id = randomUUID()) {
   };
 }
 
+function federationEnvelope(messageId, replayNonce = `nonce-${messageId}`) {
+  return {
+    protocol: 'sif-federation',
+    protocolVersion: '0.1',
+    schema: 'sif.federation.envelope',
+    schemaVersion: '1',
+    sender: { domain: 'domain-a', subject: 'workload-a', transportBinding: 'spiffe://domain-a/workload-a' },
+    targetDomain: 'domain-b',
+    messageId,
+    eventId: `event-${messageId}`,
+    provenanceId: `prov-${messageId}`,
+    time: { occurredAt: '2026-09-16T06:00:00.000Z', observedAt: '2026-09-16T06:00:01.000Z', expiresAt: '2026-09-16T07:00:00.000Z', semantics: 'event-and-observation' },
+    capabilities: [],
+    payload: { type: 'evidence', data: { messageId } },
+    replayNonce,
+    payloadDigest: digest({ type: 'evidence', data: { messageId } }),
+    signatureAlgorithm: 'Ed25519',
+    signature: 'integration-test-signature',
+  };
+}
+
 const canRun = process.env.RUN_POSTGRES_INTEGRATION === '1';
 
 test('live PostgreSQL transactional append serializes concurrent writers and persists exactly one event/outbox pair', { skip: !canRun }, async () => {
@@ -322,5 +343,116 @@ test('live PostgreSQL outbox leases are exclusive, reclaimable after expiry, and
     poolSeed.close();
     workerA.close();
     workerB.close();
+  }
+});
+
+test('live PostgreSQL federated inbox is durable, idempotent, and verifiable', { skip: !canRun }, async () => {
+  const pool = new WirePgPool();
+  const check = new PgWireClient();
+  await Promise.all([pool.client.ready, check.ready]);
+  const inbox = new PostgresFederatedInbox(pool);
+  const consumerId = `federation-consumer-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const messageId = randomUUID();
+  const envelope = federationEnvelope(messageId, `nonce-${messageId}`);
+  const effectTable = `sif_test_fed_effect_${Date.now()}_${Math.random().toString(16).slice(2)}`.replaceAll('-', '_');
+  try {
+    await check.query(`CREATE TABLE ${effectTable} (id TEXT PRIMARY KEY)`);
+
+    let effectCalls = 0;
+    const effect = async (client) => {
+      effectCalls += 1;
+      await client.query(`INSERT INTO ${effectTable} (id) VALUES ('effect-1')`);
+      return 'result-digest-1';
+    };
+
+    const first = await inbox.process(envelope, consumerId, effect, '2026-09-16T06:00:02.000Z');
+    assert.equal(first.accepted, true);
+    assert.equal(first.duplicate, false);
+    assert.equal(first.record.state, 'COMMITTED');
+    assert.equal(first.record.resultDigest, 'result-digest-1');
+    assert.equal(effectCalls, 1);
+
+    const second = await inbox.process(envelope, consumerId, async () => {
+      throw new Error('duplicate effect must not execute');
+    }, '2026-09-16T06:00:03.000Z');
+    assert.equal(second.accepted, false);
+    assert.equal(second.duplicate, true);
+    assert.equal(second.record.state, 'COMMITTED');
+
+    const count = await check.query(`SELECT count(*) AS count FROM ${effectTable}`);
+    assert.equal(count.rows[0].count, '1');
+
+    const verified = await inbox.markVerified(consumerId, messageId, '2026-09-16T06:00:04.000Z');
+    assert.equal(verified.state, 'VERIFIED');
+    assert.equal(verified.resultDigest, 'result-digest-1');
+
+    const persisted = await inbox.get(consumerId, messageId);
+    assert.equal(persisted.state, 'VERIFIED');
+    assert.equal(persisted.replayKey, `${envelope.sender.domain}\u0000${envelope.replayNonce}`);
+  } finally {
+    await check.query(`DROP TABLE IF EXISTS ${effectTable}`).catch(() => {});
+    await check.query(`DELETE FROM sif_federated_inbox WHERE consumer_id = '${consumerId}'`).catch(() => {});
+    check.close();
+    pool.close();
+  }
+});
+
+test('live PostgreSQL federated inbox rolls back durable claim and effect when effect fails', { skip: !canRun }, async () => {
+  const pool = new WirePgPool();
+  const check = new PgWireClient();
+  await Promise.all([pool.client.ready, check.ready]);
+  const inbox = new PostgresFederatedInbox(pool);
+  const consumerId = `federation-rollback-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const messageId = randomUUID();
+  const envelope = federationEnvelope(messageId, `nonce-${messageId}`);
+  const effectTable = `sif_test_fed_rollback_${Date.now()}_${Math.random().toString(16).slice(2)}`.replaceAll('-', '_');
+  try {
+    await check.query(`CREATE TABLE ${effectTable} (id TEXT PRIMARY KEY)`);
+    await assert.rejects(
+      inbox.process(envelope, consumerId, async (client) => {
+        await client.query(`INSERT INTO ${effectTable} (id) VALUES ('effect-failed')`);
+        throw new Error('forced federated effect failure');
+      }),
+      /forced federated effect failure/i,
+    );
+
+    const record = await check.query(`SELECT count(*) AS count FROM sif_federated_inbox WHERE consumer_id='${consumerId}' AND message_id='${messageId}'`);
+    const effects = await check.query(`SELECT count(*) AS count FROM ${effectTable}`);
+    assert.equal(record.rows[0].count, '0');
+    assert.equal(effects.rows[0].count, '0');
+
+    const retry = await inbox.process(envelope, consumerId, async (client) => {
+      await client.query(`INSERT INTO ${effectTable} (id) VALUES ('effect-retry')`);
+      return 'result-retry';
+    }, '2026-09-16T06:00:05.000Z');
+    assert.equal(retry.accepted, true);
+    assert.equal(retry.record.state, 'COMMITTED');
+  } finally {
+    await check.query(`DROP TABLE IF EXISTS ${effectTable}`).catch(() => {});
+    await check.query(`DELETE FROM sif_federated_inbox WHERE consumer_id = '${consumerId}'`).catch(() => {});
+    check.close();
+    pool.close();
+  }
+});
+
+test('live PostgreSQL federated inbox rejects replay-key rebinding', { skip: !canRun }, async () => {
+  const pool = new WirePgPool();
+  const check = new PgWireClient();
+  await Promise.all([pool.client.ready, check.ready]);
+  const inbox = new PostgresFederatedInbox(pool);
+  const consumerId = `federation-replay-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const firstId = randomUUID();
+  const secondId = randomUUID();
+  const replayNonce = `shared-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  try {
+    await inbox.process(federationEnvelope(firstId, replayNonce), consumerId, async () => 'result-1');
+    await assert.rejects(
+      inbox.process(federationEnvelope(secondId, replayNonce), consumerId, async () => 'result-2'),
+      /Replay key is already bound/i,
+    );
+  } finally {
+    await check.query(`DELETE FROM sif_federated_inbox WHERE consumer_id = '${consumerId}'`).catch(() => {});
+    check.close();
+    pool.close();
   }
 });

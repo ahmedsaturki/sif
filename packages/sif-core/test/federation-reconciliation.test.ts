@@ -82,8 +82,9 @@ test("oversized reconciliation batch fails before processing", () => {
 
 test("invalid observations fail closed", () => {
   const reconciler = new InMemoryFederationReconciler(10);
+  const malformed = { ...observation(), eventId: undefined, evidenceId: undefined } as unknown as FederatedObservation;
   assert.throws(
-    () => reconciler.reconcile({ observations: [observation({ eventId: undefined, evidenceId: undefined })] }),
+    () => reconciler.reconcile({ observations: [malformed] }),
     TypeError,
   );
 });

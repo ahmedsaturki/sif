@@ -47,6 +47,20 @@ function validateEnvelopeIdentity(envelope: FederationEnvelope): void {
   assertNonEmpty("envelope.replayNonce", envelope.replayNonce);
 }
 
+function logicalReplayKey(senderDomain: string, replayNonce: string): string {
+  return `${senderDomain}\u0000${replayNonce}`;
+}
+
+function durableReplayKeyHash(senderDomain: string, replayNonce: string): string {
+  return digest({ purpose: "sif-federation-replay-key-v1", senderDomain, replayNonce });
+}
+
+function isReplayConstraintError(error: unknown): boolean {
+  if ((error as { code?: unknown }).code === "23505") return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return /duplicate key value violates unique constraint.*sif_federated_inbox.*replay_key/i.test(message);
+}
+
 export class InMemoryFederatedInbox {
   private readonly records = new Map<string, FederatedInboxRecord>();
 
@@ -55,14 +69,14 @@ export class InMemoryFederatedInbox {
     assertNonEmpty("consumerId", consumerId);
     assertDate("receivedAt", receivedAt);
     const key = `${consumerId}\u0000${envelope.messageId}`;
+    const replayKey = logicalReplayKey(envelope.sender.domain, envelope.replayNonce);
     const existing = this.records.get(key);
     if (existing) {
-      if (existing.senderDomain !== envelope.sender.domain || existing.replayKey !== `${envelope.sender.domain}\u0000${envelope.replayNonce}`) {
+      if (existing.senderDomain !== envelope.sender.domain || existing.replayKey !== replayKey) {
         throw new FederationProtocolError("INTEGRITY_FAILURE", "Message identity collision does not match original sender/replay binding");
       }
       return { accepted: false, duplicate: true, record: clone(existing) };
     }
-    const replayKey = `${envelope.sender.domain}\u0000${envelope.replayNonce}`;
     for (const record of this.records.values()) {
       if (record.consumerId === consumerId && record.replayKey === replayKey && record.messageId !== envelope.messageId) {
         throw new FederationProtocolError("REPLAY_DETECTED", "Replay key is already bound to a different message identity");
@@ -209,13 +223,14 @@ export class PostgresFederatedInbox {
   }
 
   private async claim(client: PgClientLike, envelope: FederationEnvelope, consumerId: string, receivedAt: string): Promise<FederatedInboxClaim> {
-    const replayKey = `${envelope.sender.domain}\u0000${envelope.replayNonce}`;
+    const replayKey = logicalReplayKey(envelope.sender.domain, envelope.replayNonce);
+    const replayKeyHash = durableReplayKeyHash(envelope.sender.domain, envelope.replayNonce);
     try {
       const inserted = await client.query(
-        `INSERT INTO sif_federated_inbox (consumer_id, message_id, sender_domain, replay_key, state, received_at)
-         VALUES ($1,$2,$3,$4,'DELIVERED',$5)
+        `INSERT INTO sif_federated_inbox (consumer_id, message_id, sender_domain, replay_nonce, replay_key_hash, state, received_at)
+         VALUES ($1,$2,$3,$4,$5,'DELIVERED',$6)
          ON CONFLICT (consumer_id, message_id) DO NOTHING`,
-        [consumerId, envelope.messageId, envelope.sender.domain, replayKey, receivedAt],
+        [consumerId, envelope.messageId, envelope.sender.domain, envelope.replayNonce, replayKeyHash, receivedAt],
       );
       if (inserted.rowCount > 0) {
         return {
@@ -232,7 +247,7 @@ export class PostgresFederatedInbox {
         };
       }
     } catch (error) {
-      if ((error as { code?: unknown }).code === "23505") {
+      if (isReplayConstraintError(error)) {
         throw new FederationProtocolError("REPLAY_DETECTED", "Replay key is already bound to a different message identity");
       }
       throw error;
@@ -244,7 +259,7 @@ export class PostgresFederatedInbox {
     const row = existing.rows[0];
     if (!row) throw new FederationProtocolError("INTEGRITY_FAILURE", "Inbox conflict produced no durable record");
     const record = rowToRecord(row);
-    if (record.senderDomain !== envelope.sender.domain || record.replayKey !== replayKey) {
+    if (record.senderDomain !== envelope.sender.domain || String(row.replay_key_hash) !== replayKeyHash) {
       throw new FederationProtocolError("INTEGRITY_FAILURE", "Message identity collision does not match original sender/replay binding");
     }
     return { accepted: false, duplicate: true, record };
@@ -256,11 +271,17 @@ function rowToRecord(row: Record<string, unknown>): FederatedInboxRecord {
   if (!["DELIVERED", "PROCESSED", "COMMITTED", "VERIFIED"].includes(state)) {
     throw new FederationProtocolError("INTEGRITY_FAILURE", `Unknown federated inbox state: ${state}`);
   }
+  const senderDomain = String(row.sender_domain);
+  const replayNonce = String(row.replay_nonce);
+  const expectedHash = durableReplayKeyHash(senderDomain, replayNonce);
+  if (String(row.replay_key_hash) !== expectedHash) {
+    throw new FederationProtocolError("INTEGRITY_FAILURE", "Persisted replay-key hash does not match sender/replay identity");
+  }
   return {
     consumerId: String(row.consumer_id),
     messageId: String(row.message_id),
-    senderDomain: String(row.sender_domain),
-    replayKey: String(row.replay_key),
+    senderDomain,
+    replayKey: logicalReplayKey(senderDomain, replayNonce),
     state,
     receivedAt: new Date(String(row.received_at)).toISOString(),
     ...(row.processed_at == null ? {} : { processedAt: new Date(String(row.processed_at)).toISOString() }),

@@ -108,6 +108,7 @@ export interface FaultObservation {
 
 export interface FaultExecutionResult {
   observed: boolean;
+  status?: "NOT_OBSERVED" | "UNAVAILABLE";
   evidenceRef?: string;
   reason?: string;
 }
@@ -133,9 +134,23 @@ export class BoundedFaultInjector implements FaultInjector {
       const result = await this.executor.execute(clone(request));
       if (result.observed) {
         text("fault evidenceRef", result.evidenceRef ?? "");
-        return { faultId: request.faultId, requested: true, observed: true, status: "OBSERVED", evidenceRef: result.evidenceRef, reason: result.reason };
+        return {
+          faultId: request.faultId,
+          requested: true,
+          observed: true,
+          status: "OBSERVED",
+          evidenceRef: result.evidenceRef,
+          ...(result.reason === undefined ? {} : { reason: result.reason }),
+        };
       }
-      return { faultId: request.faultId, requested: true, observed: false, status: "NOT_OBSERVED", reason: result.reason };
+      const status = result.status ?? "NOT_OBSERVED";
+      return {
+        faultId: request.faultId,
+        requested: true,
+        observed: false,
+        status,
+        ...(result.reason === undefined ? {} : { reason: result.reason }),
+      };
     } catch (error) {
       return { faultId: request.faultId, requested: true, observed: false, status: "EVALUATION_FAILED", reason: String(error) };
     }

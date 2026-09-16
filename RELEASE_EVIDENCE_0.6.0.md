@@ -3,13 +3,13 @@
 ## Candidate
 
 - Branch: `feat/sif-core-0.6.0-live-postgres`
-- Current candidate commit: `0df0385c94e59762aab2f5e74ec46702a919453e`
+- Current candidate commit: `7aafe979fe688ffaa4c31c91dcdd408bc8bc6e51`
 - Package version: `0.5.0` (release artifact version intentionally not bumped yet)
 - Implementation verification baseline: GitHub Actions run `143` on `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`
-- Current candidate verification: fresh CI required after documentation reconciliation
+- Current candidate verification: GitHub Actions run `164` in progress
 - PostgreSQL service: `16`
 
-## Verified implementation gates — run 143
+## Verified implementation baseline — run 143
 
 | Gate | Result |
 |---|---|
@@ -60,6 +60,6 @@ A `0.6.0` package release requires a fresh source archive and npm package built 
 
 **Implementation verification baseline: complete.** Run 143 verified the implementation commit on real PostgreSQL 16.
 
-**Current branch state: pending final-candidate CI.** Documentation/evidence reconciliation commits were intentionally made after run 143. The current candidate must pass a fresh complete CI run before artifact production or promotion.
+**Current candidate: pending final CI.** Documentation/evidence reconciliation commits were intentionally added after run 143. Run 164 is the fresh complete CI execution for the current candidate lineage; artifact production or promotion remains blocked until that current candidate is verified.
 
 **Binary release: pending artifact channel.** Run 143 produced no Actions artifacts; no unverified 0.6.0 binary is fabricated or claimed.

@@ -33,7 +33,7 @@ Implemented and tested:
 
 ## Live PostgreSQL 0.6 Verification
 
-GitHub Actions run 93 verified the implementation commit against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and a direct SQL crash-window characterization.
+GitHub Actions **run 136** verified the **final branch HEAD `31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba`** against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and a direct SQL crash-window characterization.
 
 Verified live scenarios:
 
@@ -52,8 +52,9 @@ Verified live scenarios:
 - PostgreSQL schema bootstrap: PASS
 - GitHub Actions live PostgreSQL integration: 4/4 PASS
 - GitHub Actions crash-window characterization: PASS
+- Final-head CI requirement: SATISFIED by run 136
 
-Run 93 verified the implementation. Later commits only refreshed documentation/evidence; a fresh CI run on the final branch HEAD is required before promotion.
+Run 136 is the fresh complete verification of the final branch HEAD.
 
 ## Explicit Unknown / Not Claimed
 

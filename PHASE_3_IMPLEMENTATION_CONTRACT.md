@@ -215,20 +215,21 @@ Required properties:
 ## Typed Failure Contract
 Implementation MUST NOT collapse all failures into a boolean or generic exception. At minimum, the public boundary must distinguish:
 
-`AUTHENTICATION_FAILED`
+`AUTHENTICATION_FAILURE`
 `AUTHORIZATION_DENIED`
 `PROTOCOL_INCOMPATIBLE`
 `CAPABILITY_INCOMPATIBLE`
 `INVALID_SIGNATURE`
-`INTEGRITY_FAILED`
+`INTEGRITY_FAILURE`
 `REPLAY_DETECTED`
 `DUPLICATE_DELIVERY`
 `PEER_UNAVAILABLE`
 `TRANSIENT_DELIVERY_FAILURE`
 `UNKNOWN_OUTCOME`
 `RESOURCE_EXHAUSTED`
-`LOCAL_POLICY_REJECTED`
 `CONFLICT_REQUIRES_RECONCILIATION`
+
+A local policy rejection is represented at the federation protocol boundary as `AUTHORIZATION_DENIED`, with the underlying `PolicyEngine` decision retained as the attributable local reason/rule. The contract does not require a separate `LOCAL_POLICY_REJECTED` wire error code.
 
 ## State-Machine Rules
 Federated processing MUST follow an explicit progression:

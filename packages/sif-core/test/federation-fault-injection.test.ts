@@ -71,7 +71,7 @@ function envelope(messageId = "msg-fault-001", replayNonce = "nonce-fault-001") 
 
 function negotiated(sessionId: string) {
   return negotiateFederationCapabilities(profile, profile, {
-    peerId: peer.domain,
+    peerId: `${peer.domain}/${peer.subject}`,
     sessionId,
     protocolVersion: "0.1",
   });

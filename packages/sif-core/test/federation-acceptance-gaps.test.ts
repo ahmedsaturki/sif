@@ -5,6 +5,7 @@ import {
   FederationProtocolError,
   FederationLocalAdmission,
   FederationTrustBoundary,
+  FederationResourceGovernor,
   InMemoryFederatedInbox,
   InMemoryFederationReconciler,
   PolicyEngine,
@@ -207,6 +208,78 @@ test("F3-048: replayed historical message preserves original occurrence semantic
   assert.equal(replay.record.receivedAt, "2026-09-16T06:30:00.000Z");
   assert.equal(historical.time.occurredAt, "2026-09-15T23:00:00.000Z");
   assert.equal(historical.time.observedAt, "2026-09-16T06:00:01.000Z");
+});
+
+test("F3-049: accepted federated evidence preserves source identity, provenance and local policy attribution", () => {
+  const policy = new PolicyEngine();
+  policy.addRule({
+    id: "allow-observation-evidence",
+    effect: "allow",
+    subject: "remote-a/workload-a",
+    capability: "event.observe",
+    scopePrefix: "local-evidence",
+    reason: "Explicit local policy permits this evidence admission",
+  });
+  const admission = new FederationLocalAdmission("local-a", policy);
+  const trust: FederationTrustDecision = {
+    identity: peerIdentity,
+    trustAnchorId: anchor.id,
+    authenticated: true,
+    authorizedForLocalDomain: true,
+  };
+  const negotiation = negotiateFederationCapabilities(profile, profile, {
+    peerId: "remote-a/workload-a",
+    sessionId: "gap-session-049",
+    protocolVersion: "0.1",
+  });
+  const msg = envelope({
+    messageId: "msg-evidence-049",
+    eventId: "evt-evidence-049",
+    provenanceId: "prov-evidence-049",
+    capabilities: [{ id: "event.observe", version: "1" }],
+  });
+
+  const decision = admission.admit({
+    envelope: msg,
+    trust,
+    negotiation,
+    capabilityId: "event.observe",
+    effectClass: "record-local-evidence",
+    policyVersion: "policy-v049",
+    assertedScope: "local-evidence/federated",
+  });
+
+  assert.equal(decision.peerDomain, "remote-a");
+  assert.equal(decision.peerSubject, "workload-a");
+  assert.equal(decision.messageId, "msg-evidence-049");
+  assert.equal(decision.eventId, "evt-evidence-049");
+  assert.equal(decision.provenanceId, "prov-evidence-049");
+  assert.equal(decision.policyVersion, "policy-v049");
+  assert.equal(decision.ruleId, "allow-observation-evidence");
+});
+
+test("F3-031: repeated peer retry/reconnect attempts are bounded by resource admission", () => {
+  const limits = {
+    maxConcurrentSessions: 2,
+    maxOutstandingInboxWork: 2,
+    maxReplayEntries: 2,
+    maxReconciliationBatch: 2,
+    maxPeerRatePerWindow: 2,
+    maxGlobalRatePerWindow: 3,
+    rateWindowMs: 1000,
+  } as const;
+  const governor = new FederationResourceGovernor(limits);
+
+  governor.openSession("peer-a", 1000);
+  governor.closeSession();
+  governor.openSession("peer-a", 1000);
+  governor.closeSession();
+
+  assert.throws(
+    () => governor.openSession("peer-a", 1000),
+    (error: unknown) => error instanceof FederationProtocolError && error.code === "RESOURCE_EXHAUSTED",
+  );
+  assert.equal(governor.snapshot().peerWindowStarts, 2);
 });
 
 test("F3-051: remote domain cannot become local authority by claiming the local domain", () => {

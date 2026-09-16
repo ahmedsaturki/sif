@@ -2,11 +2,10 @@ name: SIF Core CI
 
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches: [main, 'feat/**']
 
 concurrency:
-  group: sif-core-ci-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  group: sif-core-ci-${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -31,12 +30,12 @@ jobs:
       PGUSER: postgres
       PGDATABASE: postgres
       RUN_POSTGRES_INTEGRATION: '1'
-      CANDIDATE_COMMIT: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      CANDIDATE_COMMIT: ${{ github.sha }}
     steps:
       - name: Checkout exact candidate commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
       - name: Verify exact candidate checkout
         shell: bash
         run: |

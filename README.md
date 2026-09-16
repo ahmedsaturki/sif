@@ -7,6 +7,7 @@ SIF is a sovereignty-first intelligence fabric whose implementation begins with 
 - Genesis: `main` at `f4408d81375786e7a9f0715cf70609d0e257a67c`
 - Verified kernel branch: `feat/sif-core-0.5.0`
 - Live PostgreSQL verification branch: `feat/sif-core-0.6.0-live-postgres`
+- Verified code candidate: `3f1a248b226122696dd612cd7740e3c851c9a31f`
 - Current package version remains `0.5.0`; 0.6 is an integration-verification milestone, not yet a binary package release.
 
 ## SIF Core 0.5.0
@@ -15,20 +16,17 @@ The verified kernel includes append-only event streams, deterministic replay, op
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run **143** verified commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51` against a real PostgreSQL 16 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
+GitHub Actions run **169** verified commit `3f1a248b226122696dd612cd7740e3c851c9a31f` against a real PostgreSQL 16.15 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
 
 The same run passed direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
-
-The current branch has since received documentation/evidence reconciliation commits. A fresh CI run on the current candidate is required again before artifact production.
 
 ## Verification
 
 ```text
-Implementation baseline (run 143): PASS
-Local TypeScript build: PASS
-Local tests: 27/27 PASS
+Final verified code candidate (run 169): PASS
+Strict committed TypeScript build: PASS
+Unit tests: 27/27 PASS
 GitHub Actions artifact identity: PASS
-GitHub Actions committed build/test: PASS
 GitHub Actions PostgreSQL schema bootstrap: PASS
 GitHub Actions live PostgreSQL integration: 4/4 PASS
 GitHub Actions crash-window characterization: PASS
@@ -55,7 +53,7 @@ GitHub Actions crash-window characterization: PASS
 
 ## Binary artifact preservation
 
-The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the persistent Library. Their SHA-256 identities are recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`. A 0.6.0 binary release has not been fabricated or claimed: the current repository connector cannot safely carry binary GitHub release bytes, and the previous implementation verification run produced no Actions artifacts.
+The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the persistent Library. Their SHA-256 identities are recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`. A 0.6.0 binary release has not been fabricated or claimed: the available GitHub connector cannot safely carry binary release bytes, and no Actions artifact was produced for the 0.6 candidate.
 
 ## Verification boundary
 

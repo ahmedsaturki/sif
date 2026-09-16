@@ -4,7 +4,7 @@ SIF is a sovereignty-first intelligence fabric whose implementation begins with 
 
 ## Repository baseline
 
-The `feat/sif-core-0.5.0` branch preserves the SIF Core 0.5.0 implementation, its complete source/test archive, project history, research lineage, verification boundaries, and release discipline.
+The `feat/sif-core-0.5.0` branch preserves the SIF Core 0.5.0 implementation, source/test tree, engineering history, research lineage, verification boundaries, and release discipline.
 
 ## SIF Core 0.5.0
 
@@ -21,7 +21,7 @@ Failed: 0
 Skipped: 0
 ```
 
-Repository CI verifies the preserved archive encoding, decodes the exact source ZIP, checks its SHA-256 digest, extracts the preserved tree, and runs its build/test suite on GitHub Actions.
+Repository CI verifies the committed artifact identity records and directly builds/tests the committed `packages/sif-core` tree on GitHub Actions.
 
 ## Continuity and preserved knowledge
 
@@ -30,12 +30,19 @@ Repository CI verifies the preserved archive encoding, decodes the exact source 
 - `IMPLEMENTATION_LOG.md` — implementation stages and critical fixes
 - `RESEARCH_SYNTHESIS.md` — reusable engineering patterns and research synthesis
 - `ROADMAP.md` — evidence-gated next stages
+- `DECISIONS.md` — important architecture and engineering decisions
+- `VERIFICATION_MATRIX.md` — capability-by-capability evidence state
+- `RELEASE_NOTES_0.5.0.md` — release scope and boundaries
 - `REPOSITORY_360_BASELINE.md` — repository preservation baseline
 - `packages/sif-core/docs/ARCHITECTURE.md` — kernel architecture
 - `packages/sif-core/IMPLEMENTATION_STATUS.md` — implementation and verification status
 - `artifacts/sif-core/0.5.0/ARTIFACT_INVENTORY.md` — artifact identity
-- `artifacts/sif-core/0.5.0/SHA256SUMS` — integrity manifest
-- `artifacts/sif-core/0.5.0/sif-core-0.5.0-source.zip.b64` — connector-safe preserved source archive
+- `artifacts/sif-core/0.5.0/SHA256SUMS` — binary artifact identity hashes
+- `artifacts/sif-core/0.5.0/ARCHIVE_PRESERVATION.md` — byte-for-byte artifact preservation record
+
+## Binary artifact preservation
+
+The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the persistent Library. Their SHA-256 identities are recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`. GitHub publication of binary release assets is intentionally a later release step; the repository never pretends an incomplete binary upload is a verified artifact.
 
 ## Verification boundary
 

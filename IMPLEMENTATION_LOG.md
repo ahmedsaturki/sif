@@ -51,59 +51,34 @@ Unknown infrastructure is never represented as verified implementation.
 
 The implementation-level 0.6 persistence milestone is verified through the successful CI candidate line. The package version remains `0.5.0`; the 0.6 milestone is an integration-verification boundary, not a published package release.
 
-### 0.7 Secure Federation — SPEC / CONTRACT / IMPLEMENT
+## 0.7 Secure Federation — SPEC / CONTRACT / IMPLEMENT / TEST / FIX / VERIFY
 
-- Defined `PHASE_3_FEDERATION_SPEC.md` as the normative Phase 3 boundary.
-- Defined `PHASE_3_IMPLEMENTATION_CONTRACT.md` with component boundaries, typed failures, processing state machine, security/resource/provenance invariants, implementation order, and promotion gates.
-- Defined `PHASE_3_TEST_MATRIX.md` with 60 required acceptance scenarios spanning identity, trust, signatures, capability negotiation, authority, inbox/idempotency, retry/recovery, reconciliation, resource abuse, time semantics, provenance, concurrency, fault injection, and artifact provenance.
-- Created dedicated branch `feat/sif-core-0.7.0-secure-federation` from the exact verified Phase 2 candidate.
-- Opened draft PR #3 against `feat/sif-core-0.6.0-live-postgres` to keep Phase 3 isolated from `main` and from the unpublished Phase 2 release boundary.
-- Implemented canonical federation envelope domain types, typed failure taxonomy, deterministic payload/envelope canonicalization, payload SHA-256 integrity digest, provider-neutral signing/verifier interfaces, fail-closed protocol/signature-algorithm validation, MESSAGE IDENTITY vs EVENT IDENTITY separation, and deterministic capability ordering.
-- Added trust-anchor/trusted-peer validation with effective-time, revocation, transport binding, and versioned trust-bundle activation/retirement.
-- Added durable federated inbox state progression `DELIVERED → PROCESSED → COMMITTED → VERIFIED`, replay/idempotency protection, PostgreSQL transaction boundary, and crash-window characterization.
-- Added session-scoped capability negotiation with semantic matching and negotiated message/attachment limits.
-- Added sovereign local admission through the existing `PolicyEngine`; remote trust does not become local authority.
-- Added bounded deterministic reconciliation with duplicate, cursor, divergence, explicit conflict, and batch-limit handling.
-- Added bounded delivery retry semantics with explicit `RETRY`, `STOP`, and `RECONCILE` outcomes, including `UNKNOWN_OUTCOME` handling.
-- Added provider-neutral transport session/send/close boundary with explicit local-domain binding, peer identity binding, negotiated-scope enforcement, and result identity validation.
-- Added transport-level binding between the canonical negotiated peer scope (`domain/subject`) and the authenticated session peer identity; mismatched scopes now fail closed before provider open/send.
-- Added explicit transport regression coverage for canonical negotiated peer identity binding and updated the fault-injection harness fixtures to use the same canonical scope.
-- Added resource/abuse governance for concurrent sessions, inbox work, replay retention, reconciliation batch size, and per-peer/global session rate limits.
-- Added executable coverage for delayed/replayed observations, provenance attribution, cross-peer identity collision, historical replay semantics, remote-authority isolation, deterministic reconciliation, and retry/reconnect backpressure.
-- Added executable fault-injection coverage for forced authentication failure, signature tamper, duplicate delivery, peer outage/recovery, and post-send connection loss producing `UNKNOWN_OUTCOME` followed by reconciliation.
-- Fixed the federated inbox crash-window harness so a PostgreSQL socket `close` during an induced backend termination rejects the active request instead of leaving the test pending.
-- Added declared retention-window enforcement in the federated inbox; delivery at/after `expiresAt` is rejected with typed `REPLAY_DETECTED`.
-- Added explicit encrypted-transport metadata coverage to prove encryption state does not substitute for peer authentication/trust at the provider-neutral transport boundary.
-- Added explicit strict TypeScript fixtures for the fault-injection and inbox acceptance tests so the final committed test tree builds cleanly under `exactOptionalPropertyTypes`.
-- Updated GitHub Actions to current Node 24-compatible major versions for checkout, Node setup, and artifact upload; this maintenance change was validated by the exact-head CI run after the update.
-- Aligned the typed federation failure contract with the implementation: the public codes are `AUTHENTICATION_FAILURE` and `INTEGRITY_FAILURE`; local policy denial is represented as `AUTHORIZATION_DENIED` with the underlying local rule/reason retained as attribution.
-- Fixed reconciliation cursor advancement so an explicit conflict blocks checkpoint advancement beyond the conflicted cursor; later accepted observations remain durable but are replay-safe until the conflict is reconciled.
-- Made reconciliation batch validation atomic with respect to in-memory state: all observations are validated before any observation is committed, preventing malformed later entries from leaving a partially-applied batch.
-- Added regression coverage for conflict-blocked cursor advancement, duplicate/accepted cursor progression, and no-partial-mutation behavior on malformed batches.
+Phase 3 established canonical federation envelopes, integrity and typed failure boundaries, trust anchors and versioned trust bundles, durable federated inbox states, capability negotiation, sovereign local admission, deterministic reconciliation, bounded retry/recovery, transport identity binding, resource governance, and executable fault-injection/crash-window coverage. The final candidate was verified through exact checkout, strict build/tests, live PostgreSQL integration, federation/PostgreSQL crash-window characterization, archive verification, and candidate artifact upload.
+
+## 0.8 Policy & Governance — SPEC / CONTRACT / IMPLEMENT / TEST / FIX / VERIFY
+
+Phase 4 established immutable policy bundles/versions, explicit lifecycle, historical resolution, overlap fail-closed semantics, deny-overrides-allow, provider-neutral OPA/Cedar-shaped adapters, provider-result binding to policy identity, deterministic policy evidence, non-widening federated metadata, bounded evaluations, and an immutable in-memory evidence ledger. The final candidate was verified through exact-head CI including integration, crash-window, archive, and artifact checks.
+
+## 0.9 Evaluation & Observability — SPEC / CONTRACT / IMPLEMENT / TEST / FIX / VERIFY
+
+- Defined the Phase 5 evaluation/observability specification, implementation contract, and executable F5-001..F5-060 matrix.
+- Implemented dependency-free normalized trace/evidence correlation with bounded baggage and deterministic context identity.
+- Implemented structured TRACE/METRIC/LOG observation records with deterministic IDs, bounded attributes/payloads, immutable in-memory reads, and observation-backend failure isolation.
+- Implemented deterministic evaluation records with candidate/environment provenance, normalized input hashing, explicit input and record byte limits, and immutable evidence references.
+- Implemented replay descriptors bound to candidate, artifact, environment, suite/case, input digest, and expected-result digest with fail-closed mismatch detection.
+- Replaced interface-only fault modeling with a bounded concrete fault injector/executor boundary. Observed faults require explicit non-empty evidence; no-fault, evaluator failure, and unavailable outcomes remain distinct.
+- Upgraded regression execution to true bounded parallelism using `maxConcurrentEvaluations`, while preserving deterministic result ordering and candidate propagation.
+- Hardened promotion evidence checks so requested faults cannot pass without an observed status and evidence reference.
+- Fixed acceptance-harness defects uncovered by exact-head CI, including nested candidate override coverage and strict `exactOptionalPropertyTypes` handling.
+- Reconciled the acceptance matrix descriptions with the executable test groups instead of marking documentary code paths as proof.
+- Exact-head CI subsequently passed the full committed tree, live PostgreSQL integration, both crash-window characterizations, candidate archive build/verification, and candidate artifact upload on the resulting Phase 5 candidate.
 
 ## Current Verification Boundary
 
-The current Secure Federation candidate and its exact verification provenance are intentionally tracked outside this mutable log entry to avoid a self-referential commit loop. The authoritative current candidate is the branch HEAD recorded in PR #3, and its exact-head CI run/artifact must always be used as the provenance source.
+The current candidate identity is the branch HEAD. The authoritative verification record is the successful exact-head SIF Core CI run for that same commit, together with its uploaded unpublished candidate artifact and digest. Dynamic run/artifact identifiers are not committed to this mutable log because recording them would create a self-referential commit loop.
 
-The latest successful exact-head CI execution also covers:
-- exact candidate checkout verification;
-- the complete committed test tree;
-- live PostgreSQL integration;
-- federated inbox crash-window characterization;
-- PostgreSQL crash-window characterization;
-- unpublished candidate archive build, extraction and SHA-256 verification;
-- candidate artifact upload.
+No package version bump, registry publication, merge to `main`, production observability claim, or automatic promotion is implied by Phase 5 verification.
 
-The current committed test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
-
-`PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence.
-
-F3-050 remains deliberately bounded to the provider-neutral kernel: the executable test proves that encrypted transport metadata does not authenticate or establish trust for an unauthenticated peer. It does not claim a production TLS/mTLS/SPIFFE deployment.
-
-The typed failure contract is aligned with the public implementation: `AUTHENTICATION_FAILURE` and `INTEGRITY_FAILURE` are the federation error codes, while local policy rejection is represented as `AUTHORIZATION_DENIED` with the underlying PolicyEngine rule/reason retained as attributable local context.
-
-No package version bump, registry publication, merge to `main`, production-federation claim, or release/promotion is implied by this verification boundary.
-
-Phase 3 follows:
+Phase 5 follows:
 
 `SPEC → CONTRACT → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

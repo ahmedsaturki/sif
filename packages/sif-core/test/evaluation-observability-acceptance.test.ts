@@ -8,7 +8,23 @@ const C = "candidate"; const E = "env";
 function err(e: unknown): string | undefined { return e instanceof EvaluationObservabilityError ? e.code : undefined; }
 function ex(action: () => unknown, want: string): void { let got: unknown; try { action(); } catch (e: unknown) { got = e; } assert.equal(err(got), want); }
 async function axe(action: () => Promise<unknown>, want: string): Promise<void> { let got: unknown; try { await action(); } catch (e: unknown) { got = e; } assert.equal(err(got), want); }
-function r(over: Partial<EvaluationRecord> = {}): EvaluationRecord { return createEvaluationRecord({ evaluationCase: { suiteId: "s", caseId: "c", candidateCommit: C, environmentFingerprint: E, input: { x: 1 }, expected: true }, measured: true, status: "PASS", trace: normalizeTraceContext(T, L), ...over }, L); }
+function r(over: Partial<EvaluationRecord> = {}): EvaluationRecord {
+  return createEvaluationRecord({
+    evaluationCase: {
+      suiteId: "s",
+      caseId: over.caseId ?? "c",
+      candidateCommit: over.candidateCommit ?? C,
+      environmentFingerprint: over.environmentFingerprint ?? E,
+      input: { x: 1 },
+      expected: true,
+    },
+    measured: true,
+    status: over.status ?? "PASS",
+    trace: normalizeTraceContext(T, L),
+    evidenceRefs: over.evidenceRefs,
+    failure: over.failure,
+  }, L);
+}
 function tr(): ReturnType<typeof normalizeTraceContext> { return normalizeTraceContext(T, L); }
 
 test("F5-001",()=>{const x=tr();assert.equal(x.traceId,"t");assert.equal(x.contextDigest.length,64);});
@@ -39,7 +55,7 @@ test("F5-023",()=>assert.equal(r().environmentFingerprint,E));
 test("F5-024",()=>assert.equal(r().inputDigest.length,64));
 test("F5-025",()=>{const z=r();assert.equal(z.expectedDigest.length,64);assert.equal(z.measuredDigest.length,64);});
 test("F5-026",()=>assert.equal(r().status,"PASS"));
-test("F5-027",()=>assert.equal(r({status:"FAIL",failure:"boom",measuredDigest:"x"}).failure,"boom"));
+test("F5-027",()=>assert.equal(r({status:"FAIL",failure:"boom"}).failure,"boom"));
 test("F5-028",()=>assert.deepEqual(r({evidenceRefs:["a","b"]}).evidenceRefs,["a","b"]));
 test("F5-029",async()=>{const trace=tr();await axe(()=>Promise.resolve().then(()=>createEvaluationRecord({evaluationCase:{suiteId:"s",caseId:"c",candidateCommit:C,environmentFingerprint:E,input:"x".repeat(2000),expected:true},measured:true,status:"PASS",trace},L)),"RESOURCE_EXHAUSTED");});
 test("F5-030",()=>{const input={x:1};const z=createEvaluationRecord({evaluationCase:{suiteId:"s",caseId:"c",candidateCommit:C,environmentFingerprint:E,input,expected:true},measured:true,status:"PASS",trace:tr()},L);input.x=2;assert.equal(z.inputDigest.length,64);});

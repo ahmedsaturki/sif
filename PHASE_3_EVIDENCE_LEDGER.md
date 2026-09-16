@@ -3,9 +3,30 @@
 ## Status
 Evidence ledger for `PHASE_3_TEST_MATRIX.md`. A row is marked `EVIDENCED` only when an executable test exercises the scenario and the exact candidate is covered by the CI run. This ledger does not grant Verified/promotion status by itself.
 
-## Candidate Evidence
+## Exact Candidate Evidence Binding
 
-The ledger is intended to be read against the exact candidate checked out by the successful SIF Core CI run. The CI workflow verifies `CANDIDATE_COMMIT = github.sha`, executes the committed test tree, executes live PostgreSQL integration and crash-window tests, then builds and hashes an unpublished candidate archive.
+The evidence in this ledger is bound to the same exact candidate and unpublished artifact produced by the successful SIF Core CI execution below:
+
+- Candidate commit: `c84664c9c08582f2b0d44afdb3f61949612263be`
+- Branch: `feat/sif-core-0.7.0-secure-federation`
+- Base candidate: `0ede9babeba1303c44ea592812a48bcd874db1e4`
+- CI workflow run: `35137781892` (Run #379)
+- Verification job: `104934427743` (`verify-core`)
+- Candidate artifact: `sif-core-unpublished-candidate-c84664c9c08582f2b0d44afdb3f61949612263be`
+- Artifact ID: `10463298475`
+- Artifact ZIP SHA-256: `sha256:6f4c1cdad695f94d194b4c47802e7c5e943f66bca862baa05242c86d0ee0a0e4`
+- Build/test result: `123/123` passing
+- Live PostgreSQL result: `7/7` passing
+- Federated inbox crash-window: passing
+- PostgreSQL crash-window: passing
+- Candidate archive build/extraction/SHA-256 verification: passing
+- Candidate archive upload: passing
+
+The CI workflow verifies `CANDIDATE_COMMIT = github.sha`, checks out that exact commit, executes the committed test tree, executes live PostgreSQL integration and crash-window tests, then builds and hashes the unpublished candidate archive. The artifact manifest records the same candidate commit.
+
+## Evidence Identity Rule
+
+For this ledger, an `EVIDENCED` row is considered execution-bound only when its listed evidence source is part of the committed candidate tree at the exact candidate commit above and the exact-head CI run above completed successfully. A later source-tree change invalidates this binding and requires a new exact-head verification run before the row can be treated as evidence for the new candidate.
 
 ## Row Mapping
 
@@ -75,5 +96,6 @@ The ledger is intended to be read against the exact candidate checked out by the
 ## Boundary Notes
 
 - This ledger documents executable coverage; it does not declare the candidate `Verified` until the promotion gate accepts the complete evidence set.
+- The exact candidate/run/artifact identity above is part of the evidence binding. Any source-tree change requires a new exact-head CI execution before this ledger can continue to serve as evidence for that changed candidate.
 - Provider-neutral transport remains deliberately separate from deployment-specific TLS/mTLS/SPIFFE. F3-050 proves the security principle that encryption is not trust using an explicit transport security flag; it does not claim a production TLS deployment.
 - The package version remains `0.5.0`; no publication or merge is implied.

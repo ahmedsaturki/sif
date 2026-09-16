@@ -47,6 +47,13 @@ function validateEnvelopeIdentity(envelope: FederationEnvelope): void {
   assertNonEmpty("envelope.replayNonce", envelope.replayNonce);
 }
 
+function assertWithinDeclaredRetention(envelope: FederationEnvelope, receivedAt: string): void {
+  if (envelope.time.expiresAt === undefined) return;
+  if (Date.parse(receivedAt) >= Date.parse(envelope.time.expiresAt)) {
+    throw new FederationProtocolError("REPLAY_DETECTED", "Federated message is outside its declared retention window");
+  }
+}
+
 function logicalReplayKey(senderDomain: string, replayNonce: string): string {
   return `${senderDomain}\u0000${replayNonce}`;
 }
@@ -68,6 +75,7 @@ export class InMemoryFederatedInbox {
     validateEnvelopeIdentity(envelope);
     assertNonEmpty("consumerId", consumerId);
     assertDate("receivedAt", receivedAt);
+    assertWithinDeclaredRetention(envelope, receivedAt);
     const key = `${consumerId}\u0000${envelope.messageId}`;
     const replayKey = logicalReplayKey(envelope.sender.domain, envelope.replayNonce);
     const existing = this.records.get(key);
@@ -153,6 +161,7 @@ export class PostgresFederatedInbox {
     validateEnvelopeIdentity(envelope);
     assertNonEmpty("consumerId", consumerId);
     assertDate("receivedAt", receivedAt);
+    assertWithinDeclaredRetention(envelope, receivedAt);
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");

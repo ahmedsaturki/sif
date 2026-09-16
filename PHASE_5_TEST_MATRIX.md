@@ -4,12 +4,13 @@ Required executable acceptance rows: **F5-001..F5-060**.
 
 ## Matrix groups
 
-- **F5-001..F5-010 — Trace/evidence identity:** normalized trace context, parent/child correlation, event/policy/federation linkage, bounded metadata, identity collision rejection.
-- **F5-011..F5-020 — Observation adapter:** structured span/metric/log boundaries, deterministic attributes, backend isolation, unavailable sink behavior, bounded payloads.
-- **F5-021..F5-030 — Evaluation records:** deterministic suite/case identity, normalized inputs, expected/measured outcomes, evidence references, candidate binding, immutable record semantics.
-- **F5-031..F5-040 — Replay:** exact input descriptor, candidate/environment binding, historical policy/state references, deterministic rerun, mismatch rejection, replay resource bounds.
-- **F5-041..F5-050 — Fault injection:** explicit fault declaration, actual-fault observation proof, no-fault classification, evaluation-failed classification, unavailable evaluator distinction, bounded fault execution.
-- **F5-051..F5-060 — Regression/promotion evidence:** cross-phase kernel/persistence/federation/policy invariants, artifact identity binding, evidence completeness, fail-closed promotion gate, reproducible evidence package.
+- **F5-001..F5-010 — Trace/evidence identity:** normalized trace context, parent/child correlation, bounded baggage, deterministic context identity, and caller-immutability.
+- **F5-011..F5-020 — Observation adapter:** structured span/metric/log boundaries, deterministic observation identity, immutable sink reads, bounded attributes/payloads, and backend isolation.
+- **F5-021..F5-030 — Evaluation records:** deterministic suite/case identity, normalized input identity, expected/measured digests, candidate binding, failure capture, and input/resource bounds.
+- **F5-031..F5-040 — Replay:** exact candidate/artifact/environment/case binding, deterministic replay descriptor identity, mismatch rejection, and non-replayable input rejection.
+- **F5-041..F5-045 — Regression execution:** true bounded parallelism, pass/fail capture, observation emission, candidate propagation, and bounded case counts.
+- **F5-046..F5-050 — Fault injection:** explicit fault declaration, actual-fault observation proof, no-fault classification, evaluation-failed classification, unavailable evaluator distinction, and finite action budget.
+- **F5-051..F5-060 — Regression/promotion evidence:** observability backend no-op behavior, fail-closed candidate/artifact evidence, indeterminate/unavailable rejection, non-required fault handling, evidence linkage, and reproducible final promotion evidence.
 
 ## Pass condition
 

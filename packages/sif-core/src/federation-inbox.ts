@@ -1,4 +1,4 @@
-import { digest, cryptoRandomId, now } from "./core.js";
+import { digest, now } from "./core.js";
 import type { FederationEnvelope } from "./federation-envelope.js";
 import type { PgPoolLike, PgClientLike } from "./postgres.js";
 import { FederationProtocolError } from "./federation-envelope.js";
@@ -56,12 +56,23 @@ export class InMemoryFederatedInbox {
     assertDate("receivedAt", receivedAt);
     const key = `${consumerId}\u0000${envelope.messageId}`;
     const existing = this.records.get(key);
-    if (existing) return { accepted: false, duplicate: true, record: clone(existing) };
+    if (existing) {
+      if (existing.senderDomain !== envelope.sender.domain || existing.replayKey !== `${envelope.sender.domain}\u0000${envelope.replayNonce}`) {
+        throw new FederationProtocolError("INTEGRITY_FAILURE", "Message identity collision does not match original sender/replay binding");
+      }
+      return { accepted: false, duplicate: true, record: clone(existing) };
+    }
+    const replayKey = `${envelope.sender.domain}\u0000${envelope.replayNonce}`;
+    for (const record of this.records.values()) {
+      if (record.consumerId === consumerId && record.replayKey === replayKey && record.messageId !== envelope.messageId) {
+        throw new FederationProtocolError("REPLAY_DETECTED", "Replay key is already bound to a different message identity");
+      }
+    }
     const record: FederatedInboxRecord = {
       consumerId,
       messageId: envelope.messageId,
       senderDomain: envelope.sender.domain,
-      replayKey: `${envelope.sender.domain}\u0000${envelope.replayNonce}`,
+      replayKey,
       state: "DELIVERED",
       receivedAt,
     };
@@ -137,20 +148,22 @@ export class PostgresFederatedInbox {
         return claim;
       }
 
+      const processedAt = now();
       await client.query(
         "UPDATE sif_federated_inbox SET state = 'PROCESSED', processed_at = $3 WHERE consumer_id = $1 AND message_id = $2",
-        [consumerId, envelope.messageId, receivedAt],
+        [consumerId, envelope.messageId, processedAt],
       );
       const processed: FederatedInboxRecord = {
         ...claim.record,
         state: "PROCESSED",
-        processedAt: receivedAt,
+        processedAt,
       };
       const result = await effect(client, { record: processed, envelope });
       assertNonEmpty("effect result digest", result);
+      const committedAt = now();
       await client.query(
         "UPDATE sif_federated_inbox SET state = 'COMMITTED', committed_at = $3, result_digest = $4 WHERE consumer_id = $1 AND message_id = $2",
-        [consumerId, envelope.messageId, now(), result],
+        [consumerId, envelope.messageId, committedAt, result],
       );
       await client.query("COMMIT");
 
@@ -160,7 +173,7 @@ export class PostgresFederatedInbox {
         record: {
           ...processed,
           state: "COMMITTED",
-          committedAt: now(),
+          committedAt,
           resultDigest: result,
         },
       };
@@ -197,25 +210,32 @@ export class PostgresFederatedInbox {
 
   private async claim(client: PgClientLike, envelope: FederationEnvelope, consumerId: string, receivedAt: string): Promise<FederatedInboxClaim> {
     const replayKey = `${envelope.sender.domain}\u0000${envelope.replayNonce}`;
-    const inserted = await client.query(
-      `INSERT INTO sif_federated_inbox (consumer_id, message_id, sender_domain, replay_key, state, received_at)
-       VALUES ($1,$2,$3,$4,'DELIVERED',$5)
-       ON CONFLICT (consumer_id, message_id) DO NOTHING`,
-      [consumerId, envelope.messageId, envelope.sender.domain, replayKey, receivedAt],
-    );
-    if (inserted.rowCount > 0) {
-      return {
-        accepted: true,
-        duplicate: false,
-        record: {
-          consumerId,
-          messageId: envelope.messageId,
-          senderDomain: envelope.sender.domain,
-          replayKey,
-          state: "DELIVERED",
-          receivedAt,
-        },
-      };
+    try {
+      const inserted = await client.query(
+        `INSERT INTO sif_federated_inbox (consumer_id, message_id, sender_domain, replay_key, state, received_at)
+         VALUES ($1,$2,$3,$4,'DELIVERED',$5)
+         ON CONFLICT (consumer_id, message_id) DO NOTHING`,
+        [consumerId, envelope.messageId, envelope.sender.domain, replayKey, receivedAt],
+      );
+      if (inserted.rowCount > 0) {
+        return {
+          accepted: true,
+          duplicate: false,
+          record: {
+            consumerId,
+            messageId: envelope.messageId,
+            senderDomain: envelope.sender.domain,
+            replayKey,
+            state: "DELIVERED",
+            receivedAt,
+          },
+        };
+      }
+    } catch (error) {
+      if ((error as { code?: unknown }).code === "23505") {
+        throw new FederationProtocolError("REPLAY_DETECTED", "Replay key is already bound to a different message identity");
+      }
+      throw error;
     }
     const existing = await client.query<Record<string, unknown>>(
       "SELECT * FROM sif_federated_inbox WHERE consumer_id = $1 AND message_id = $2 FOR UPDATE",
@@ -252,8 +272,4 @@ function rowToRecord(row: Record<string, unknown>): FederatedInboxRecord {
 
 export function federatedEffectDigest(value: unknown): string {
   return digest(value);
-}
-
-export function newConsumerCorrelationId(): string {
-  return cryptoRandomId();
 }

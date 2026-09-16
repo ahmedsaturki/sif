@@ -11,48 +11,53 @@
 - Outbox uniqueness remains `(event_id, destination)`.
 - PostgreSQL schema includes stream heads, events, outbox, artifact metadata, and projection checkpoints.
 - PostgreSQL artifact metadata and projection checkpoint runtime contracts are implemented.
-- Durable PostgreSQL outbox leasing/reclaim semantics are implemented by contract and live-verified below.
+- Durable PostgreSQL outbox leasing/reclaim semantics are implemented by contract.
 - PostgreSQL inbox idempotency with retryable failure cleanup is implemented by contract.
-- Resumable projection runner with persisted checkpoints is implemented by contract and its checkpoint persistence is live-verified below.
+- Resumable projection runner with persisted checkpoints is implemented by contract.
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run 73 executed the committed tree against a real PostgreSQL 16 service and passed the complete live integration suite using the compiled implementation through a dependency-free PostgreSQL wire-protocol test harness.
+GitHub Actions run 93 executed the committed SIF Core against a real PostgreSQL 16 service and passed every persistence gate in the workflow.
 
-Live scenarios verified:
+Verified live scenarios:
 
-1. **Concurrent same-stream append serialization** — two independent PostgreSQL connections contend for version 1; the stream-head row lock serializes the writers and exactly one event/outbox pair remains.
-2. **Atomic rollback** — a constraint failure after event/head work causes PostgreSQL to roll back the event, stream head, and outbox together; no partial commit remains.
-3. **Projection checkpoint lifecycle** — checkpoint state persists in PostgreSQL and round-trips deterministically for resumable projection progress.
-4. **Outbox worker lifecycle** — leases are exclusive, expired leases are reclaimable, and delivery/attempt updates are fenced to the current lease owner.
+1. **Concurrent same-stream append** — two independent PostgreSQL connections contend for version 1; the `sif_stream_heads ... FOR UPDATE` serialization point accepts exactly one writer, leaving one event and one durable outbox row.
+2. **Atomic rollback** — a constraint failure during a transactional append leaves event, stream-head update, and outbox state rolled back together.
+3. **Projection checkpoint durability** — a checkpoint persists and round-trips deterministically through PostgreSQL.
+4. **Outbox lease lifecycle** — one worker owns the item, another worker is blocked while the lease is valid, the item is reclaimed after expiry, stale-owner delivery is fenced, and the new owner can mark it delivered.
+5. **Crash-window characterization** — terminating a PostgreSQL backend before commit leaves no partial stream/event/outbox state and permits retry; terminating the client/backend after commit but before acknowledgement preserves the committed event and stream head, with no outbox item in the direct SQL scenario.
 
-The live integration result was **4/4 PASS**. The CI job also passed artifact identity verification, strict build, the 27-test unit suite, and PostgreSQL schema bootstrap.
-
-This establishes live behavior for the covered PostgreSQL transaction, checkpoint, and worker-lease paths. It does not establish production-scale performance, database HA, arbitrary crash-point recovery, network fault tolerance, or exactly-once external side effects.
-
-## Local verification
+## CI evidence
 
 ```text
-TypeScript build: PASS
-Test suite: 27/27 PASS
-Failed: 0
-Skipped: 0
+GitHub Actions run: 93
+PostgreSQL service: 16
+Artifact identity: PASS
+Strict committed build + tests: PASS
+Unit tests: 27/27 PASS
+Schema bootstrap: PASS
+Live PostgreSQL integration: 4/4 PASS
+Crash-window characterization: PASS
 ```
 
-## Not claimed as live-verified
+## What this verifies
 
-- Arbitrary process/database crash-point characterization beyond the exercised transaction rollback scenario.
-- Full recovery/reconciliation behavior after external PostgreSQL/network faults.
-- TLS/mTLS/SPIFFE federation transport.
-- OPA/Cedar adapter.
-- KMS/HSM secret integration.
-- Distributed consensus.
-- Production OpenTelemetry exporter.
-- Exactly-once external side effects.
-- Production-scale PostgreSQL performance/HA characterization.
+This milestone verifies live PostgreSQL connectivity, transactional append semantics, per-stream serialization, rollback atomicity, durable checkpoint persistence, outbox lease/reclaim/fencing behavior, and two explicit backend termination windows.
 
-These remain explicit adapters or verification stages rather than hidden assumptions.
+## Explicit boundaries / not claimed
 
-## Delivery boundary
+- arbitrary process/database crash-point coverage
+- full recovery/reconciliation after external database or network faults
+- network-partition recovery
+- production-scale PostgreSQL throughput/latency characterization
+- HA/failover characterization
+- exactly-once external side effects
+- TLS/mTLS/SPIFFE federation transport
+- OPA/Cedar adapters
+- KMS/HSM integration
+- distributed consensus
+- production OpenTelemetry export
 
-The durable delivery model is at-least-once. Exactly-once external effects require transactional participation by the side effect or independently idempotent consumers.
+The durable delivery model remains at-least-once. Exactly-once external effects require transactional participation by the side effect or independently idempotent consumers.
+
+Package version remains `0.5.0` until a dedicated `0.6.0` artifact set is built, SHA-256 hashed, preserved, and independently verified.

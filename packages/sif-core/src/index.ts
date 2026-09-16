@@ -17,7 +17,6 @@ export * from "./self-model.js";
 export * from "./integrity.js";
 export * from "./cas.js";
 export * from "./policy.js";
-
 export {
   InMemoryPolicyDecisionLedger,
   LocalDeterministicPolicyAdapter,
@@ -43,10 +42,9 @@ export {
   type PolicyRegistryOptions,
   type PolicyRequest,
 } from "./policy-governance.js";
-
+export * from "./evaluation-observability.js";
 export * from "./outbox.js";
 export * from "./postgres.js";
-
 export * from "./replay.js";
 export * from "./cas-metadata.js";
 export * from "./worker.js";

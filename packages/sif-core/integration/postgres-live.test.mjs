@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import net from 'node:net';
 import { randomUUID } from 'node:crypto';
-import { PostgresTransactionalEventStore } from '../dist/src/postgres.js';
+import { PostgresTransactionalEventStore, PostgresProjectionCheckpointStore } from '../dist/src/postgres.js';
+import { PostgresOutboxWorker } from '../dist/src/worker.js';
+import { digest } from '../dist/src/core.js';
 
 const HOST = process.env.PGHOST ?? '127.0.0.1';
 const PORT = Number(process.env.PGPORT ?? 5432);
@@ -46,13 +48,9 @@ class PgWireClient {
       if (this.buffer.length < len + 1) return;
       const payload = this.buffer.subarray(5, len + 1);
       this.buffer = this.buffer.subarray(len + 1);
-      if (tag === 'Z') {
-        this.finishReady(payload);
-      } else if (tag === 'E') {
-        this.rejectActive(new Error(decodeError(payload)));
-      } else {
-        this.collect(tag, payload);
-      }
+      if (tag === 'Z') this.finishReady(payload);
+      else if (tag === 'E') this.rejectActive(new Error(decodeError(payload)));
+      else this.collect(tag, payload);
     }
   }
 
@@ -146,6 +144,7 @@ function decodeDataRow(buf) {
 function sqlLiteral(value) {
   if (value == null) return 'NULL';
   if (typeof value === 'number') return String(value);
+  if (Array.isArray(value)) return `ARRAY[${value.map(sqlLiteral).join(',')}]`;
   return `'${String(value).replaceAll("'", "''")}'`;
 }
 
@@ -160,11 +159,17 @@ class WirePgClientAdapter {
 
 class WirePgPool {
   constructor() { this.client = new PgWireClient(); }
-  async connect() { await this.client.ready; const adapter = new WirePgClientAdapter(this.client); adapter.release = () => {}; return adapter; }
+  async connect() {
+    await this.client.ready;
+    const adapter = new WirePgClientAdapter(this.client);
+    adapter.release = () => {};
+    return adapter;
+  }
+  async query(text, values = []) { await this.client.ready; return new WirePgClientAdapter(this.client).query(text, values); }
   close() { this.client.close(); }
 }
 
-function event(streamId, version, id) {
+function event(streamId, version, id = randomUUID()) {
   const timestamp = new Date().toISOString();
   return {
     eventId: id,
@@ -193,13 +198,14 @@ test('live PostgreSQL transactional append serializes concurrent writers and per
       await client.query(`DELETE FROM sif_outbox WHERE event_id IN (SELECT event_id FROM sif_events WHERE stream_id = '${streamId}')`);
       await client.query(`DELETE FROM sif_events WHERE stream_id = '${streamId}'`);
       await client.query(`DELETE FROM sif_stream_heads WHERE stream_id = '${streamId}'`);
+      await client.query(`DELETE FROM sif_projection_checkpoints WHERE stream_id = '${streamId}'`);
     };
     await cleanup(check);
     const storeA = new PostgresTransactionalEventStore(poolA);
     const storeB = new PostgresTransactionalEventStore(poolB);
     const results = await Promise.allSettled([
-      storeA.appendAndEnqueue(event(streamId, 1, randomUUID()), { expectedStreamVersion: 0 }, ['integration']),
-      storeB.appendAndEnqueue(event(streamId, 1, randomUUID()), { expectedStreamVersion: 0 }, ['integration'])
+      storeA.appendAndEnqueue(event(streamId, 1), { expectedStreamVersion: 0 }, ['integration']),
+      storeB.appendAndEnqueue(event(streamId, 1), { expectedStreamVersion: 0 }, ['integration'])
     ]);
     const fulfilled = results.filter((r) => r.status === 'fulfilled');
     const rejected = results.filter((r) => r.status === 'rejected');
@@ -215,8 +221,108 @@ test('live PostgreSQL transactional append serializes concurrent writers and per
     await check.query(`DELETE FROM sif_outbox WHERE event_id IN (SELECT event_id FROM sif_events WHERE stream_id = '${streamId}')`).catch(() => {});
     await check.query(`DELETE FROM sif_events WHERE stream_id = '${streamId}'`).catch(() => {});
     await check.query(`DELETE FROM sif_stream_heads WHERE stream_id = '${streamId}'`).catch(() => {});
+    await check.query(`DELETE FROM sif_projection_checkpoints WHERE stream_id = '${streamId}'`).catch(() => {});
     check.close();
     poolA.close();
     poolB.close();
+  }
+});
+
+test('live PostgreSQL transaction rolls back event, stream head, and outbox together on constraint failure', { skip: !canRun }, async () => {
+  const pool = new WirePgPool();
+  const check = new PgWireClient();
+  await Promise.all([pool.client.ready, check.ready]);
+  const streamId = `rollback-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const eventId = randomUUID();
+  try {
+    const cleanup = async (client) => {
+      await client.query(`DELETE FROM sif_outbox WHERE event_id IN (SELECT event_id FROM sif_events WHERE stream_id = '${streamId}')`);
+      await client.query(`DELETE FROM sif_events WHERE stream_id = '${streamId}'`);
+      await client.query(`DELETE FROM sif_stream_heads WHERE stream_id = '${streamId}'`);
+    };
+    await cleanup(check);
+    const store = new PostgresTransactionalEventStore(pool);
+    await store.appendAndEnqueue(event(streamId, 1, eventId), { expectedStreamVersion: 0 }, ['rollback']);
+    await assert.rejects(
+      store.appendAndEnqueue(event(streamId, 2, eventId), { expectedStreamVersion: 1 }, ['rollback']),
+      /duplicate key|unique/i
+    );
+    const state = await check.query(`SELECT (SELECT stream_version FROM sif_stream_heads WHERE stream_id='${streamId}') AS head, (SELECT count(*) FROM sif_events WHERE stream_id='${streamId}') AS events, (SELECT count(*) FROM sif_outbox o JOIN sif_events e ON e.event_id=o.event_id WHERE e.stream_id='${streamId}') AS outbox`);
+    assert.equal(state.rows[0].head, '1');
+    assert.equal(state.rows[0].events, '1');
+    assert.equal(state.rows[0].outbox, '1');
+  } finally {
+    await check.query(`DELETE FROM sif_outbox WHERE event_id IN (SELECT event_id FROM sif_events WHERE stream_id = '${streamId}')`).catch(() => {});
+    await check.query(`DELETE FROM sif_events WHERE stream_id = '${streamId}'`).catch(() => {});
+    await check.query(`DELETE FROM sif_stream_heads WHERE stream_id = '${streamId}'`).catch(() => {});
+    check.close();
+    pool.close();
+  }
+});
+
+test('live PostgreSQL projection checkpoint round-trips deterministically', { skip: !canRun }, async () => {
+  const client = new PgWireClient();
+  await client.ready;
+  const streamId = `projection-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  try {
+    const store = new PostgresProjectionCheckpointStore(new WirePgClientAdapter(client));
+    const checkpoint = { projectionId: 'integration-projection', streamId, streamVersion: 7, stateDigest: digest({ value: 7 }), updatedAt: '2026-09-16T00:00:00.000Z' };
+    await store.save(checkpoint);
+    const loaded = await store.get(checkpoint.projectionId, checkpoint.streamId);
+    assert.deepEqual(loaded, checkpoint);
+  } finally {
+    await client.query(`DELETE FROM sif_projection_checkpoints WHERE stream_id = '${streamId}'`).catch(() => {});
+    client.close();
+  }
+});
+
+test('live PostgreSQL outbox leases are exclusive, reclaimable after expiry, and owner-fenced for delivery', { skip: !canRun }, async () => {
+  const poolSeed = new WirePgPool();
+  const workerA = new WirePgPool();
+  const workerB = new WirePgPool();
+  const check = new PgWireClient();
+  await Promise.all([poolSeed.client.ready, workerA.client.ready, workerB.client.ready, check.ready]);
+  const streamId = `outbox-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  try {
+    const cleanup = async (client) => {
+      await client.query(`DELETE FROM sif_outbox WHERE event_id IN (SELECT event_id FROM sif_events WHERE stream_id = '${streamId}')`);
+      await client.query(`DELETE FROM sif_events WHERE stream_id = '${streamId}'`);
+      await client.query(`DELETE FROM sif_stream_heads WHERE stream_id = '${streamId}'`);
+    };
+    await cleanup(check);
+    const seedStore = new PostgresTransactionalEventStore(poolSeed);
+    const created = await seedStore.appendAndEnqueue(event(streamId, 1), { expectedStreamVersion: 0 }, ['A', 'B']);
+    assert.equal(created.length, 2);
+
+    const a = new PostgresOutboxWorker(workerA);
+    const b = new PostgresOutboxWorker(workerB);
+    const [claimedA, claimedB] = await Promise.all([
+      a.claim({ limit: 1, leaseUntil: '2026-09-16T01:00:00.000Z', workerId: 'worker-a', now: '2026-09-16T00:30:00.000Z' }),
+      b.claim({ limit: 1, leaseUntil: '2026-09-16T01:00:00.000Z', workerId: 'worker-b', now: '2026-09-16T00:30:00.000Z' })
+    ]);
+    assert.equal(claimedA.length, 1);
+    assert.equal(claimedB.length, 1);
+    assert.notEqual(claimedA[0].outboxId, claimedB[0].outboxId);
+
+    const reclaimed = await b.claim({ limit: 1, leaseUntil: '2026-09-16T02:00:00.000Z', workerId: 'worker-b', now: '2026-09-16T01:30:00.000Z' });
+    assert.equal(reclaimed.length, 1);
+    assert.equal(reclaimed[0].outboxId, claimedA[0].outboxId);
+
+    await a.markDelivered(claimedB[0].outboxId, 'worker-a', '2026-09-16T00:31:00.000Z');
+    const stillUndelivered = await check.query(`SELECT delivered_at FROM sif_outbox WHERE outbox_id='${claimedB[0].outboxId}'`);
+    assert.equal(stillUndelivered.rows[0].delivered_at, null);
+    await b.markDelivered(claimedB[0].outboxId, 'worker-b', '2026-09-16T00:32:00.000Z');
+    const delivered = await check.query(`SELECT delivered_at, lease_owner, leased_until FROM sif_outbox WHERE outbox_id='${claimedB[0].outboxId}'`);
+    assert.equal(delivered.rows[0].delivered_at, '2026-09-16T00:32:00.000Z+00');
+    assert.equal(delivered.rows[0].lease_owner, null);
+    assert.equal(delivered.rows[0].leased_until, null);
+  } finally {
+    await check.query(`DELETE FROM sif_outbox WHERE event_id IN (SELECT event_id FROM sif_events WHERE stream_id = '${streamId}')`).catch(() => {});
+    await check.query(`DELETE FROM sif_events WHERE stream_id = '${streamId}'`).catch(() => {});
+    await check.query(`DELETE FROM sif_stream_heads WHERE stream_id = '${streamId}'`).catch(() => {});
+    check.close();
+    poolSeed.close();
+    workerA.close();
+    workerB.close();
   }
 });

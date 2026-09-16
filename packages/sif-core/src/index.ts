@@ -6,6 +6,7 @@ export * from "./federation.js";
 export * from "./federation-envelope.js";
 export * from "./federation-trust.js";
 export * from "./federation-trust-bundle.js";
+export * from "./federation-inbox.js";
 export * from "./self-model.js";
 export * from "./integrity.js";
 export * from "./cas.js";

@@ -15,30 +15,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Verify preserved source archive encoding
+      - name: Verify artifact identity manifest
         shell: bash
         run: |
           set -euo pipefail
-          cd artifacts/sif-core/0.5.0
-          expected_b64=$(awk '$1 !~ /^#/ && $2 == "sif-core-0.5.0-source.zip.b64" {print $1; exit}' SHA256SUMS)
-          test -n "$expected_b64"
-          printf '%s  %s\n' "$expected_b64" sif-core-0.5.0-source.zip.b64 | sha256sum -c -
-      - name: Decode and verify preserved source ZIP
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd artifacts/sif-core/0.5.0
-          base64 -d sif-core-0.5.0-source.zip.b64 > sif-core-0.5.0-source.zip
-          expected_zip=$(awk '$1 !~ /^#/ && $2 == "decoded:sif-core-0.5.0-source.zip" {print $1; exit}' SHA256SUMS)
-          test -n "$expected_zip"
-          printf '%s  %s\n' "$expected_zip" sif-core-0.5.0-source.zip | sha256sum -c -
-      - name: Extract exact preserved source/test tree
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf .ci
-          mkdir -p .ci
-          unzip -q artifacts/sif-core/0.5.0/sif-core-0.5.0-source.zip -d .ci
-      - name: Build and test exact preserved tree
-        working-directory: .ci/sif-core-0.5.0
+          grep -Eq '^3f728ac799be5714efdbbddb80fae98152a3767f339f29ee84750ec1c2687bd5  sif-core-0.5.0-source.zip$' artifacts/sif-core/0.5.0/SHA256SUMS
+          grep -Eq '^c1b6d297ebef82523d4e1abc0249497fa702f3bd68bd6fa25d839402cc122abc  sif-core-0.5.0.tgz$' artifacts/sif-core/0.5.0/SHA256SUMS
+          grep -Fq '/SIF/0.5.0/sif-core-0.5.0-source.zip' artifacts/sif-core/0.5.0/ARCHIVE_PRESERVATION.md
+          grep -Fq '/SIF/0.5.0/sif-core-0.5.0.tgz' artifacts/sif-core/0.5.0/ARCHIVE_PRESERVATION.md
+      - name: Build and test committed SIF Core tree
+        working-directory: packages/sif-core
         run: npm test

@@ -4,7 +4,7 @@ import net from 'node:net';
 import { randomUUID } from 'node:crypto';
 import { PostgresFederatedInbox } from '../dist/src/index.js';
 
-auto const HOST = process.env.PGHOST ?? '127.0.0.1';
+const HOST = process.env.PGHOST ?? '127.0.0.1';
 const PORT = Number(process.env.PGPORT ?? 5432);
 const USER = process.env.PGUSER ?? 'postgres';
 const DATABASE = process.env.PGDATABASE ?? 'postgres';
@@ -55,6 +55,7 @@ class PgWireClient {
   }
   query(sql) {
     if (sql.includes('\u0000')) throw new Error('NUL is forbidden in PostgreSQL simple queries');
+    if (this.active) throw new Error('concurrent simple queries on one wire client are unsupported');
     return new Promise((resolve, reject) => {
       this.active = { resolve, reject, columns: [], rows: [], command: '' };
       const text = Buffer.from(sql + '\0');
@@ -117,10 +118,7 @@ function decodeDataRow(buf) {
   }
   return fields;
 }
-function sqlLiteral(value) {
-  if (value == null) return 'NULL';
-  return `'${String(value).replaceAll("'", "''")}'`;
-}
+function sqlLiteral(value) { return `'${String(value).replaceAll("'", "''")}'`; }
 class WirePgAdapter {
   constructor(client) { this.client = client; }
   async query(text, values = []) {

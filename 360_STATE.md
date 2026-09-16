@@ -53,7 +53,7 @@ Verified live scenarios:
 - GitHub Actions live PostgreSQL integration: 4/4 PASS
 - GitHub Actions crash-window characterization: PASS
 
-Run 93 verified the implementation commit. Later commits are documentation/evidence-only; a fresh CI run on the final branch HEAD is required before promotion.
+Run 93 verified the implementation. Later commits only refreshed documentation/evidence; a fresh CI run on the final branch HEAD is required before promotion.
 
 ## Explicit Unknown / Not Claimed
 
@@ -71,7 +71,7 @@ Run 93 verified the implementation commit. Later commits are documentation/evide
 ## Release / Promotion State
 
 `feat/sif-core-0.5.0` remains the verified kernel baseline.
-`feat/sif-core-0.6.0-live-postgres` contains the completed core live-persistence verification milestone plus evidence/documentation updates.
+`feat/sif-core-0.6.0-live-postgres` contains the completed core live-persistence implementation milestone plus evidence/documentation updates.
 Binary package versioning remains 0.5.0 until a new 0.6.0 release artifact is built, hashed, preserved, and independently verified from the final promotion commit. No merge or binary publication is implied by CI success alone.
 
 ## Governing Laws

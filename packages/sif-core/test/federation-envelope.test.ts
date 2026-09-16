@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { digest } from "../src/core.js";
 import {
   FEDERATION_PROTOCOL,
+  FEDERATION_CANONICALIZATION_VERSION,
+  FEDERATION_SIGNATURE_ENCODING,
   FederationProtocolError,
   createUnsignedFederationEnvelope,
   federationPayloadDigest,
@@ -46,6 +48,27 @@ test("canonical envelope ordering is deterministic", () => {
   const a = createUnsignedFederationEnvelope(input());
   const b = createUnsignedFederationEnvelope(input({ payload: { data: { a: { x: 3, y: 1 }, z: 2 }, type: "evidence" } }));
   assert.equal(canonicalizeFederationEnvelope(a), canonicalizeFederationEnvelope(b));
+});
+
+test("signing contract metadata is explicit and signed", () => {
+  const unsigned = createUnsignedFederationEnvelope(input());
+  assert.equal(unsigned.canonicalizationVersion, FEDERATION_CANONICALIZATION_VERSION);
+  assert.equal(unsigned.signatureEncoding, FEDERATION_SIGNATURE_ENCODING);
+  assert.equal(unsigned.keyId, unsigned.sender.transportBinding);
+
+  const signed = signFederationEnvelope(unsigned, signer);
+  assert.throws(
+    () => verifyFederationEnvelope({ ...signed, keyId: "different-key" }, verifier),
+    (error: unknown) => error instanceof FederationProtocolError && error.code === "INVALID_SIGNATURE",
+  );
+  assert.throws(
+    () => verifyFederationEnvelope({ ...signed, canonicalizationVersion: "other" as typeof FEDERATION_CANONICALIZATION_VERSION }, verifier),
+    (error: unknown) => error instanceof FederationProtocolError && error.code === "PROTOCOL_INCOMPATIBLE",
+  );
+  assert.throws(
+    () => verifyFederationEnvelope({ ...signed, signatureEncoding: "hex" as typeof FEDERATION_SIGNATURE_ENCODING }, verifier),
+    (error: unknown) => error instanceof FederationProtocolError && error.code === "PROTOCOL_INCOMPATIBLE",
+  );
 });
 
 test("provider-neutral signature verifies and tampering is rejected", () => {

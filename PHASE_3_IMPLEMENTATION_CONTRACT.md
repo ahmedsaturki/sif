@@ -181,6 +181,37 @@ Every federated accepted artifact MUST retain:
 - cryptographic verification result;
 - exact candidate/runtime provenance needed for later reconstruction.
 
+### F11 — Provider-Neutral Transport Adapter
+Responsibilities:
+- establish an authenticated session bound to an explicit local domain and peer identity;
+- enforce the negotiated protocol, envelope, signature, capability, and resource scope before provider delivery;
+- return typed delivery outcomes while preserving message identity and idempotency identity;
+- keep concrete TLS/mTLS/SPIFFE/network implementations outside the dependency-free kernel.
+
+Required properties:
+- local domain is explicit input, never inferred from peer identity;
+- returned session identity and peer binding are validated before use;
+- target domain must match the session's local domain;
+- sender identity must match the authenticated peer;
+- negotiated message/attachment limits are enforced before provider send;
+- provider result must preserve session id, message id, idempotency key, and valid observation time.
+
+### F12 — Resource / Abuse Governor
+Responsibilities:
+- bound concurrent federation sessions;
+- bound outstanding inbox work;
+- bound retained replay entries;
+- bound reconciliation batch size;
+- enforce per-peer and global session-rate limits;
+- fail closed with `RESOURCE_EXHAUSTED` when configured limits are exceeded.
+
+Required properties:
+- limits are explicit positive safe integers;
+- rate windows reset deterministically;
+- closing/releasing work reduces the active resource count;
+- governor state does not grant or alter local authority;
+- resource checks are performed before expensive downstream work where feasible.
+
 ## Typed Failure Contract
 Implementation MUST NOT collapse all failures into a boolean or generic exception. At minimum, the public boundary must distinguish:
 
@@ -247,6 +278,16 @@ Every federated processing attempt SHOULD expose correlation data sufficient to 
 
 Do not claim OpenTelemetry production export until the relevant later-stage implementation is separately verified.
 
+## Fault-Injection Contract
+Fault-injection tests are acceptance tests, not production behavior. They MUST prove that the targeted fault actually occurred and that no later mandatory stage was incorrectly treated as successful.
+
+Required minimum scenarios include:
+- forced authentication failure before transport admission;
+- signature tamper detected by verification;
+- duplicate delivery actually observed twice and safely contained by inbox idempotency;
+- peer outage actually returned and followed by bounded recovery;
+- connection loss after provider-side receipt producing `UNKNOWN_OUTCOME`, followed by reconciliation rather than false success.
+
 ## Implementation Order
 1. canonical domain types and error taxonomy;
 2. envelope canonicalization and deterministic signing contract;
@@ -255,9 +296,10 @@ Do not claim OpenTelemetry production export until the relevant later-stage impl
 5. local admission adapter boundary;
 6. bounded reconciliation engine;
 7. transport adapter;
-8. fault injection and recovery characterization;
-9. CI integration and exact-artifact provenance;
-10. promotion review.
+8. resource/abuse governor;
+9. fault injection and recovery characterization;
+10. CI integration and exact-artifact provenance;
+11. promotion review.
 
 No implementation step may silently expand the scope of the prior step.
 

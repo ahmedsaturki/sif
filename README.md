@@ -4,24 +4,30 @@ SIF is a sovereignty-first intelligence fabric whose implementation begins with 
 
 ## Repository baseline
 
-The `feat/sif-core-0.5.0` branch preserves the SIF Core 0.5.0 implementation, source/test tree, engineering history, research lineage, verification boundaries, and release discipline.
+- Genesis: `main` at `f4408d81375786e7a9f0715cf70609d0e257a67c`
+- Verified kernel branch: `feat/sif-core-0.5.0`
+- Live PostgreSQL verification branch: `feat/sif-core-0.6.0-live-postgres`
+- Current package version remains `0.5.0`; 0.6 is an integration-verification milestone, not a binary package release.
 
 ## SIF Core 0.5.0
 
 The verified kernel includes append-only event streams, deterministic replay, optimistic concurrency, SHA-256 event integrity and stream hash chains, filesystem CAS, evidence/provenance/knowledge/semantic/lineage registries, scoped authority and attenuation, default-deny policy, durable outbox delivery, PostgreSQL transactional contracts, Ed25519 attestations, worker/inbox primitives, resumable projections, and self-model/reconstruction verification.
 
+## Live PostgreSQL verification — 0.6 milestone
+
+GitHub Actions run 64 executed the committed SIF Core against a real PostgreSQL 16 service and passed the live integration step. The test exercises the actual `PostgresTransactionalEventStore` and verifies concurrent same-stream writers are serialized by the dedicated `sif_stream_heads` row lock, with exactly one accepted version-1 event and one durable outbox row left behind.
+
+This is a live connectivity/concurrency verification milestone. It is not a claim of production-scale performance, HA characterization, or exactly-once external effects.
+
 ## Verification
 
-Local verification:
-
 ```text
-TypeScript build: PASS
-Tests: 27/27 PASS
-Failed: 0
-Skipped: 0
+Local TypeScript build: PASS
+Local tests: 27/27 PASS
+GitHub Actions artifact identity: PASS
+GitHub Actions committed build/test: PASS
+GitHub Actions live PostgreSQL integration: PASS
 ```
-
-Repository CI verifies the committed artifact identity records and directly builds/tests the committed `packages/sif-core` tree on GitHub Actions.
 
 ## Continuity and preserved knowledge
 
@@ -30,12 +36,13 @@ Repository CI verifies the committed artifact identity records and directly buil
 - `IMPLEMENTATION_LOG.md` — implementation stages and critical fixes
 - `RESEARCH_SYNTHESIS.md` — reusable engineering patterns and research synthesis
 - `ROADMAP.md` — evidence-gated next stages
-- `DECISIONS.md` — important architecture and engineering decisions
+- `DECISIONS.md` — architecture and engineering decisions
 - `VERIFICATION_MATRIX.md` — capability-by-capability evidence state
-- `RELEASE_NOTES_0.5.0.md` — release scope and boundaries
+- `RELEASE_NOTES_0.5.0.md` — 0.5.0 release scope and boundaries
 - `REPOSITORY_360_BASELINE.md` — repository preservation baseline
+- `SECURITY.md` — security boundaries
 - `packages/sif-core/docs/ARCHITECTURE.md` — kernel architecture
-- `packages/sif-core/IMPLEMENTATION_STATUS.md` — implementation and verification status
+- `packages/sif-core/IMPLEMENTATION_STATUS.md` — implementation and live verification status
 - `artifacts/sif-core/0.5.0/ARTIFACT_INVENTORY.md` — artifact identity
 - `artifacts/sif-core/0.5.0/SHA256SUMS` — binary artifact identity hashes
 - `artifacts/sif-core/0.5.0/ARCHIVE_PRESERVATION.md` — byte-for-byte artifact preservation record
@@ -46,7 +53,7 @@ The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the per
 
 ## Verification boundary
 
-0.5.0 does not claim live PostgreSQL wire-level multi-client verification, SPIFFE/mTLS transport, OPA/Cedar adapters, KMS/HSM integration, distributed consensus, production OpenTelemetry exporters, or exactly-once external side effects. These remain explicit integration boundaries.
+The 0.6 live-Persistence milestone does not claim TLS/mTLS/SPIFFE federation transport, OPA/Cedar adapters, KMS/HSM integration, distributed consensus, production OpenTelemetry exporters, exactly-once external side effects, or production-scale PostgreSQL HA/performance characterization.
 
 ## Release discipline
 

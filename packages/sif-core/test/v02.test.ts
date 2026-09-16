@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { InMemoryEventStore, SifEventWriter } from "../src/core.js";
-import { HashChainEventStore, AttestationSigner, AttestationVerifier } from "../src/integrity.js";
+import { HashChainEventStore, AttestationSigner, AttestationVerifier, eventDigest } from "../src/integrity.js";
 import { FileCas } from "../src/cas.js";
 import { AuthorityRegistry } from "../src/core.js";
 import { PolicyEngine } from "../src/policy.js";
@@ -16,6 +16,19 @@ test("hash-chain store verifies the chain and rejects tampered persisted events"
   const dir = temp("chain"), file = join(dir, "events.jsonl"); const { PersistentJsonlEventStore } = await import("../src/persistence.js"); const base = new PersistentJsonlEventStore(file); const chained = new HashChainEventStore(base); const writer = new SifEventWriter(chained);
   writer.write({ streamId: "s", eventType: "A", actorId: "a", correlationId: "c", payload: { n: 1 } }); writer.write({ streamId: "s", eventType: "B", actorId: "a", correlationId: "c", payload: { n: 2 } }); assert.equal(chained.verifyStream("s"), true);
   const raw = readFileSync(file, "utf8"); const tampered = raw.replace('"n":2', '"n":999'); const { writeFileSync, rmSync: rm } = await import("node:fs"); writeFileSync(file, tampered, "utf8"); assert.throws(() => new HashChainEventStore(new PersistentJsonlEventStore(file)), /digest mismatch/); rm(dir, { recursive: true, force: true });
+});
+
+test("event digests bind application metadata while ignoring reserved integrity metadata", () => {
+  const base = { eventId: "e1", eventType: "X", streamId: "s", streamVersion: 1, occurredAt: "2026-01-01T00:00:00.000Z", observedAt: "2026-01-01T00:00:00.000Z", actorId: "a", correlationId: "c", payload: { ok: true } };
+  const d1 = eventDigest({ ...base, metadata: { provenance: "p1", __sif_event_digest: "ignored" } });
+  const d2 = eventDigest({ ...base, metadata: { provenance: "p2", __sif_event_digest: "ignored" } });
+  const d3 = eventDigest({ ...base, metadata: { provenance: "p1", __sif_event_digest: "different" } });
+  assert.notEqual(d1, d2); assert.equal(d1, d3);
+});
+
+test("canonical stringify is locale-independent for non-ASCII object keys", async () => {
+  const { stableStringify } = await import("../src/core.js");
+  assert.equal(stableStringify({ z: 1, "ä": 2, a: 3 }), stableStringify({ "ä": 2, a: 3, z: 1 }));
 });
 
 test("file CAS stores by digest and detects corruption", () => { const root = temp("cas"); const cas = new FileCas(root); const d = cas.putJson({ b: 2, a: 1 }); assert.equal(cas.has(d), true); assert.deepEqual(cas.getJson(d), { b: 2, a: 1 }); assert.equal(readFileSync(join(root, d.slice(0, 2), d.slice(2))).length > 0, true); rmSync(root, { recursive: true, force: true }); });

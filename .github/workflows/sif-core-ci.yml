@@ -55,3 +55,7 @@ jobs:
       - name: Run live PostgreSQL integration
         working-directory: packages/sif-core
         run: node integration/postgres-live.test.mjs
+      - name: Run PostgreSQL crash-window characterization
+        working-directory: packages/sif-core
+        shell: bash
+        run: bash integration/postgres-crash-window.sh

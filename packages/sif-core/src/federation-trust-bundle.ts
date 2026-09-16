@@ -159,8 +159,9 @@ export class FederationTrustBundleRegistry {
     assertDate("observedAt", observedAt);
 
     const candidates = [...this.bundles.values()].filter((bundle) => {
-      if (bundle.status !== "active") return false;
+      if (bundle.status !== "active" && bundle.status !== "retired") return false;
       if (bundle.issuer !== issuer) return false;
+      if (bundle.activatedAt === undefined || Date.parse(observedAt) < Date.parse(bundle.activatedAt)) return false;
       if (bundle.retiredAt !== undefined && Date.parse(observedAt) >= Date.parse(bundle.retiredAt)) return false;
       if (!isWithinWindow(bundle.validFrom, bundle.expiresAt, observedAt)) return false;
       return bundle.anchors.some((anchor) => {

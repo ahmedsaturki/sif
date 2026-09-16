@@ -59,3 +59,40 @@ jobs:
         working-directory: packages/sif-core
         shell: bash
         run: bash integration/postgres-crash-window.sh
+      - name: Build unpublished candidate archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/sif-candidate"
+          mkdir -p "$RUNNER_TEMP/sif-candidate"
+          git archive --format=zip --prefix=sif-core-source/ HEAD -- packages/sif-core
+          mv sif-core-source.zip "$RUNNER_TEMP/sif-candidate/sif-core-source.zip"
+          npm pack --pack-destination "$RUNNER_TEMP/sif-candidate" ./packages/sif-core
+          test -f "$RUNNER_TEMP/sif-candidate/sif-core-0.5.0.tgz"
+          printf 'commit=%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/sif-candidate/MANIFEST.txt"
+          node -e "const p=require('./packages/sif-core/package.json'); if(p.name!=='sif-core'||p.version!=='0.5.0') process.exit(1); console.log('package='+p.name+'@'+p.version)" >> "$RUNNER_TEMP/sif-candidate/MANIFEST.txt"
+          sha256sum "$RUNNER_TEMP/sif-candidate/sif-core-source.zip" "$RUNNER_TEMP/sif-candidate/sif-core-0.5.0.tgz" >> "$RUNNER_TEMP/sif-candidate/MANIFEST.txt"
+      - name: Verify unpublished candidate archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/sif-candidate"
+          unzip -t sif-core-source.zip >/dev/null
+          tar -tzf sif-core-0.5.0.tgz >/dev/null
+          unzip -l sif-core-source.zip | grep -Fq 'packages/sif-core/package.json'
+          unzip -l sif-core-source.zip | grep -Fq 'packages/sif-core/src/'
+          unzip -l sif-core-source.zip | grep -Fq 'packages/sif-core/test/'
+          unzip -l sif-core-source.zip | grep -Fq 'packages/sif-core/sql/'
+          tar -xOf sif-core-0.5.0.tgz package/package.json > package.json.extracted
+          node -e "const p=require('./package.json.extracted'); if(p.name!=='sif-core'||p.version!=='0.5.0') process.exit(1); console.log('verified '+p.name+'@'+p.version)"
+          awk '$1 ~ /^[0-9a-f]{64}$/ {print $1"  "$2}' MANIFEST.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+          test "$(wc -c < sif-core-source.zip)" -gt 0
+          test "$(wc -c < sif-core-0.5.0.tgz)" -gt 0
+      - name: Upload unpublished candidate artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sif-core-unpublished-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/sif-candidate
+          if-no-files-found: error
+          retention-days: 14

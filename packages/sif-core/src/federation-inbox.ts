@@ -226,10 +226,11 @@ export class PostgresFederatedInbox {
     const replayKey = logicalReplayKey(envelope.sender.domain, envelope.replayNonce);
     const replayKeyHash = durableReplayKeyHash(envelope.sender.domain, envelope.replayNonce);
     try {
-      const inserted = await client.query(
+      const inserted = await client.query<Record<string, unknown>>(
         `INSERT INTO sif_federated_inbox (consumer_id, message_id, sender_domain, replay_nonce, replay_key_hash, state, received_at)
          VALUES ($1,$2,$3,$4,$5,'DELIVERED',$6)
-         ON CONFLICT (consumer_id, message_id) DO NOTHING`,
+         ON CONFLICT (consumer_id, message_id) DO NOTHING
+         RETURNING consumer_id`,
         [consumerId, envelope.messageId, envelope.sender.domain, envelope.replayNonce, replayKeyHash, receivedAt],
       );
       if (inserted.rowCount > 0) {

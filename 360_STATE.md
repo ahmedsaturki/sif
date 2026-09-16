@@ -14,7 +14,8 @@
 - `main` remains at Genesis `f4408d81375786e7a9f0715cf70609d0e257a67c`.
 - `feat/sif-core-0.5.0` remains the preserved kernel baseline.
 - `feat/sif-core-0.6.0-live-postgres` is the live-persistence candidate line.
-- Current candidate commit before this state-document reconciliation: `53e1918afb23c5313be601db76c2ac5d76ad39e8`.
+- Verified code candidate: `3f1a248b226122696dd612cd7740e3c851c9a31f`.
+- Documentation reconciliation commits follow that verified code candidate and do not change the implementation behavior.
 - PR #2 remains open and unmerged.
 
 ## Verified Kernel
@@ -53,8 +54,8 @@ Verified live scenarios:
 
 ## Evidence State
 
-- Final verified implementation commit: `3f1a248b226122696dd612cd7740e3c851c9a31f`
-- Final CI: PASS — run 169
+- Verified implementation commit: `3f1a248b226122696dd612cd7740e3c851c9a31f`
+- Verification run: GitHub Actions `169`
 - Artifact identity manifest: PASS
 - Strict committed TypeScript build + tests: PASS
 - Unit tests: 27/27 PASS
@@ -62,11 +63,11 @@ Verified live scenarios:
 - Live PostgreSQL integration: 4/4 PASS
 - Crash-window characterization: PASS
 
-The implementation-level 0.6 persistence milestone is verified.
+The implementation-level 0.6 persistence milestone is verified for the code candidate above.
 
 ## Release / Promotion State
 
-The implementation milestone is verified, but `0.6.0` is **not yet an artifact release**. Package version remains `0.5.0` until a fresh source ZIP and npm TGZ are built from the promotion commit, SHA-256 identities are recorded, byte-preserving artifacts are preserved, and the artifacts are independently verified.
+The implementation milestone is verified, but `0.6.0` is **not yet an artifact release**. Package version remains `0.5.0` until a fresh source ZIP and npm TGZ are built from the exact promotion commit, SHA-256 identities are recorded, byte-preserving artifacts are preserved, and the artifacts are independently verified.
 
 The 0.5.0 binary artifacts remain preserved in the persistent Library. No unverified 0.6.0 binary is fabricated or claimed.
 

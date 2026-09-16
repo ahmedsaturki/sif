@@ -115,3 +115,16 @@ test("missing inbox identity is typed as replay detection rather than implicit s
     (error: unknown) => error instanceof FederationProtocolError && error.code === "REPLAY_DETECTED",
   );
 });
+
+test("concurrent deliveries of the same logical message produce one accepted record", async () => {
+  const inbox = new InMemoryFederatedInbox();
+  const results = await Promise.all(
+    Array.from({ length: 16 }, () =>
+      Promise.resolve().then(() => inbox.accept(baseEnvelope, "consumer-a")),
+    ),
+  );
+
+  assert.equal(results.filter((result) => result.accepted).length, 1);
+  assert.equal(results.filter((result) => result.duplicate).length, 15);
+  assert.equal(inbox.list("consumer-a").length, 1);
+});

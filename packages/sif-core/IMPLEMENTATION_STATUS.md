@@ -25,7 +25,7 @@ Verified live scenarios:
 2. **Atomic rollback** — a constraint failure during a transactional append leaves event, stream-head update, and outbox state rolled back together.
 3. **Projection checkpoint durability** — a checkpoint persists and round-trips deterministically through PostgreSQL.
 4. **Outbox lease lifecycle** — one worker owns the item, another worker is blocked while the lease is valid, the item is reclaimed after expiry, stale-owner delivery is fenced, and the new owner can mark it delivered.
-5. **Crash-window characterization** — terminating a PostgreSQL backend before commit leaves no partial stream/event/outbox state and permits retry; terminating the client/backend after commit but before acknowledgement preserves the committed event and stream head, with no outbox item in the direct SQL scenario.
+5. **Crash-window characterization** — terminating a PostgreSQL backend before commit leaves no partial stream/event/outbox state and permits retry; terminating the backend after commit but before acknowledgement preserves the committed event and stream head, with no outbox item in the direct SQL scenario.
 
 ## CI evidence
 
@@ -42,7 +42,7 @@ Crash-window characterization: PASS
 
 ## What this verifies
 
-This milestone verifies live PostgreSQL connectivity, transactional append semantics, per-stream serialization, rollback atomicity, durable checkpoint persistence, outbox lease/reclaim/fencing behavior, and two explicit backend termination windows.
+This milestone verifies live PostgreSQL connectivity, transactional append semantics, per-stream serialization, rollback atomicity, durable checkpoint persistence, outbox lease/reclaim/fencing behavior, and two explicit backend-termination windows.
 
 ## Explicit boundaries / not claimed
 

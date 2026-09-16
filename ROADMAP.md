@@ -11,7 +11,9 @@ Status: verified kernel baseline preserved.
 ## Phase 2 — Live Persistence 0.6
 Real PostgreSQL integration, migration harness, concurrency tests, crash recovery, durable projections and production-style worker lifecycle.
 
-Current status: **live PostgreSQL connectivity and concurrent same-stream serialization verified** against PostgreSQL 16 in GitHub Actions. Remaining 0.6 gates: crash-after-commit/before-commit characterization, recovery/reconciliation scenarios, durable projection lifecycle, and production-style worker lifecycle verification.
+Current status: **core live PostgreSQL verification gates passed** against PostgreSQL 16 in GitHub Actions run 73. Verified scenarios are concurrent same-stream serialization, atomic transaction rollback, projection checkpoint persistence/deterministic round-trip, and exclusive outbox lease/reclaim/owner-fencing. The CI job also passed strict build, 27/27 unit tests, artifact identity verification, and schema bootstrap.
+
+Remaining qualification boundary for a future broader 0.6 release is explicit: arbitrary crash-point characterization and full recovery/reconciliation after external database/network faults are not claimed by this milestone. Production-scale PostgreSQL performance/HA, distributed consensus, secure federation transport, and exactly-once external side effects remain later-stage work.
 
 ## Phase 3 — Secure Federation
 SPIFFE/mTLS boundary, trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation.

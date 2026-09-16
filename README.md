@@ -7,7 +7,7 @@ SIF is a sovereignty-first intelligence fabric whose implementation begins with 
 - Genesis: `main` at `f4408d81375786e7a9f0715cf70609d0e257a67c`
 - Verified kernel branch: `feat/sif-core-0.5.0`
 - Live PostgreSQL verification branch: `feat/sif-core-0.6.0-live-postgres`
-- Verified code candidate: `3f1a248b226122696dd612cd7740e3c851c9a31f`
+- Current candidate head: `38b7cc348a5adabc06d782ad6f475bbcb692da06`
 - Current package version remains `0.5.0`; 0.6 is an integration-verification milestone, not yet a binary package release.
 
 ## SIF Core 0.5.0
@@ -16,20 +16,25 @@ The verified kernel includes append-only event streams, deterministic replay, op
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run **169** verified commit `3f1a248b226122696dd612cd7740e3c851c9a31f` against a real PostgreSQL 16.15 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
+The current exact candidate head `38b7cc348a5adabc06d782ad6f475bbcb692da06` is covered by the latest CI workflow. The verification path checks out the exact candidate commit, then passes strict TypeScript build/tests, PostgreSQL schema bootstrap, live integration, crash-window characterization, candidate archive build/verification, and artifact upload.
 
-The same run passed direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
+The live integration suite covers **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
+
+The crash-window characterization covers two explicit windows: before-commit backend termination and after-commit/before-client-acknowledgement termination.
+
+The hardening changes also add regression coverage for delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
 
 ## Verification
 
 ```text
-Final verified code candidate (run 169): PASS
+Exact candidate checkout: PASS
 Strict committed TypeScript build: PASS
-Unit tests: 27/27 PASS
-GitHub Actions artifact identity: PASS
-GitHub Actions PostgreSQL schema bootstrap: PASS
-GitHub Actions live PostgreSQL integration: 4/4 PASS
-GitHub Actions crash-window characterization: PASS
+Unit tests: PASS
+Live PostgreSQL integration: 4/4 PASS
+PostgreSQL crash-window characterization: PASS
+Candidate archive build: PASS
+Candidate archive verification: PASS
+Candidate artifact upload: PASS
 ```
 
 ## Continuity and preserved knowledge
@@ -53,7 +58,9 @@ GitHub Actions crash-window characterization: PASS
 
 ## Binary artifact preservation
 
-The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the persistent Library. Their SHA-256 identities are recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`. A 0.6.0 binary release has not been fabricated or claimed: the available GitHub connector cannot safely carry binary release bytes, and no Actions artifact was produced for the 0.6 candidate.
+The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ remain preserved separately, with their SHA-256 identities recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`.
+
+An unpublished candidate artifact for the current exact head is also produced by CI and independently inspected. It is evidence for the candidate only; it is not a `0.6.0` published release.
 
 ## Verification boundary
 

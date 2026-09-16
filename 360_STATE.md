@@ -14,8 +14,7 @@
 - `main` remains at Genesis `f4408d81375786e7a9f0715cf70609d0e257a67c`.
 - `feat/sif-core-0.5.0` remains the preserved kernel baseline.
 - `feat/sif-core-0.6.0-live-postgres` is the live-persistence candidate line.
-- Verified code candidate: `3f1a248b226122696dd612cd7740e3c851c9a31f`.
-- Documentation reconciliation commits follow that verified code candidate and do not change the implementation behavior.
+- Current candidate head: `38b7cc348a5adabc06d782ad6f475bbcb692da06`.
 - PR #2 remains open and unmerged.
 
 ## Verified Kernel
@@ -42,34 +41,49 @@ Implemented and tested:
 
 ## Live PostgreSQL 0.6 Verification
 
-GitHub Actions **run 169** verified commit `3f1a248b226122696dd612cd7740e3c851c9a31f` against a real PostgreSQL 16.15 service. The compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and direct SQL crash-window characterization.
+Latest CI run `209` checks out the exact candidate commit `38b7cc348a5adabc06d782ad6f475bbcb692da06` rather than a pull-request merge ref. The complete verification job passed.
 
-Verified live scenarios:
+Verified gates:
 
-1. Concurrent same-stream append serialization: independent connections contend for the same expected version and exactly one event/outbox pair remains.
-2. Atomic rollback: a constraint failure rolls back the event, stream head, and outbox together with no partial commit.
-3. Projection checkpoint persistence: checkpoint state survives through the PostgreSQL store and round-trips deterministically.
-4. Outbox worker lifecycle: one worker claims the item, another is blocked while the lease is valid, the item is reclaimed after expiry, stale-owner delivery is fenced, and the new owner can mark it delivered.
-5. Crash-window characterization: terminating the PostgreSQL backend before commit leaves no partial state and permits retry; terminating it after commit but before client acknowledgement preserves the committed event and stream head.
+1. Exact candidate checkout.
+2. Strict TypeScript build and unit tests.
+3. PostgreSQL schema bootstrap.
+4. Four live PostgreSQL scenarios: concurrent append serialization, atomic rollback, projection checkpoint persistence, and owner-fenced outbox leasing/reclaim.
+5. Explicit before-commit and after-commit/before-ack crash-window characterization.
+6. Candidate source ZIP and npm TGZ build, verification, and upload.
+7. Exact-candidate artifact provenance check in the workflow.
+
+Hardening regressions now covered include delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
 
 ## Evidence State
 
-- Verified implementation commit: `3f1a248b226122696dd612cd7740e3c851c9a31f`
-- Verification run: GitHub Actions `169`
-- Artifact identity manifest: PASS
-- Strict committed TypeScript build + tests: PASS
-- Unit tests: 27/27 PASS
+- Current candidate head: `38b7cc348a5adabc06d782ad6f475bbcb692da06`
+- Latest verification run: GitHub Actions `209`
+- Exact candidate checkout: PASS
+- Strict TypeScript build + tests: PASS
+- Unit tests: PASS
 - PostgreSQL schema bootstrap: PASS
 - Live PostgreSQL integration: 4/4 PASS
 - Crash-window characterization: PASS
+- Candidate archive build: PASS
+- Candidate archive verification: PASS
+- Candidate artifact upload: PASS
 
-The implementation-level 0.6 persistence milestone is verified for the code candidate above.
+The implementation-level 0.6 persistence milestone is verified for the current candidate head above.
+
+## Artifact State
+
+CI produced an unpublished candidate artifact from the exact branch head. It is independently downloaded and checked outside the CI execution environment.
+
+The candidate is evidence-bound to the exact head and remains unpublished. Package version is still `0.5.0`.
 
 ## Release / Promotion State
 
-The implementation milestone is verified, but `0.6.0` is **not yet an artifact release**. Package version remains `0.5.0` until a fresh source ZIP and npm TGZ are built from the exact promotion commit, SHA-256 identities are recorded, byte-preserving artifacts are preserved, and the artifacts are independently verified.
+`0.6.0` is **not a released package**. No version bump, tag, registry publication, or merge to `main` has been performed.
 
-The 0.5.0 binary artifacts remain preserved in the persistent Library. No unverified 0.6.0 binary is fabricated or claimed.
+The 0.5.0 binary artifacts remain preserved separately. No unverified 0.6.0 binary is fabricated or claimed.
+
+The artifact/evidence gate is complete for the current candidate. Actual release promotion remains a separate explicit operation.
 
 ## Explicit Unknown / Not Claimed
 
@@ -96,6 +110,7 @@ The 0.5.0 binary artifacts remain preserved in the persistent Library. No unveri
 - recovery requires reconciliation
 - remote evidence does not become local authority automatically
 - conceptual research is not implementation evidence
+- artifact provenance must identify the exact candidate content being promoted
 
 ## Release Discipline
 

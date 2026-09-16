@@ -11,11 +11,13 @@ Status: verified kernel baseline preserved.
 ## Phase 2 — Live Persistence 0.6
 Real PostgreSQL integration, migration harness, concurrency tests, crash-window characterization, durable projections and production-style worker lifecycle.
 
-Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16.15**. GitHub Actions run 169 passed strict TypeScript build, 27/27 unit tests, schema bootstrap, four live integration scenarios, and explicit before-commit/after-commit backend termination characterization on verified code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`.
+Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16.15**. Latest CI run `209` checks out exact candidate head `38b7cc348a5adabc06d782ad6f475bbcb692da06` and passes exact-checkout verification, strict TypeScript build/tests, schema bootstrap, four live PostgreSQL scenarios, explicit crash-window characterization, candidate archive build/verification, and artifact upload.
+
+Hardening included regression coverage for delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
 
 Release boundary remains explicit: arbitrary crash-point coverage and full recovery/reconciliation after external database/network faults are not claimed. Production-scale PostgreSQL performance/HA, network-partition recovery, secure federation, distributed consensus, and exactly-once external effects remain later-stage work.
 
-The remaining 0.6 release gate is binary artifact production and independent verification; the package version is intentionally still `0.5.0`.
+The artifact/evidence gate for the current candidate is complete. The package version remains intentionally `0.5.0`; no `0.6.0` tag or publication has been performed.
 
 ## Phase 3 — Secure Federation
 SPIFFE/mTLS boundary, trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation.

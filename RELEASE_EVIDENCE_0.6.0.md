@@ -3,20 +3,21 @@
 ## Candidate
 
 - Branch: `feat/sif-core-0.6.0-live-postgres`
-- Current candidate commit: `16ece4e78b7d288a8bd1a7eaedd6ec4c5834a910`
+- Current candidate head before this documentation snapshot: `38b7cc348a5adabc06d782ad6f475bbcb692da06`
 - Package version: `0.5.0` (release artifact version intentionally not bumped yet)
-- Final implementation verification: GitHub Actions runs `192` (push) and `193` (pull request)
+- Latest full verification run: GitHub Actions `209`
 - PostgreSQL service: `16.15`
 - Node: `22.23.2`
 - npm: `10.9.8`
 
-## Implementation verification — runs 192/193
+## Implementation verification — run 209
 
 | Gate | Result |
 |---|---|
+| Exact candidate checkout | PASS |
 | Artifact identity manifest | PASS |
 | Strict TypeScript build | PASS |
-| Unit tests | 27/27 PASS |
+| Unit tests | PASS |
 | PostgreSQL schema bootstrap | PASS |
 | Live PostgreSQL integration | 4/4 PASS |
 | Crash-window characterization | PASS |
@@ -24,7 +25,18 @@
 | Candidate archive verification | PASS |
 | Candidate artifact upload | PASS |
 
-## Live integration scenarios
+The exact checkout gate verifies that the CI worktree commit equals the declared candidate commit. For pull-request events the workflow uses the PR head SHA rather than the pull-request merge ref for candidate provenance.
+
+## Hardening incorporated
+
+The current candidate includes and tests:
+
+1. Delegated authority cannot become unbounded when its parent authority expires.
+2. Canonical object-key ordering is locale-independent.
+3. Application metadata is included in event digests while reserved hash-chain metadata is excluded from the digest input.
+4. `PostgresTransactionalEventStore.append()` uses the transactional head-locking path so inherited append cannot desynchronize stream heads.
+
+## Live PostgreSQL scenarios
 
 1. Concurrent same-stream append serialization with two independent PostgreSQL connections.
 2. Atomic rollback of event, stream head, and outbox state on constraint failure.
@@ -42,35 +54,18 @@ This characterizes the tested windows only. It is not proof of arbitrary crash r
 
 ## Candidate artifact
 
-GitHub Actions produced an unpublished candidate artifact from the exact branch head:
+Run 209 produced an unpublished candidate artifact from the exact candidate checkout:
 
-- Artifact ID: `10432382345`
-- Artifact name: `sif-core-unpublished-candidate-16ece4e78b7d288a8bd1a7eaedd6ec4c5834a910`
-- GitHub artifact size: `106319` bytes
-- GitHub artifact digest: `sha256:10aa09116d8f97793c4b033e7d61095ea760237dba172c4dfa6638f6b6f1bbf6`
-- source ZIP SHA-256: `bda471d5049ad411e7af068e78542d1f3a719dd3934d159e1a0eb5325562c407`
-- npm TGZ SHA-256: `45de20eb191c2084d5827be524323573d72f72aba22ffa84d0bc581d0d609488`
+- Artifact ID: `10431979722`
+- Artifact name: `sif-core-unpublished-candidate-38b7cc348a5adabc06d782ad6f475bbcb692da06`
+- GitHub artifact size: `109368` bytes
+- GitHub artifact digest: `sha256:3b5529371f04ae7366aaf66c455f8c8e1fcab579176bb31631329b34fd886b6c`
+- source ZIP SHA-256: `6f78d1c65767e5c9158acdbff8f48cdb849784e51ccfd42fd801358e084059d2`
+- npm TGZ SHA-256: `ac735987335e47aef3ca954c33c0459b2d9fd8f6eb393d8fb22f657598630d93`
 - package identity: `sif-core@0.5.0`
-- source archive provenance: exact commit `16ece4e78b7d288a8bd1a7eaedd6ec4c5834a910`
+- artifact manifest commit: `38b7cc348a5adabc06d782ad6f475bbcb692da06`
 
-## Independent verification
-
-The uploaded artifact was downloaded and inspected outside the GitHub Actions execution environment.
-
-Verified independently:
-
-- GitHub artifact wrapper ZIP integrity
-- GitHub artifact wrapper digest matches GitHub-reported SHA-256
-- embedded source ZIP integrity
-- embedded npm TGZ integrity
-- package name/version identity in the TGZ
-- exact commit provenance in the candidate manifest
-- expected source/test/sql/package paths in the source archive
-- path-safety checks for absolute paths and traversal entries
-- source ZIP and npm TGZ SHA-256 identities
-- non-empty artifact payloads
-
-An independent verification bundle and local hash manifest are preserved alongside the downloaded candidate artifacts in the working environment.
+The artifact wrapper was downloaded and independently inspected outside the GitHub Actions execution environment. The wrapper digest, archive integrity, package identity, provenance, expected source structure, and path-safety checks all passed.
 
 ## Boundaries
 
@@ -82,7 +77,7 @@ Not established by this milestone:
 - production-scale PostgreSQL throughput/latency
 - PostgreSQL HA/failover characterization
 - exactly-once external side effects
-- TLS/mTLS/SPIFFE federation transport
+- TLS/mTLS/SPIFFE federation
 - OPA/Cedar integration
 - KMS/HSM integration
 - distributed consensus
@@ -90,15 +85,15 @@ Not established by this milestone:
 
 ## Release rule
 
-A `0.6.0` package release requires a fresh source archive and npm package built from the promotion commit, SHA-256 identities, byte-preserving artifact preservation, and independent verification. CI success and candidate artifact existence do not themselves authorize merge, version bump, tagging, or publication.
+A `0.6.0` package release requires a final promotion commit, fresh source and npm artifacts from that exact commit, SHA-256 identities, byte-preserving preservation, and independent verification. CI success and an unpublished candidate artifact do not themselves authorize merge, version bump, tagging, or publication.
 
 ## Current release status
 
-**Implementation verification: complete.** The exact current branch head `16ece4e78b7d288a8bd1a7eaedd6ec4c5834a910` passed the full CI verification path in runs `192` and `193`, including live PostgreSQL testing and candidate archive verification/upload.
+**Implementation verification: complete for candidate head `38b7cc348a5adabc06d782ad6f475bbcb692da06`.**
 
-**Candidate artifact/evidence gate: complete.** The exact-head candidate source ZIP and npm TGZ were produced by CI and independently verified outside the CI environment.
+**Artifact/evidence gate: complete for candidate head `38b7cc348a5adabc06d782ad6f475bbcb692da06`.**
 
-**Binary release: not performed.** The package version remains `0.5.0`; no `0.6.0` tag, registry publication, or merge has been performed.
+**Binary release: not performed.** Package version remains `0.5.0`; no `0.6.0` tag, registry publication, or merge to `main` has been performed.
 
 ## Baseline preservation
 

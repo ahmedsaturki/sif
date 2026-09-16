@@ -12,9 +12,12 @@ export type FederationFailureCode =
   | "INVALID_SIGNATURE"
   | "INTEGRITY_FAILURE"
   | "REPLAY_DETECTED"
+  | "DUPLICATE_DELIVERY"
+  | "PEER_UNAVAILABLE"
   | "UNKNOWN_OUTCOME"
   | "TRANSIENT_DELIVERY_FAILURE"
-  | "RESOURCE_EXHAUSTED";
+  | "RESOURCE_EXHAUSTED"
+  | "CONFLICT_REQUIRES_RECONCILIATION";
 
 export type FederationFailureKind = "peer" | "message" | "delivery" | "authorization";
 

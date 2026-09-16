@@ -97,6 +97,8 @@ The current committed test execution contains explicit scenarios for F3-031, F3-
 
 F3-050 remains deliberately bounded to the provider-neutral kernel: the executable test proves that encrypted transport metadata does not authenticate or establish trust for an unauthenticated peer. It does not claim a production TLS/mTLS/SPIFFE deployment.
 
+The typed failure contract is aligned with the public implementation: `AUTHENTICATION_FAILURE` and `INTEGRITY_FAILURE` are the federation error codes, while local policy rejection is represented as `AUTHORIZATION_DENIED` with the underlying PolicyEngine rule/reason retained as attributable local context.
+
 No package version bump, registry publication, merge to `main`, production-federation claim, or release/promotion is implied by this verification boundary.
 
 Phase 3 follows:

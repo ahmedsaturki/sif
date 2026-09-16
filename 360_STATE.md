@@ -33,7 +33,14 @@ Implemented and tested:
 
 ## Live PostgreSQL 0.6 Verification
 
-GitHub Actions run 64 verified the committed PostgreSQL integration against a real PostgreSQL 16 service. The actual `PostgresTransactionalEventStore` was exercised from independent database connections and the test confirmed that concurrent writers using the same expected stream version are serialized at the `sif_stream_heads` row lock, leaving one version-1 event and one durable outbox row.
+GitHub Actions run 73 verified the committed integration against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness.
+
+Verified live scenarios:
+
+1. Concurrent same-stream append serialization: independent connections contend for the same expected version and exactly one event/outbox pair remains.
+2. Atomic rollback: a constraint failure rolls back the event, stream head, and outbox together with no partial commit.
+3. Projection checkpoint persistence: checkpoint state survives through the PostgreSQL store and round-trips deterministically.
+4. Outbox worker lifecycle: leases are exclusive, expired leases are reclaimable, and delivery/attempt mutations are owner-fenced.
 
 ## Evidence State
 
@@ -41,10 +48,13 @@ GitHub Actions run 64 verified the committed PostgreSQL integration against a re
 - Local tests: 27/27 PASS
 - GitHub Actions artifact identity: PASS
 - GitHub Actions committed build/test: PASS
-- GitHub Actions live PostgreSQL integration: PASS
+- PostgreSQL schema bootstrap: PASS
+- GitHub Actions live PostgreSQL integration: 4/4 PASS
 
 ## Explicit Unknown / Not Claimed
 
+- Arbitrary process/database crash-point characterization beyond the exercised transaction rollback scenario
+- Full recovery/reconciliation after external database/network faults
 - TLS/mTLS/SPIFFE federation transport
 - OPA/Cedar adapter
 - KMS/HSM secret integration
@@ -56,8 +66,8 @@ GitHub Actions run 64 verified the committed PostgreSQL integration against a re
 ## Release / Promotion State
 
 `feat/sif-core-0.5.0` remains the verified kernel baseline.
-`feat/sif-core-0.6.0-live-postgres` contains the live persistence verification milestone.
-Binary package versioning remains 0.5.0 until a new 0.6.0 release artifact is built, hashed, preserved, and independently verified.
+`feat/sif-core-0.6.0-live-postgres` contains the completed core live-persistence verification milestone.
+Binary package versioning remains 0.5.0 until a new 0.6.0 release artifact is built, hashed, preserved, and independently verified. No merge or binary publication is implied by CI success alone.
 
 ## Governing Laws
 

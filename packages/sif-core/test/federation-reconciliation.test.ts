@@ -47,6 +47,7 @@ test("conflicting remote observations become explicit conflicts rather than over
   assert.equal(result.accepted.length, 0);
   assert.equal(result.conflicts.length, 1);
   assert.equal(result.conflicts[0]?.reason, "REMOTE_OBSERVATION_DIVERGENCE");
+  assert.equal(result.nextCursor, null);
   assert.equal(reconciler.listObservations()[0]?.eventDigest, "digest-001");
 });
 
@@ -59,6 +60,7 @@ test("remote state divergence from immutable local history is recorded without m
   assert.equal(result.accepted.length, 0);
   assert.equal(result.conflicts.length, 1);
   assert.equal(result.conflicts[0]?.reason, "LOCAL_EVENT_DIVERGENCE");
+  assert.equal(result.nextCursor, null);
   assert.equal(reconciler.listObservations().length, 0);
 });
 
@@ -78,6 +80,49 @@ test("oversized reconciliation batch fails before processing", () => {
     (error: unknown) => error instanceof FederationProtocolError && error.code === "RESOURCE_EXHAUSTED",
   );
   assert.equal(reconciler.listObservations().length, 0);
+});
+
+test("invalid observations are validated before any batch mutation", () => {
+  const reconciler = new InMemoryFederationReconciler(10);
+  const malformed = { ...observation({ observationId: "obs-002", cursor: "0002" }), eventId: undefined, evidenceId: undefined } as unknown as FederatedObservation;
+  assert.throws(
+    () => reconciler.reconcile({ observations: [observation(), malformed] }),
+    TypeError,
+  );
+  assert.equal(reconciler.listObservations().length, 0);
+});
+
+test("conflict blocks cursor advancement past later accepted observations", () => {
+  const reconciler = new InMemoryFederationReconciler(10);
+  const result = reconciler.reconcile({
+    observations: [
+      observation({ observationId: "obs-001", cursor: "0001" }),
+      observation({ observationId: "obs-conflict", cursor: "0002", eventId: "event-conflict", eventDigest: "digest-conflict" }),
+      observation({ observationId: "obs-003", cursor: "0003", eventId: "event-003", eventDigest: "digest-003" }),
+    ],
+    localEventDigests: new Map([["event-conflict", "local-digest"]]),
+  });
+
+  assert.deepEqual(result.accepted.map((item) => item.observationId), ["obs-001", "obs-003"]);
+  assert.equal(result.conflicts.length, 1);
+  assert.equal(result.nextCursor, "0001");
+  assert.equal(reconciler.listObservations().map((item) => item.cursor).join(","), "0001,0003");
+});
+
+test("cursor advances through duplicates only while no earlier conflict blocks progress", () => {
+  const reconciler = new InMemoryFederationReconciler(10);
+  reconciler.reconcile({ observations: [observation()] });
+
+  const result = reconciler.reconcile({
+    observations: [
+      observation({ observationId: "obs-001", cursor: "0001" }),
+      observation({ observationId: "obs-002", cursor: "0002", eventId: "event-002", eventDigest: "digest-002" }),
+    ],
+  });
+
+  assert.equal(result.duplicates.length, 1);
+  assert.equal(result.accepted.length, 1);
+  assert.equal(result.nextCursor, "0002");
 });
 
 test("invalid observations fail closed", () => {
@@ -118,6 +163,7 @@ test("concurrent divergent reconciliation stays explicit and preserves the first
 
   assert.equal(results.every((result) => result.accepted.length === 0), true);
   assert.equal(results.every((result) => result.conflicts.length === 1), true);
+  assert.equal(results.every((result) => result.nextCursor === null), true);
   assert.equal(reconciler.listObservations().length, 1);
   assert.equal(reconciler.listObservations()[0]?.eventDigest, "digest-001");
 });

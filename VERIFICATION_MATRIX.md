@@ -2,15 +2,15 @@
 
 | Surface | Status | Evidence / Boundary |
 |---|---|---|
-| TypeScript strict build | PASS | GitHub Actions run 143 on final HEAD |
-| Core test suite | PASS | 27/27 tests passed in run 143 |
+| TypeScript strict build | PASS | GitHub Actions run 169 on verified code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f` |
+| Core test suite | PASS | 27/27 tests passed in run 169 |
 | Event append/replay | VERIFIED | Unit/integration coverage |
 | Integrity hash chains | VERIFIED | Tamper-detection coverage |
 | Filesystem CAS | VERIFIED | Digest addressing + corruption detection |
 | Authority/delegation | VERIFIED | Scoped/expiring/attenuating behavior covered |
 | Policy admission | VERIFIED | Default-deny + deny-overrides covered |
 | Outbox persistence | VERIFIED | Durable JSONL + idempotent enqueue/retry covered |
-| PostgreSQL transactional append | VERIFIED LIVE | Real PostgreSQL 16; event + stream head + outbox transaction exercised |
+| PostgreSQL transactional append | VERIFIED LIVE | Real PostgreSQL 16.15; event + stream head + outbox transaction exercised |
 | PostgreSQL multi-client concurrency | VERIFIED LIVE | Two independent connections; exactly one same-version append succeeds |
 | Projection checkpointing | VERIFIED LIVE | Real PostgreSQL persistence and deterministic round-trip |
 | Worker lease/reclaim | VERIFIED LIVE | Real PostgreSQL claim, blocking, expiry/reclaim and owner fencing |
@@ -28,4 +28,4 @@
 
 ## 0.6 Promotion Gate
 
-The 0.6 implementation milestone is live-verified on PostgreSQL 16 by GitHub Actions run 143 for commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`. The remaining release gate is artifact production and independent verification. NOT IMPLEMENTED / NOT VERIFIED / NOT CLAIMED entries remain hard boundaries and must not be represented as production capabilities.
+The 0.6 implementation milestone is live-verified on PostgreSQL 16.15 by GitHub Actions run 169 for verified code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`. The remaining release gate is artifact production and independent verification. NOT IMPLEMENTED / NOT VERIFIED / NOT CLAIMED entries remain hard boundaries and must not be represented as production capabilities.

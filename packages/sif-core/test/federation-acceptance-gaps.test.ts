@@ -190,12 +190,21 @@ test("F3-047: occurrence, observation and inbox receipt times remain distinct fa
   assert.notEqual(claim.record.receivedAt, msg.time.observedAt);
 });
 
-test("F3-048: historical message preserves original occurrence semantics when processed later", () => {
+test("F3-048: replayed historical message preserves original occurrence semantics", () => {
   const inbox = new InMemoryFederatedInbox();
   const historical = envelope({ messageId: "msg-historical-001", eventId: "evt-historical-001", replayNonce: "nonce-historical-001" });
-  const claim = inbox.accept(historical, "consumer-a", "2026-09-16T06:30:00.000Z");
+  const first = inbox.accept(historical, "consumer-a", "2026-09-16T06:30:00.000Z");
+  assert.equal(first.accepted, true);
+  assert.equal(first.record.receivedAt, "2026-09-16T06:30:00.000Z");
 
-  assert.equal(claim.record.receivedAt, "2026-09-16T06:30:00.000Z");
+  inbox.markProcessed("consumer-a", historical.messageId, "2026-09-16T06:31:00.000Z");
+  inbox.markCommitted("consumer-a", historical.messageId, "result-historical-001", "2026-09-16T06:32:00.000Z");
+
+  const replay = inbox.accept(historical, "consumer-a", "2026-09-16T06:33:00.000Z");
+  assert.equal(replay.accepted, false);
+  assert.equal(replay.duplicate, true);
+  assert.equal(replay.record.state, "COMMITTED");
+  assert.equal(replay.record.receivedAt, "2026-09-16T06:30:00.000Z");
   assert.equal(historical.time.occurredAt, "2026-09-15T23:00:00.000Z");
   assert.equal(historical.time.observedAt, "2026-09-16T06:00:01.000Z");
 });

@@ -73,27 +73,22 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 - Added declared retention-window enforcement in the federated inbox; delivery at/after `expiresAt` is rejected with typed `REPLAY_DETECTED`.
 - Added explicit encrypted-transport metadata coverage to prove encryption state does not substitute for peer authentication/trust at the provider-neutral transport boundary.
 - Added explicit strict TypeScript fixtures for the fault-injection and inbox acceptance tests so the final committed test tree builds cleanly under `exactOptionalPropertyTypes`.
+- Updated GitHub Actions to current Node 24-compatible major versions for checkout, Node setup, and artifact upload; this maintenance change is verified by the latest exact-head CI run.
 
 ## Current Verification Boundary
 
-The code-bearing Secure Federation candidate is:
-`64c7beee9343be25809179bc59ea60577cc2d394`
+The current Secure Federation candidate and its exact verification provenance are intentionally tracked outside this mutable log entry to avoid a self-referential commit loop. The authoritative current candidate is the branch HEAD recorded in PR #3, and its exact-head CI run/artifact must always be used as the provenance source.
 
-Its exact-head CI record is:
-- SIF Core CI Run #371 / `35136067984`
-- conclusion: `success`
-- exact checkout verified
-- build and test: 123/123 passed
-- live PostgreSQL integration: 7/7 passed
-- federated inbox crash-window characterization: passed
-- PostgreSQL crash-window characterization: passed
-- unpublished candidate archives built and SHA-256 verified
-- artifact ID: `10462904785`
-- artifact ZIP digest: `sha256:4d9dfae825c4e245db421e4d137ea0a618b222a4a86062902e4285f01922322d`
+The latest successful exact-head CI execution also covers:
+- exact candidate checkout verification;
+- the complete committed test tree;
+- live PostgreSQL integration;
+- federated inbox crash-window characterization;
+- PostgreSQL crash-window characterization;
+- unpublished candidate archive build, extraction and SHA-256 verification;
+- candidate artifact upload.
 
-The repository may contain subsequent documentation-only provenance commits; those commits do not change the federation code semantics. The final branch HEAD must always be established and verified from the exact SHA of the CI run associated with that HEAD, rather than inferred from this log entry.
-
-The final committed test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
+The current committed test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
 
 `PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence.
 

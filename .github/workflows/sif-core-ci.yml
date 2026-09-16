@@ -27,9 +27,17 @@ jobs:
       PGUSER: postgres
       PGDATABASE: postgres
       RUN_POSTGRES_INTEGRATION: '1'
+      CANDIDATE_COMMIT: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
     steps:
-      - name: Checkout
+      - name: Checkout exact candidate commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact candidate checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_COMMIT"
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -68,7 +76,7 @@ jobs:
           git archive --format=zip --prefix=sif-core-source/ HEAD -- packages/sif-core > "$RUNNER_TEMP/sif-candidate/sif-core-source.zip"
           npm pack --pack-destination "$RUNNER_TEMP/sif-candidate" ./packages/sif-core
           test -f "$RUNNER_TEMP/sif-candidate/sif-core-0.5.0.tgz"
-          printf 'commit=%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/sif-candidate/MANIFEST.txt"
+          printf 'commit=%s\n' "$CANDIDATE_COMMIT" > "$RUNNER_TEMP/sif-candidate/MANIFEST.txt"
           node -e "const p=require('./packages/sif-core/package.json'); if(p.name!=='sif-core'||p.version!=='0.5.0') process.exit(1); console.log('package='+p.name+'@'+p.version)" >> "$RUNNER_TEMP/sif-candidate/MANIFEST.txt"
           sha256sum "$RUNNER_TEMP/sif-candidate/sif-core-source.zip" "$RUNNER_TEMP/sif-candidate/sif-core-0.5.0.tgz" >> "$RUNNER_TEMP/sif-candidate/MANIFEST.txt"
       - name: Verify unpublished candidate archives
@@ -88,10 +96,11 @@ jobs:
           sha256sum -c SHA256SUMS
           test "$(wc -c < sif-core-source.zip)" -gt 0
           test "$(wc -c < sif-core-0.5.0.tgz)" -gt 0
+          grep -Fx "commit=$CANDIDATE_COMMIT" MANIFEST.txt
       - name: Upload unpublished candidate artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: sif-core-unpublished-candidate-${{ github.sha }}
+          name: sif-core-unpublished-candidate-${{ env.CANDIDATE_COMMIT }}
           path: ${{ runner.temp }}/sif-candidate
           if-no-files-found: error
           retention-days: 14

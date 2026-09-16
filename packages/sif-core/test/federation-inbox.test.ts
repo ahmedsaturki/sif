@@ -31,8 +31,8 @@ const baseEnvelope: FederationEnvelope = {
   signature: "test-signature",
 };
 
-function withMessage(messageId: string, replayNonce = baseEnvelope.replayNonce): FederationEnvelope {
-  return { ...baseEnvelope, messageId, replayNonce };
+function withMessage(messageId: string, replayNonce = baseEnvelope.replayNonce, eventId = baseEnvelope.eventId): FederationEnvelope {
+  return { ...baseEnvelope, messageId, eventId, replayNonce };
 }
 
 test("duplicate delivery returns the existing record without creating another logical delivery", () => {
@@ -65,6 +65,17 @@ test("replay key cannot be rebound to a distinct message identity", () => {
     () => inbox.accept(withMessage("msg-002"), "consumer-a"),
     (error: unknown) => error instanceof FederationProtocolError && error.code === "REPLAY_DETECTED",
   );
+});
+
+test("F3-026: reordered inbox messages remain independently admissible within the envelope ordering model", () => {
+  const inbox = new InMemoryFederatedInbox();
+  const later = withMessage("msg-002", "nonce-002", "evt-002");
+  const first = inbox.accept(later, "consumer-a", "2026-09-16T06:00:02.000Z");
+  const second = inbox.accept(baseEnvelope, "consumer-a", "2026-09-16T06:00:03.000Z");
+  assert.equal(first.accepted, true);
+  assert.equal(second.accepted, true);
+  assert.equal(inbox.get("consumer-a", "msg-002").eventId, "evt-002");
+  assert.equal(inbox.get("consumer-a", "msg-001").eventId, "evt-001");
 });
 
 test("processing state progression is explicit and monotonic", () => {

@@ -17,6 +17,7 @@ export interface FederationTransportSession {
   localDomain: string;
   peerIdentity: FederationPeerIdentity;
   establishedAt: ISODate;
+  encrypted: boolean;
   authenticated: boolean;
   negotiated: NegotiatedFederationCapabilities;
 }
@@ -78,6 +79,7 @@ function validateSession(session: FederationTransportSession): void {
 
 /**
  * Provider-neutral transport boundary. TLS/mTLS/SPIFFE implementations live outside this kernel.
+ * Encryption is represented as transport metadata only; it never grants peer trust.
  */
 export class FederationTransportBoundary {
   constructor(private readonly adapter: FederationTransportAdapter) {}
@@ -161,6 +163,7 @@ export class InMemoryFederationTransportAdapter implements FederationTransportAd
       localDomain: context.localDomain,
       peerIdentity: { ...context.peer },
       establishedAt: this.observedAt,
+      encrypted: false,
       authenticated: true,
       negotiated: cloneNegotiated(context.negotiated),
     };

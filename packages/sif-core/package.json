@@ -2,7 +2,7 @@
   "name": "sif-core",
   "version": "0.5.0",
   "private": false,
-  "description": "Dependency-free TypeScript core for a Sovereign Intelligence Fabric with transactional PostgreSQL integration, durable outbox, cryptographic integrity, CAS, evidence/provenance, scoped authority, policy admission, semantic knowledge, federation, lineage and reconstruction verification.",
+  "description": "Dependency-free TypeScript core for a Sovereign Intelligence Fabric with transactional PostgreSQL integration, durable outbox, cryptographic integrity, CAS, evidence/provenance, scoped authority, policy admission, semantic knowledge, lineage and reconstruction verification.",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {

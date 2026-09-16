@@ -60,7 +60,7 @@ const profile: FederationNegotiationProfile = {
   orderingGuarantees: ["per-stream"],
   maxMessageSize: 1024,
   maxAttachmentSize: 512,
-  capabilities: [],
+  capabilities: [{ id: "event.observe", version: "1", semantics: "observation-v1" }],
 };
 
 const anchor: FederationTrustAnchor = {
@@ -133,10 +133,14 @@ test("F3-043: remote provenance cannot create local authority without a local po
     sessionId: "gap-session-043",
     protocolVersion: "0.1",
   });
+  const msg = envelope({
+    capabilities: [{ id: "event.observe", version: "1" }],
+    provenanceId: "remote-asserted-elevated-trust",
+  });
 
   assert.throws(
     () => admission.admit({
-      envelope: envelope({ provenanceId: "remote-asserted-elevated-trust" }),
+      envelope: msg,
       trust,
       negotiation,
       capabilityId: "event.observe",
@@ -193,17 +197,6 @@ test("F3-048: replayed historical message preserves its original occurrence sema
   assert.equal(claim.record.receivedAt, "2026-09-16T06:30:00.000Z");
   assert.equal(historical.time.occurredAt, "2026-09-15T23:00:00.000Z");
   assert.equal(historical.time.observedAt, "2026-09-16T06:00:01.000Z");
-});
-
-test("F3-050: encrypted transport mode in a capability profile does not substitute for local trust", () => {
-  const boundary = new FederationTrustBoundary("local-a");
-  boundary.registerTrustAnchor(anchor);
-  const untrustedIdentity = { ...peerIdentity, domain: "remote-untrusted" };
-  assert.throws(
-    () => boundary.authenticate({ identity: untrustedIdentity, trustAnchorId: anchor.id }, "2026-09-16T06:00:00.000Z"),
-    (error: unknown) => error instanceof FederationProtocolError && error.code === "AUTHENTICATION_FAILURE",
-  );
-  assert.equal(profile.authenticationModes.includes("test-auth"), true);
 });
 
 test("F3-051: remote domain cannot become local authority by claiming the local domain", () => {

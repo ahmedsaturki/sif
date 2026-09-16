@@ -71,29 +71,34 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 - Added executable fault-injection coverage for forced authentication failure, signature tamper, duplicate delivery, peer outage/recovery, and post-send connection loss producing `UNKNOWN_OUTCOME` followed by reconciliation.
 - Fixed the federated inbox crash-window harness so a PostgreSQL socket `close` during an induced backend termination rejects the active request instead of leaving the test pending.
 - Added declared retention-window enforcement in the federated inbox; delivery at/after `expiresAt` is rejected with typed `REPLAY_DETECTED`.
+- Added explicit encrypted-transport metadata coverage to prove encryption state does not substitute for peer authentication/trust at the provider-neutral transport boundary.
+- Added explicit strict TypeScript fixtures for the fault-injection and inbox acceptance tests so the final committed test tree builds cleanly under `exactOptionalPropertyTypes`.
 
 ## Current Verification Boundary
 
 Current candidate HEAD:
-`da6dfb66236e7571b7b49e192c1ac31592dc8bfd`
+`adc52430dd8fb63df8a7d3cce302939a2bc9a95c`
 
 Exact-head CI:
-- SIF Core CI Run #360 / `35134396939`
+- SIF Core CI Run #369 / `35135466735`
 - conclusion: `success`
-- build and test: 115/115 passed
+- build and test: 123/123 passed
 - live PostgreSQL integration: 7/7 passed
 - federated inbox crash-window characterization: passed
 - PostgreSQL crash-window characterization: passed
-- unpublished candidate archives built and independently checked by SHA-256
-- candidate artifact uploaded as `sif-core-unpublished-candidate-da6dfb66236e7571b7b49e192c1ac31592dc8bfd`
-- artifact ID: `10462142084`
-- artifact ZIP digest: `sha256:a9bb651a176dfd96085b501dd9afda2d72a688c1959402d06b48129faae50602`
+- unpublished candidate archives built and SHA-256 verified
+- exact candidate archive manifest records `commit=adc52430dd8fb63df8a7d3cce302939a2bc9a95c`
+- candidate artifact uploaded as `sif-core-unpublished-candidate-adc52430dd8fb63df8a7d3cce302939a2bc9a95c`
+- artifact ID: `10462579392`
+- artifact ZIP digest: `sha256:d9fc685a8d81e372467f5310b5ccf2eaaff0bf85de2073fd4b99e7b3ce4490a2`
 
-The test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
+The final committed test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
 
-The matrix still requires row-by-row reconciliation before any Verified/promotion claim. In particular, F3-050 remains a deliberate non-claim because the dependency-free provider-neutral kernel does not implement deployment-specific encrypted transport (TLS/mTLS/SPIFFE); encryption alone must not be treated as peer trust, but that specific encrypted/untrusted-peer runtime scenario is not currently executable inside this kernel boundary.
+`PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence. The exact-head Run #369 covered the candidate containing that ledger and the related acceptance tests.
 
-No package version bump, registry publication, merge to `main`, production-federation claim, or Verified promotion is claimed.
+F3-050 remains deliberately bounded to the provider-neutral kernel: the executable test proves that encrypted transport metadata does not authenticate or establish trust for an unauthenticated peer. It does not claim a production TLS/mTLS/SPIFFE deployment.
+
+No package version bump, registry publication, merge to `main`, production-federation claim, or release/promotion is implied by this verification boundary.
 
 Phase 3 follows:
 

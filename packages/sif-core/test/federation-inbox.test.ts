@@ -31,7 +31,7 @@ const baseEnvelope: FederationEnvelope = {
   signature: "test-signature",
 };
 
-function withMessage(messageId: string, replayNonce = baseEnvelope.replayNonce, eventId = baseEnvelope.eventId): FederationEnvelope {
+function withMessage(messageId: string, replayNonce = baseEnvelope.replayNonce, eventId = "evt-001"): FederationEnvelope {
   return { ...baseEnvelope, messageId, eventId, replayNonce };
 }
 
@@ -74,8 +74,8 @@ test("F3-026: reordered inbox messages remain independently admissible within th
   const second = inbox.accept(baseEnvelope, "consumer-a", "2026-09-16T06:00:03.000Z");
   assert.equal(first.accepted, true);
   assert.equal(second.accepted, true);
-  assert.equal(inbox.get("consumer-a", "msg-002").eventId, "evt-002");
-  assert.equal(inbox.get("consumer-a", "msg-001").eventId, "evt-001");
+  assert.equal(inbox.get("consumer-a", "msg-002").messageId, "msg-002");
+  assert.equal(inbox.get("consumer-a", "msg-001").messageId, "msg-001");
 });
 
 test("processing state progression is explicit and monotonic", () => {

@@ -49,9 +49,9 @@ Unknown infrastructure is never represented as verified implementation.
 
 ### Final verification state
 
-The implementation-level 0.6 persistence milestone is verified through the latest successful CI candidate line. The package version remains `0.5.0`; the 0.6 milestone is an integration-verification boundary, not a published package release.
+The implementation-level 0.6 persistence milestone is verified through the successful CI candidate line. The package version remains `0.5.0`; the 0.6 milestone is an integration-verification boundary, not a published package release.
 
-### 0.7 Secure Federation — SPEC / CONTRACT / IMPLEMENT START
+### 0.7 Secure Federation — SPEC / CONTRACT / IMPLEMENT
 
 - Defined `PHASE_3_FEDERATION_SPEC.md` as the normative Phase 3 boundary.
 - Defined `PHASE_3_IMPLEMENTATION_CONTRACT.md` with component boundaries, typed failures, processing state machine, security/resource/provenance invariants, implementation order, and promotion gates.
@@ -67,17 +67,34 @@ The implementation-level 0.6 persistence milestone is verified through the lates
 - Added bounded delivery retry semantics with explicit `RETRY`, `STOP`, and `RECONCILE` classification, including `UNKNOWN_OUTCOME` handling.
 - Added provider-neutral transport session/send/close boundary with explicit local-domain binding, peer identity binding, negotiated-scope enforcement, and result identity validation.
 - Added resource/abuse governance for concurrent sessions, inbox work, replay retention, reconciliation batch size, and per-peer/global session rate limits.
+- Added executable coverage for delayed/replayed observations, provenance attribution, cross-peer identity collision, historical replay semantics, remote-authority isolation, deterministic reconciliation, and retry/reconnect backpressure.
 - Added executable fault-injection coverage for forced authentication failure, signature tamper, duplicate delivery, peer outage/recovery, and post-send connection loss producing `UNKNOWN_OUTCOME` followed by reconciliation.
-- Fixed CI workflow duplication by adding branch-scoped concurrency and limiting push-triggered verification to `main`; feature branches are verified through their pull-request workflow.
-- Reconciled the Phase 3 implementation contract with the implemented transport/resource/fault-injection boundaries.
-- Reconciled this implementation log with the current Phase 3 implementation state.
-- The current candidate is still unpublished and remains subject to exact-HEAD CI verification; no passing status is inferred from cancelled, queued, or earlier runs.
-- No package version bump, registry publication, or merge is claimed.
+- Fixed the federated inbox crash-window harness so a PostgreSQL socket `close` during an induced backend termination rejects the active request instead of leaving the test pending.
+- Added declared retention-window enforcement in the federated inbox; delivery at/after `expiresAt` is rejected with typed `REPLAY_DETECTED`.
 
 ## Current Verification Boundary
 
-The current branch must only be promoted when every applicable Required row in `PHASE_3_TEST_MATRIX.md` has executable evidence tied to the exact candidate commit, and the artifact/provenance checks validate the same checkout. Documentation describing coverage does not itself constitute a PASS.
+Current candidate HEAD:
+`da6dfb66236e7571b7b49e192c1ac31592dc8bfd`
 
-Phase 3 follows the same evidence-gated sequence:
+Exact-head CI:
+- SIF Core CI Run #360 / `35134396939`
+- conclusion: `success`
+- build and test: 115/115 passed
+- live PostgreSQL integration: 7/7 passed
+- federated inbox crash-window characterization: passed
+- PostgreSQL crash-window characterization: passed
+- unpublished candidate archives built and independently checked by SHA-256
+- candidate artifact uploaded as `sif-core-unpublished-candidate-da6dfb66236e7571b7b49e192c1ac31592dc8bfd`
+- artifact ID: `10462142084`
+- artifact ZIP digest: `sha256:a9bb651a176dfd96085b501dd9afda2d72a688c1959402d06b48129faae50602`
+
+The test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
+
+The matrix still requires row-by-row reconciliation before any Verified/promotion claim. In particular, F3-050 remains a deliberate non-claim because the dependency-free provider-neutral kernel does not implement deployment-specific encrypted transport (TLS/mTLS/SPIFFE); encryption alone must not be treated as peer trust, but that specific encrypted/untrusted-peer runtime scenario is not currently executable inside this kernel boundary.
+
+No package version bump, registry publication, merge to `main`, production-federation claim, or Verified promotion is claimed.
+
+Phase 3 follows:
 
 `SPEC → CONTRACT → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

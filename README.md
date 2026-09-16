@@ -19,16 +19,16 @@ GitHub Actions run **143** verified commit `b01ba3f56aa7cd20436ddec8e0628944e99c
 
 The same run passed direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
 
-The final-head CI requirement is satisfied. The implementation remains unpromoted because package artifact publication still requires a fresh 0.6.0 artifact set, SHA-256 identities, byte-preserving preservation, and independent verification.
+The current branch has since received documentation/evidence reconciliation commits. A fresh CI run on the current candidate is required again before artifact production.
 
 ## Verification
 
 ```text
-Final branch HEAD: b01ba3f56aa7cd20436ddec8e0628944e99c6b51
-GitHub Actions run 143: PASS
-Strict committed TypeScript build + tests: PASS
-Unit tests: 27/27 PASS
+Implementation baseline (run 143): PASS
+Local TypeScript build: PASS
+Local tests: 27/27 PASS
 GitHub Actions artifact identity: PASS
+GitHub Actions committed build/test: PASS
 GitHub Actions PostgreSQL schema bootstrap: PASS
 GitHub Actions live PostgreSQL integration: 4/4 PASS
 GitHub Actions crash-window characterization: PASS
@@ -55,7 +55,7 @@ GitHub Actions crash-window characterization: PASS
 
 ## Binary artifact preservation
 
-The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the persistent Library. Their SHA-256 identities are recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`. A 0.6.0 binary release has not been fabricated or claimed: the current repository connector cannot safely carry binary GitHub release bytes, and run 143 produced no Actions artifacts.
+The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the persistent Library. Their SHA-256 identities are recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`. A 0.6.0 binary release has not been fabricated or claimed: the current repository connector cannot safely carry binary GitHub release bytes, and the previous implementation verification run produced no Actions artifacts.
 
 ## Verification boundary
 

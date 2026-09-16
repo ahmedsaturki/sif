@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { generateKeyPairSync } from "node:crypto";
+import { digest } from "../src/core.js";
 import {
   FEDERATION_PROTOCOL,
   FederationProtocolError,
@@ -33,6 +33,9 @@ function input(overrides: Partial<BuildInput> = {}): BuildInput {
   };
 }
 
+const signer = { sign: (data: string) => digest({ purpose: "test-only", data }) };
+const verifier = { verify: (data: string, signature: string) => signature === digest({ purpose: "test-only", data }) };
+
 test("canonical payload digest is independent of object insertion order", () => {
   const a = { type: "t", data: { z: 2, a: 1 } };
   const b = { data: { a: 1, z: 2 }, type: "t" };
@@ -45,12 +48,11 @@ test("canonical envelope ordering is deterministic", () => {
   assert.equal(canonicalizeFederationEnvelope(a), canonicalizeFederationEnvelope(b));
 });
 
-test("Ed25519 signature verifies and tampering is rejected", () => {
-  const { privateKey, publicKey } = generateKeyPairSync("ed25519");
-  const signed = signFederationEnvelope(createUnsignedFederationEnvelope(input()), privateKey);
-  assert.doesNotThrow(() => verifyFederationEnvelope(signed, publicKey));
+test("provider-neutral signature verifies and tampering is rejected", () => {
+  const signed = signFederationEnvelope(createUnsignedFederationEnvelope(input()), signer);
+  assert.doesNotThrow(() => verifyFederationEnvelope(signed, verifier));
   const tampered = { ...signed, payload: { ...signed.payload, data: { ...signed.payload.data, z: 999 } } };
-  assert.throws(() => verifyFederationEnvelope(tampered, publicKey), FederationProtocolError);
+  assert.throws(() => verifyFederationEnvelope(tampered, verifier), FederationProtocolError);
 });
 
 test("message identity cannot equal event identity", () => {
@@ -62,7 +64,7 @@ test("unsupported protocol and signature algorithm fail closed", () => {
   assert.throws(() => createUnsignedFederationEnvelope(input({ protocol: "other" as typeof FEDERATION_PROTOCOL })), FederationProtocolError);
   const unsigned = createUnsignedFederationEnvelope(input());
   const incompatible = { ...unsigned, signatureAlgorithm: "RSA-SHA256" as "Ed25519", signature: "x" };
-  assert.throws(() => verifyFederationEnvelope(incompatible, generateKeyPairSync("ed25519").publicKey), FederationProtocolError);
+  assert.throws(() => verifyFederationEnvelope(incompatible, verifier), FederationProtocolError);
 });
 
 test("expiry must be after observation time", () => {

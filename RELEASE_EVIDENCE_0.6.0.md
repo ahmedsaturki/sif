@@ -3,12 +3,13 @@
 ## Candidate
 
 - Branch: `feat/sif-core-0.6.0-live-postgres`
-- Current candidate commit: `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`
+- Current candidate commit: `0df0385c94e59762aab2f5e74ec46702a919453e`
 - Package version: `0.5.0` (release artifact version intentionally not bumped yet)
-- Final-head verification: GitHub Actions run `143`
+- Implementation verification baseline: GitHub Actions run `143` on `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`
+- Current candidate verification: fresh CI required after documentation reconciliation
 - PostgreSQL service: `16`
 
-## Verified final-head gates — run 143
+## Verified implementation gates — run 143
 
 | Gate | Result |
 |---|---|
@@ -57,10 +58,8 @@ A `0.6.0` package release requires a fresh source archive and npm package built 
 
 ## Current release status
 
-**Implementation verification: complete.**
+**Implementation verification baseline: complete.** Run 143 verified the implementation commit on real PostgreSQL 16.
 
-The final-head gate is satisfied by run `143` on commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`.
+**Current branch state: pending final-candidate CI.** Documentation/evidence reconciliation commits were intentionally made after run 143. The current candidate must pass a fresh complete CI run before artifact production or promotion.
 
-**Binary release: pending artifact channel.**
-
-The repository currently contains no 0.6.0 binary artifact set. Run 143 produced no Actions artifacts, and the current execution environment cannot safely clone from `github.com` because DNS resolution is unavailable. Therefore no unverified binary is fabricated or claimed.
+**Binary release: pending artifact channel.** Run 143 produced no Actions artifacts; no unverified 0.6.0 binary is fabricated or claimed.

@@ -3,13 +3,15 @@
 ## Candidate
 
 - Branch: `feat/sif-core-0.6.0-live-postgres`
-- Current candidate commit: `7aafe979fe688ffaa4c31c91dcdd408bc8bc6e51`
+- Current candidate commit: `3f1a248b226122696dd612cd7740e3c851c9a31f`
 - Package version: `0.5.0` (release artifact version intentionally not bumped yet)
-- Implementation verification baseline: GitHub Actions run `143` on `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`
-- Current candidate verification: GitHub Actions run `164` in progress
-- PostgreSQL service: `16`
+- Final candidate verification: GitHub Actions run `169`
+- PR merge-ref exercised by CI: `60ffcb55e31be5545f61ecc7f0298c7c5e9a8b75`
+- PostgreSQL service: `16.15`
+- Node: `22.23.2`
+- npm: `10.9.8`
 
-## Verified implementation baseline — run 143
+## Final candidate verification — run 169
 
 | Gate | Result |
 |---|---|
@@ -58,8 +60,6 @@ A `0.6.0` package release requires a fresh source archive and npm package built 
 
 ## Current release status
 
-**Implementation verification baseline: complete.** Run 143 verified the implementation commit on real PostgreSQL 16.
+**Implementation verification: complete.** Run 169 verified the current candidate commit on real PostgreSQL 16.15, including the compiled TypeScript tree, 27 unit tests, 4 live PostgreSQL scenarios, and the two exercised crash windows.
 
-**Current candidate: pending final CI.** Documentation/evidence reconciliation commits were intentionally added after run 143. Run 164 is the fresh complete CI execution for the current candidate lineage; artifact production or promotion remains blocked until that current candidate is verified.
-
-**Binary release: pending artifact channel.** Run 143 produced no Actions artifacts; no unverified 0.6.0 binary is fabricated or claimed.
+**Binary release: pending artifact channel.** Existing 0.5.0 artifacts remain preserved. No unverified 0.6.0 binary is fabricated or claimed. A 0.6.0 binary release remains gated on exact promotion-commit artifact production, SHA-256 identity, preservation, and independent verification.

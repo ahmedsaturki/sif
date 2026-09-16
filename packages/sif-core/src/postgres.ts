@@ -93,6 +93,10 @@ export interface PostgresTransactionalAppend {
 export class PostgresTransactionalEventStore extends PostgresEventStore implements PostgresTransactionalAppend {
   constructor(private readonly pool: PgPoolLike) { super(pool); }
 
+  override async append<T extends Record<string, unknown>>(event: EventEnvelope<T>, condition: AppendCondition): Promise<void> {
+    await this.appendAndEnqueue(event, condition, []);
+  }
+
   async appendAndEnqueue<T extends Record<string, unknown>>(
     event: EventEnvelope<T>,
     condition: AppendCondition,

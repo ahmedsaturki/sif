@@ -2,58 +2,29 @@
 
 SIF is a sovereignty-first intelligence fabric whose implementation begins with a small, verifiable TypeScript kernel and grows through evidence-gated integration layers.
 
-## Repository baseline
+## Current candidate line
 
-- Genesis: `main` at `f4408d81375786e7a9f0715cf70609d0e257a67c`
-- Verified kernel branch: `feat/sif-core-0.5.0`
-- Live PostgreSQL verification branch: `feat/sif-core-0.6.0-live-postgres`
-- Current branch is the exact candidate line verified by the latest successful CI run.
-- Current package version remains `0.5.0`; 0.6 is an integration-verification milestone, not yet a binary package release.
+- Verified kernel baseline is preserved.
+- Phase 2 Live PostgreSQL verification remains preserved by later candidate CI.
+- Phase 3 Secure Federation is an unpublished implementation candidate on its dedicated feature branch.
+- Phase 4 Policy & Governance is an unpublished implementation candidate on `feat/sif-core-0.8.0-policy-governance`.
+- The package version remains `0.5.0`; later milestones do not imply package publication.
 
-## SIF Core 0.5.0
+## Phase 4 Policy & Governance
 
-The verified kernel includes append-only event streams, deterministic replay, optimistic concurrency, SHA-256 event integrity and stream hash chains, filesystem CAS, evidence/provenance/knowledge/semantic/lineage registries, scoped authority and attenuation, default-deny policy, durable outbox delivery, PostgreSQL transactional contracts, Ed25519 attestations, worker/inbox primitives, resumable projections, and self-model/reconstruction verification.
+The Phase 4 candidate adds a dependency-free governance boundary for immutable policy versions, explicit lifecycle, timestamp-aware historical resolution, local deny-overrides/default-deny, provider-neutral OPA/Cedar-shaped adapters, deterministic attributable decision evidence, bounded policy/evaluation resources, and federated-policy subordination to local authorization.
 
-## Live PostgreSQL verification — 0.6 milestone
-
-The latest candidate line is verified by a complete CI path that explicitly checks out the candidate commit rather than a pull-request merge ref. The path verifies exact checkout identity, strict TypeScript build/tests, PostgreSQL schema bootstrap, live integration, crash-window characterization, candidate archive build/verification, and artifact upload.
-
-The live integration suite covers **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
-
-The crash-window characterization covers two explicit windows: before-commit backend termination and after-commit/before-client-acknowledgement termination.
-
-Hardening regressions cover delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
-
-## Verification
-
-```text
-Exact candidate checkout: PASS
-Strict committed TypeScript build: PASS
-Unit tests: PASS
-Live PostgreSQL integration: 4/4 PASS
-PostgreSQL crash-window characterization: PASS
-Candidate archive build: PASS
-Candidate archive verification: PASS
-Candidate artifact upload: PASS
-```
-
-## Binary artifact preservation
-
-The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ remain preserved separately, with their SHA-256 identities recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`.
-
-The exact-head candidate artifact is an unpublished verification artifact. It is evidence for the candidate only; it is not a `0.6.0` published release.
+The executable acceptance suite is F4-001..F4-040 in `packages/sif-core/test/policy-governance.test.ts`. Exact-head CI retains the existing persistence, crash-window, archive, and artifact verification gates.
 
 ## Verification boundary
 
-The 0.6 live-Persistence milestone does not claim arbitrary crash-point coverage, full recovery/reconciliation after external database/network faults, network-partition recovery, TLS/mTLS/SPIFFE federation, OPA/Cedar adapters, KMS/HSM integration, distributed consensus, production OpenTelemetry exporters, exactly-once external side effects, or production-scale PostgreSQL HA/performance characterization.
+A passing exact-head CI result is evidence for the exact source candidate only. It is not a production deployment, external policy-provider deployment, HA/performance claim, or registry publication claim.
 
 ## Release discipline
 
-```text
-SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT
-```
+`SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
 
-No capability is considered complete because code exists. Promotion requires reproducible evidence, explicit scope, and verified expected deltas.
+Promotion requires a separate explicit decision. No merge to `main`, version bump, or registry publication is implied by candidate verification.
 
 ## License
 

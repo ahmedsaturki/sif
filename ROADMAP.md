@@ -11,19 +11,17 @@ Status: verified kernel baseline preserved.
 ## Phase 2 — Live Persistence 0.6
 Real PostgreSQL integration, migration harness, concurrency tests, crash-window characterization, durable projections and production-style worker lifecycle.
 
-Current status: **implementation-level 0.6 persistence gates verified by the latest successful CI run on the exact candidate checkout.** The workflow verifies exact checkout identity, strict TypeScript build/tests, schema bootstrap, four live PostgreSQL scenarios, explicit crash-window characterization, candidate archive build/verification, and artifact upload.
-
-Hardening includes regression coverage for delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
-
-The artifact/evidence gate is complete for the verified candidate line. The package version remains intentionally `0.5.0`; no `0.6.0` tag or publication has been performed.
-
-Release boundary remains explicit: arbitrary crash-point coverage and full recovery/reconciliation after external database/network faults are not claimed. Production-scale PostgreSQL performance/HA, network-partition recovery, secure federation, distributed consensus, and exactly-once external effects remain later-stage work.
+Status: implementation-level persistence gates remain preserved and regression-tested by later candidate CI.
 
 ## Phase 3 — Secure Federation
-SPIFFE/mTLS boundary, trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation.
+SPIFFE/mTLS adapter boundary, trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation, durable inbox, retry/recovery and resource controls.
+
+Status: implementation candidate verified by exact-head CI on its dedicated branch. No publication, merge to main, or production federation claim.
 
 ## Phase 4 — Policy and Governance
-OPA/Cedar adapter boundary, policy versioning, policy provenance, authorization decisions, governance artifacts.
+Versioned policy bundles, immutable policy digests, explicit lifecycle, timestamp-aware historical resolution, local deny-overrides/default-deny, provider-neutral OPA/Cedar-shaped adapters, attributable decision evidence, bounded evaluation resources, and federation-to-local-policy sovereignty.
+
+Status: implementation candidate on `feat/sif-core-0.8.0-policy-governance`; F4-001..F4-040 executable acceptance coverage and exact-head CI verification are present. Promotion remains a separate explicit boundary.
 
 ## Phase 5 — Evaluation and Observability
 OpenTelemetry, trace/evidence correlation, replayable evaluations, fault injection, regression suites and production-to-eval qualification.

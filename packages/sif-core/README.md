@@ -13,54 +13,31 @@ Dependency-free TypeScript kernel for a Sovereign Intelligence Fabric.
 - default-deny policy admission with deny-overrides
 - durable JSONL outbox
 - transactional PostgreSQL event + outbox adapter
-- per-stream PostgreSQL serialization via `sif_stream_heads` row locking
-- PostgreSQL artifact metadata / projection checkpoint schema
+- PostgreSQL stream-head serialization and projection metadata
 - Ed25519 attestations
 - lineage / reconstruction verification
 - capability-gated execution
 - durable outbox leasing/reclaim and inbox idempotency primitives
 - resumable projections
-- Phase 3 Secure Federation kernel boundaries for signed envelopes, trust, capability negotiation, admission, reconciliation, retry, provider-neutral transport, resource governance, and durable federation inboxes
+- Phase 3 Secure Federation boundaries
+- Phase 4 Policy & Governance boundaries
 
-## Package and milestone boundary
+## Current candidate
 
-The published/unpublished package identity in this repository remains `sif-core@0.5.0`.
+The package identity remains `sif-core@0.5.0`. Phase 3 and Phase 4 are isolated unpublished implementation candidates; candidate verification does not imply a package version bump or registry publication.
 
-The Phase 2 `0.6` label is an implementation/integration verification milestone, not a package release. Phase 3 Secure Federation is developed on an isolated feature branch and draft pull request; its verification evidence does not change the package version or imply registry publication.
+Phase 4 provides immutable versioned policy bundles, explicit policy lifecycle, timestamp-aware historical resolution, deny-overrides/default-deny, a dependency-free provider-neutral policy adapter boundary, deterministic attributable decisions, resource limits, and a federation-to-local-policy sovereignty boundary.
 
-## Current Secure Federation candidate
-
-The current Phase 3 candidate is governed by:
-
-- `PHASE_3_FEDERATION_SPEC.md`
-- `PHASE_3_IMPLEMENTATION_CONTRACT.md`
-- `PHASE_3_TEST_MATRIX.md`
-- `PHASE_3_EVIDENCE_LEDGER.md`
-
-The candidate includes executable federation coverage for identity and trust, canonical signed envelopes, semantic capability negotiation, sovereign local admission, durable/idempotent federation inbox behavior, bounded reconciliation and retry, provider-neutral transport, resource abuse controls, fault injection, and live PostgreSQL/crash-window characterization.
-
-The authoritative provenance rule is exact-head based: the current branch HEAD must be matched by a successful SIF Core CI execution before its evidence is considered valid. Dynamic CI run/artifact identifiers are intentionally not embedded in committed state documents because doing so would make the provenance self-invalidating.
+F4-001..F4-040 are executable in `packages/sif-core/test/policy-governance.test.ts`.
 
 ## Verification boundary
 
-Phase 3 CI currently verifies the committed source tree through strict TypeScript build/tests, live PostgreSQL integration, federation inbox crash-window characterization, PostgreSQL crash-window characterization, exact candidate archive construction/extraction/SHA-256 verification, and candidate artifact upload.
+Exact-head SIF Core CI verifies checkout identity, strict build/tests, live PostgreSQL integration, crash-window characterization, candidate archive construction/verification, and artifact upload. A successful candidate run is evidence for that exact source checkout only.
 
-Passing these checks does not claim a production TLS/mTLS/SPIFFE deployment, production-scale HA/performance, distributed consensus, exactly-once external side effects, or registry publication.
+Production OPA/Cedar deployment, production TLS/mTLS/SPIFFE deployment, KMS/HSM integration, distributed consensus, production-scale HA/performance, exactly-once external side effects, and registry publication remain outside this candidate boundary.
 
-## Guarantees and boundaries
+## Release discipline
 
-- Durable PostgreSQL outbox leasing uses `FOR UPDATE SKIP LOCKED` with an explicit `lease_owner`; expired leases can be reclaimed.
-- PostgreSQL inbox deduplicates `(consumer_id, message_id)` and removes an incomplete claim on handler failure so transient failures remain retryable.
-- Resumable projections persist a checkpoint after applying new events and verify contiguous stream versions.
-- Transactional append commits the event, stream head, and outbox records together; a database constraint failure rolls the transaction back as one unit.
-- Event history remains the authoritative source; projections and checkpoints are derived state.
-- Delivery is at-least-once. Exactly-once external side effects require the side effect and inbox completion to participate in the same transaction or be made independently idempotent.
-- Federation trust is distinct from transport encryption, and remote trust does not create local application authority.
-- Federation reconciliation is bounded and explicit: conflicts do not silently overwrite local history or advance the synchronization cursor past a conflict.
-- The package version remains `0.5.0` until a separate promotion/release process authorizes a new artifact line.
+`SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
 
-## Verification boundaries
-
-The following are not claimed as production-live by this package candidate: deployment-specific TLS/mTLS/SPIFFE transport, OPA/Cedar integration, KMS/HSM integration, distributed consensus, production OpenTelemetry export, exactly-once external side effects, and production-scale PostgreSQL performance/HA characterization.
-
-See `docs/ARCHITECTURE.md`, `IMPLEMENTATION_STATUS.md`, and `sql/postgres-schema.sql`.
+The package version remains `0.5.0` until an explicit promotion/release decision.

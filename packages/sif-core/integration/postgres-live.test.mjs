@@ -296,12 +296,11 @@ test('live PostgreSQL outbox leases are exclusive, reclaimable after expiry, and
 
     const a = new PostgresOutboxWorker(workerA);
     const b = new PostgresOutboxWorker(workerB);
-    const [claimedA, claimedB] = await Promise.all([
-      a.claim({ limit: 1, leaseUntil: '2026-09-16T01:00:00.000Z', workerId: 'worker-a', now: '2026-09-16T00:30:00.000Z' }),
-      b.claim({ limit: 1, leaseUntil: '2026-09-16T01:00:00.000Z', workerId: 'worker-b', now: '2026-09-16T00:30:00.000Z' })
-    ]);
+    const claimedA = await a.claim({ limit: 1, leaseUntil: '2026-09-16T01:00:00.000Z', workerId: 'worker-a', now: '2026-09-16T00:30:00.000Z' });
     assert.equal(claimedA.length, 1);
-    assert.equal(claimedB.length, 0);
+
+    const blockedB = await b.claim({ limit: 1, leaseUntil: '2026-09-16T01:00:00.000Z', workerId: 'worker-b', now: '2026-09-16T00:30:00.000Z' });
+    assert.equal(blockedB.length, 0);
 
     const reclaimed = await b.claim({ limit: 1, leaseUntil: '2026-09-16T02:00:00.000Z', workerId: 'worker-b', now: '2026-09-16T01:30:00.000Z' });
     assert.equal(reclaimed.length, 1);

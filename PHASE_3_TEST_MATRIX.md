@@ -88,7 +88,8 @@ The current candidate line now has executable coverage for:
 - bounded reconciliation with duplicate/divergence/conflict behavior;
 - bounded delivery retry with explicit `RETRY`, `STOP`, and `RECONCILE` decisions;
 - provider-neutral transport session/send/close contracts;
-- resource governance for sessions, inbox work, replay retention, rate limits and reconciliation batch size.
+- resource governance for sessions, inbox work, replay retention, rate limits and reconciliation batch size;
+- executable forced authentication, signature-tamper, duplicate-delivery, peer-outage/recovery, and post-send unknown-outcome/reconciliation scenarios (F3-053..057).
 
 ## Minimum Scenario Classes
 The implementation must include at least one executable test for every Required row and additional cases where implementation details create new failure modes.
@@ -108,13 +109,5 @@ Passing this matrix does not by itself establish:
 - distributed consensus;
 - arbitrary network fault recovery;
 - production-scale HA/performance;
-- exactly-once effects across arbitrary external systems;
-- organization-wide or internet-scale federation safety;
-- production OpenTelemetry export.
-
-Those claims require separate specifications and evidence.
-
-## Promotion Rule
-`TECHNICALLY IMPLEMENTED` requires code plus tests.
-`VERIFIED CANDIDATE` requires all applicable Required rows, artifact provenance, security review, and reproducible CI evidence.
-`RELEASED` additionally requires an explicit version/tag/publication operation; this matrix never authorizes publication or merge by itself.
+- secure deployment-specific TLS/mTLS/SPIFFE configuration;
+- registry publication or release readiness without the separate promotion gate.

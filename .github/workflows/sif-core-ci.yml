@@ -8,6 +8,25 @@ on:
 jobs:
   verify-core:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGDATABASE: postgres
+      RUN_POSTGRES_INTEGRATION: '1'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,3 +45,13 @@ jobs:
       - name: Build and test committed SIF Core tree
         working-directory: packages/sif-core
         run: npm test
+      - name: Prepare PostgreSQL schema
+        working-directory: packages/sif-core
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v psql >/dev/null 2>&1 || { sudo apt-get update; sudo apt-get install -y postgresql-client; }
+          psql -v ON_ERROR_STOP=1 -f sql/postgres-schema.sql
+      - name: Run live PostgreSQL integration
+        working-directory: packages/sif-core
+        run: node integration/postgres-live.test.mjs

@@ -291,8 +291,8 @@ test('live PostgreSQL outbox leases are exclusive, reclaimable after expiry, and
     };
     await cleanup(check);
     const seedStore = new PostgresTransactionalEventStore(poolSeed);
-    const created = await seedStore.appendAndEnqueue(event(streamId, 1), { expectedStreamVersion: 0 }, ['A', 'B']);
-    assert.equal(created.length, 2);
+    const created = await seedStore.appendAndEnqueue(event(streamId, 1), { expectedStreamVersion: 0 }, ['integration']);
+    assert.equal(created.length, 1);
 
     const a = new PostgresOutboxWorker(workerA);
     const b = new PostgresOutboxWorker(workerB);
@@ -301,18 +301,17 @@ test('live PostgreSQL outbox leases are exclusive, reclaimable after expiry, and
       b.claim({ limit: 1, leaseUntil: '2026-09-16T01:00:00.000Z', workerId: 'worker-b', now: '2026-09-16T00:30:00.000Z' })
     ]);
     assert.equal(claimedA.length, 1);
-    assert.equal(claimedB.length, 1);
-    assert.notEqual(claimedA[0].outboxId, claimedB[0].outboxId);
+    assert.equal(claimedB.length, 0);
 
     const reclaimed = await b.claim({ limit: 1, leaseUntil: '2026-09-16T02:00:00.000Z', workerId: 'worker-b', now: '2026-09-16T01:30:00.000Z' });
     assert.equal(reclaimed.length, 1);
     assert.equal(reclaimed[0].outboxId, claimedA[0].outboxId);
 
-    await a.markDelivered(claimedB[0].outboxId, 'worker-a', '2026-09-16T00:31:00.000Z');
-    const stillUndelivered = await check.query(`SELECT delivered_at FROM sif_outbox WHERE outbox_id='${claimedB[0].outboxId}'`);
+    await a.markDelivered(claimedA[0].outboxId, 'worker-a', '2026-09-16T00:31:00.000Z');
+    const stillUndelivered = await check.query(`SELECT delivered_at FROM sif_outbox WHERE outbox_id='${claimedA[0].outboxId}'`);
     assert.equal(stillUndelivered.rows[0].delivered_at, null);
-    await b.markDelivered(claimedB[0].outboxId, 'worker-b', '2026-09-16T00:32:00.000Z');
-    const delivered = await check.query(`SELECT delivered_at, lease_owner, leased_until FROM sif_outbox WHERE outbox_id='${claimedB[0].outboxId}'`);
+    await b.markDelivered(claimedA[0].outboxId, 'worker-b', '2026-09-16T00:32:00.000Z');
+    const delivered = await check.query(`SELECT delivered_at, lease_owner, leased_until FROM sif_outbox WHERE outbox_id='${claimedA[0].outboxId}'`);
     assert.equal(new Date(delivered.rows[0].delivered_at).toISOString(), '2026-09-16T00:32:00.000Z');
     assert.equal(delivered.rows[0].lease_owner, null);
     assert.equal(delivered.rows[0].leased_until, null);

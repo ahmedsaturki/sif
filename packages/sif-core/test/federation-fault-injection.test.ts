@@ -99,6 +99,17 @@ class ForcedAuthenticationFaultAdapter implements FederationTransportAdapter {
   async close(_session: FederationTransportSession): Promise<void> {}
 }
 
+class ForcedDuplicateDeliveryAdapter extends InMemoryFederationTransportAdapter {
+  sendCalls = 0;
+
+  override async send(context: FederationTransportSendContext): Promise<FederationTransportResult> {
+    this.sendCalls += 1;
+    const first = await super.send(context);
+    await super.send(context);
+    return first;
+  }
+}
+
 class ForcedOutageThenRecoveryAdapter extends InMemoryFederationTransportAdapter {
   sendCalls = 0;
 
@@ -109,7 +120,7 @@ class ForcedOutageThenRecoveryAdapter extends InMemoryFederationTransportAdapter
         outcome: "PEER_UNAVAILABLE",
         sessionId: context.session.sessionId,
         messageId: context.envelope.messageId,
-        idempotencyKey: `${context.envelope.sender.domain}\\u0000${context.envelope.replayNonce}`,
+        idempotencyKey: `${context.envelope.sender.domain}\u0000${context.envelope.replayNonce}`,
         observedAt: fixedObservedAt,
         error: "forced peer outage",
       };
@@ -140,7 +151,7 @@ test("F3-053: forced authentication fault occurs before transport admission", as
   assert.equal(adapter.openCalls, 1, "the forced authentication fault must actually execute");
 });
 
-test("F3-054: forced signature tamper is detected", () => {
+test("F3-054: forced signature tamper is detected before any admission callback can run", () => {
   const unsigned = createUnsignedFederationEnvelope({
     protocol: FEDERATION_PROTOCOL,
     protocolVersion: "0.1",
@@ -166,23 +177,27 @@ test("F3-054: forced signature tamper is detected", () => {
   const signed = signFederationEnvelope(unsigned, signer);
   const tampered = { ...signed, signature: `${signed.signature}:tampered` };
   assert.equal(federationSigningBytes(tampered), federationSigningBytes(signed));
+  let admissionCalled = false;
 
   assert.throws(
-    () => verifyFederationEnvelope(tampered, verifier),
+    () => {
+      verifyFederationEnvelope(tampered, verifier);
+      admissionCalled = true;
+    },
     (error: unknown) => error instanceof FederationProtocolError && error.code === "INVALID_SIGNATURE",
   );
+  assert.equal(admissionCalled, false);
 });
 
 test("F3-055: forced duplicate delivery is actually delivered twice and inbox idempotency contains it", async () => {
-  const adapter = new InMemoryFederationTransportAdapter(fixedObservedAt);
+  const adapter = new ForcedDuplicateDeliveryAdapter(fixedObservedAt);
   const boundary = new FederationTransportBoundary(adapter);
   const n = negotiated("fault-duplicate");
   const session = await boundary.open("domain-b", peer, n.scope, n);
-  const first = await boundary.send(session, envelope(), 100, 0);
-  const second = await boundary.send(session, envelope(), 100, 0);
-  assert.equal(first.outcome, "DELIVERED");
-  assert.equal(second.outcome, "DELIVERED");
-  assert.equal(adapter.listReceived().length, 2, "the duplicate fault must actually produce two deliveries");
+  const result = await boundary.send(session, envelope(), 100, 0);
+  assert.equal(result.outcome, "DELIVERED");
+  assert.equal(adapter.sendCalls, 1);
+  assert.equal(adapter.listReceived().length, 2, "the forced duplicate fault must actually produce two deliveries");
 
   const inbox = new InMemoryFederatedInbox();
   const accepted = inbox.accept(envelope(), "consumer-b");

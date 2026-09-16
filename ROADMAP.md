@@ -11,9 +11,9 @@ Status: verified kernel baseline preserved.
 ## Phase 2 — Live Persistence 0.6
 Real PostgreSQL integration, migration harness, concurrency tests, crash recovery, durable projections and production-style worker lifecycle.
 
-Current status: **core live PostgreSQL verification gates passed** against PostgreSQL 16 in GitHub Actions run 73. Verified scenarios are concurrent same-stream serialization, atomic transaction rollback, projection checkpoint persistence/deterministic round-trip, and exclusive outbox lease/reclaim/owner-fencing. The CI job also passed strict build, 27/27 unit tests, artifact identity verification, and schema bootstrap.
+Current status: **core live PostgreSQL verification gates passed** against PostgreSQL 16 in GitHub Actions run 93. Verified scenarios are concurrent same-stream serialization, atomic transaction rollback, projection checkpoint persistence/deterministic round-trip, exclusive outbox lease/reclaim/owner-fencing, and explicit before-commit / after-commit backend termination characterization. The CI job also passed strict build, 27/27 unit tests, artifact identity verification, and schema bootstrap.
 
-Remaining qualification boundary for a future broader 0.6 release is explicit: arbitrary crash-point characterization and full recovery/reconciliation after external database/network faults are not claimed by this milestone. Production-scale PostgreSQL performance/HA, distributed consensus, secure federation transport, and exactly-once external side effects remain later-stage work.
+Release boundary remains explicit: arbitrary crash-point coverage and full recovery/reconciliation after external database/network faults are not claimed by this milestone. Production-scale PostgreSQL performance/HA, network-partition recovery, secure federation, distributed consensus, and exactly-once external effects remain later-stage work.
 
 ## Phase 3 — Secure Federation
 SPIFFE/mTLS boundary, trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation.

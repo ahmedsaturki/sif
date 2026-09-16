@@ -15,13 +15,16 @@ The verified kernel includes append-only event streams, deterministic replay, op
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run 93 executed the committed SIF Core against a real PostgreSQL 16 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
+GitHub Actions run 93 executed the implementation commit against a real PostgreSQL 16 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
 
-The same CI run also passed a direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
+The same run also passed direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
+
+The implementation was then followed by documentation/evidence-only commits. A fresh CI run on the final branch HEAD remains required before package artifact publication or promotion.
 
 ## Verification
 
 ```text
+Implementation verification baseline (run 93): PASS
 Local TypeScript build: PASS
 Local tests: 27/27 PASS
 GitHub Actions artifact identity: PASS
@@ -43,6 +46,7 @@ GitHub Actions crash-window characterization: PASS
 - `RELEASE_NOTES_0.5.0.md` — 0.5.0 release scope and boundaries
 - `REPOSITORY_360_BASELINE.md` — repository preservation baseline
 - `SECURITY.md` — security boundaries
+- `RELEASE_EVIDENCE_0.6.0.md` — 0.6 verification evidence and release rule
 - `packages/sif-core/docs/ARCHITECTURE.md` — kernel architecture
 - `packages/sif-core/IMPLEMENTATION_STATUS.md` — implementation and live verification status
 - `artifacts/sif-core/0.5.0/ARTIFACT_INVENTORY.md` — artifact identity

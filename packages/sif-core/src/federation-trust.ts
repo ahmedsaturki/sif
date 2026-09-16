@@ -76,7 +76,7 @@ export class FederationTrustBoundary {
     if (peer.identity.domain === this.localDomain) {
       throw new FederationProtocolError("AUTHORIZATION_DENIED", "Remote peer identity cannot claim the local domain");
     }
-    const key = identityKey(peer.identity);
+    const key = peerIdentityKey(peer.identity);
     if (this.peers.has(key)) {
       throw new FederationProtocolError("INTEGRITY_FAILURE", `Trusted peer already exists: ${key}`);
     }
@@ -94,7 +94,7 @@ export class FederationTrustBoundary {
   }
 
   revokePeer(identity: FederationPeerIdentity): void {
-    const key = identityKey(identity);
+    const key = peerIdentityKey(identity);
     const peer = this.peers.get(key);
     if (!peer) throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Unknown federation peer");
     this.peers.set(key, { ...peer, status: "revoked" });
@@ -108,7 +108,7 @@ export class FederationTrustBoundary {
       throw new FederationProtocolError("AUTHORIZATION_DENIED", "Remote authentication cannot establish local authority");
     }
 
-    const peer = this.peers.get(identityKey(observation.identity));
+    const peer = this.peers.get(peerIdentityKey(observation.identity));
     if (!peer) throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Observed peer is not trusted");
     if (peer.status !== "active") throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Trusted peer is revoked");
     if (peer.trustAnchorId !== observation.trustAnchorId) {
@@ -119,11 +119,11 @@ export class FederationTrustBoundary {
     if (!anchor || anchor.status !== "active") {
       throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Trust anchor is not active");
     }
-    const now = Date.parse(observedAt);
-    if (now < Date.parse(anchor.validFrom)) {
+    const observedTime = Date.parse(observedAt);
+    if (observedTime < Date.parse(anchor.validFrom)) {
       throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Observation predates trust-anchor validity");
     }
-    if (anchor.expiresAt !== undefined && now >= Date.parse(anchor.expiresAt)) {
+    if (anchor.expiresAt !== undefined && observedTime >= Date.parse(anchor.expiresAt)) {
       throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Trust anchor is expired");
     }
     if (peer.identity.transportBinding !== observation.identity.transportBinding) {
@@ -145,6 +145,6 @@ function validateIdentity(identity: FederationPeerIdentity): void {
   assertNonEmpty("identity.transportBinding", identity.transportBinding);
 }
 
-function identityKey(identity: FederationPeerIdentity): string {
-  return `${identity.domain}\u0000${identity.subject}\u0000${identity.transportBinding}`;
+function peerIdentityKey(identity: FederationPeerIdentity): string {
+  return `${identity.domain}\u0000${identity.subject}`;
 }

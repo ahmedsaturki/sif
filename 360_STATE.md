@@ -33,14 +33,15 @@ Implemented and tested:
 
 ## Live PostgreSQL 0.6 Verification
 
-GitHub Actions run 73 verified the committed integration against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness.
+GitHub Actions run 93 verified the committed integration against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and a direct SQL crash-window characterization.
 
 Verified live scenarios:
 
 1. Concurrent same-stream append serialization: independent connections contend for the same expected version and exactly one event/outbox pair remains.
 2. Atomic rollback: a constraint failure rolls back the event, stream head, and outbox together with no partial commit.
 3. Projection checkpoint persistence: checkpoint state survives through the PostgreSQL store and round-trips deterministically.
-4. Outbox worker lifecycle: leases are exclusive, expired leases are reclaimable, and delivery/attempt mutations are owner-fenced.
+4. Outbox worker lifecycle: one worker claims the item, another is blocked while the lease is valid, the item is reclaimed after expiry, stale-owner delivery is fenced, and the new owner can mark it delivered.
+5. Crash-window characterization: terminating the PostgreSQL backend before commit leaves no partial state and permits retry; terminating it after commit but before client acknowledgement preserves the committed event and stream head, with no outbox row in the direct SQL scenario.
 
 ## Evidence State
 
@@ -50,11 +51,13 @@ Verified live scenarios:
 - GitHub Actions committed build/test: PASS
 - PostgreSQL schema bootstrap: PASS
 - GitHub Actions live PostgreSQL integration: 4/4 PASS
+- GitHub Actions crash-window characterization: PASS
 
 ## Explicit Unknown / Not Claimed
 
-- Arbitrary process/database crash-point characterization beyond the exercised transaction rollback scenario
-- Full recovery/reconciliation after external database/network faults
+- arbitrary process/database crash-point coverage
+- full recovery/reconciliation after external database/network faults
+- network-partition recovery
 - TLS/mTLS/SPIFFE federation transport
 - OPA/Cedar adapter
 - KMS/HSM secret integration

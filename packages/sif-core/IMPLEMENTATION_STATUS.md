@@ -17,7 +17,7 @@
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run 93 executed the committed SIF Core against a real PostgreSQL 16 service and passed every persistence gate in the workflow.
+GitHub Actions run 93 executed the committed implementation against a real PostgreSQL 16 service and passed every persistence gate in the workflow.
 
 Verified live scenarios:
 
@@ -30,7 +30,7 @@ Verified live scenarios:
 ## CI evidence
 
 ```text
-GitHub Actions run: 93
+Implementation verification baseline: GitHub Actions run 93
 PostgreSQL service: 16
 Artifact identity: PASS
 Strict committed build + tests: PASS
@@ -40,9 +40,7 @@ Live PostgreSQL integration: 4/4 PASS
 Crash-window characterization: PASS
 ```
 
-## What this verifies
-
-This milestone verifies live PostgreSQL connectivity, transactional append semantics, per-stream serialization, rollback atomicity, durable checkpoint persistence, outbox lease/reclaim/fencing behavior, and two explicit backend-termination windows.
+Run 93 verified the implementation commit before the final documentation-only evidence commits. A fresh CI run on the final branch HEAD is required before promotion or artifact publication.
 
 ## Explicit boundaries / not claimed
 

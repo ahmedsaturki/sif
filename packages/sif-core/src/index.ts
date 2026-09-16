@@ -17,7 +17,6 @@ export * from "./self-model.js";
 export * from "./integrity.js";
 export * from "./cas.js";
 export * from "./policy.js";
-export * from "./policy-governance.js";
 export * from "./outbox.js";
 export * from "./postgres.js";
 

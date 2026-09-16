@@ -87,3 +87,36 @@ test("invalid observations fail closed", () => {
     TypeError,
   );
 });
+
+test("concurrent reconciliation of the same observation does not create duplicate accepted evidence", async () => {
+  const reconciler = new InMemoryFederationReconciler(10);
+  const results = await Promise.all(
+    Array.from({ length: 16 }, () =>
+      Promise.resolve().then(() => reconciler.reconcile({ observations: [observation()] })),
+    ),
+  );
+
+  assert.equal(results.filter((result) => result.accepted.length === 1).length, 1);
+  assert.equal(results.filter((result) => result.duplicates.length === 1).length, 15);
+  assert.equal(reconciler.listObservations().length, 1);
+});
+
+test("concurrent divergent reconciliation stays explicit and preserves the first observation", async () => {
+  const reconciler = new InMemoryFederationReconciler(10);
+  await reconciler.reconcile({ observations: [observation()] });
+
+  const results = await Promise.all(
+    Array.from({ length: 8 }, (_, index) =>
+      Promise.resolve().then(() =>
+        reconciler.reconcile({
+          observations: [observation({ eventDigest: `tampered-${index}` })],
+        }),
+      ),
+    ),
+  );
+
+  assert.equal(results.every((result) => result.accepted.length === 0), true);
+  assert.equal(results.every((result) => result.conflicts.length === 1), true);
+  assert.equal(reconciler.listObservations().length, 1);
+  assert.equal(reconciler.listObservations()[0]?.eventDigest, "digest-001");
+});

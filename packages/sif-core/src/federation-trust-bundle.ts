@@ -178,7 +178,13 @@ export class FederationTrustBundleRegistry {
     }
 
     const bundle = candidates[0];
-    const anchor = bundle.anchors.find((candidate) => candidate.id === anchorId)!;
+    if (!bundle) {
+      throw new FederationProtocolError("INTEGRITY_FAILURE", `Trust bundle resolution unexpectedly returned no bundle for ${issuer}#${anchorId}`);
+    }
+    const anchor = bundle.anchors.find((candidate) => candidate.id === anchorId);
+    if (!anchor) {
+      throw new FederationProtocolError("INTEGRITY_FAILURE", `Resolved trust bundle does not contain anchor: ${anchorId}`);
+    }
     return { bundle: cloneBundle(bundle), anchor: { ...anchor } };
   }
 

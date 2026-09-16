@@ -1,5 +1,4 @@
-import { createHash, createPrivateKey, createPublicKey, sign, verify } from "node:crypto";
-import type { KeyObject } from "node:crypto";
+import { createHash } from "node:crypto";
 import type { ISODate } from "./types.js";
 
 export const FEDERATION_PROTOCOL = "sif-federation" as const;
@@ -18,38 +17,21 @@ export type FederationFailureCode =
 export type FederationFailureKind = "peer" | "message" | "delivery" | "authorization";
 
 export class FederationProtocolError extends Error {
-  constructor(
-    readonly code: FederationFailureCode,
-    message: string,
-    readonly kind: FederationFailureKind = "message",
-  ) {
+  constructor(readonly code: FederationFailureCode, message: string, readonly kind: FederationFailureKind = "message") {
     super(message);
     this.name = "FederationProtocolError";
   }
 }
 
-export interface FederationCapability {
-  id: string;
-  version: string;
-}
-
-export interface FederationPeerIdentity {
-  domain: string;
-  subject: string;
-  transportBinding: string;
-}
-
+export interface FederationCapability { id: string; version: string; }
+export interface FederationPeerIdentity { domain: string; subject: string; transportBinding: string; }
 export interface FederationTime {
   occurredAt: ISODate;
   observedAt: ISODate;
   expiresAt?: ISODate;
   semantics: "event-and-observation" | "observation-only" | "control-message";
 }
-
-export interface FederationEnvelopePayload {
-  type: string;
-  data: Record<string, unknown>;
-}
+export interface FederationEnvelopePayload { type: string; data: Record<string, unknown>; }
 
 export interface FederationEnvelope {
   protocol: typeof FEDERATION_PROTOCOL;
@@ -73,6 +55,17 @@ export interface FederationEnvelope {
 
 export type UnsignedFederationEnvelope = Omit<FederationEnvelope, "signature">;
 
+/**
+ * Crypto remains an adapter boundary. The dependency-free kernel only requires
+ * deterministic signing bytes and accepts an implementation-provided signature.
+ */
+export interface FederationSigner {
+  sign(data: string): string;
+}
+export interface FederationVerifier {
+  verify(data: string, signature: string): boolean;
+}
+
 function assertNonEmpty(name: string, value: string): void {
   if (value.length === 0) throw new TypeError(`${name} must not be empty`);
 }
@@ -90,9 +83,8 @@ function sortCapabilities(capabilities: FederationCapability[]): FederationCapab
 function canonicalize(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value && typeof value === "object") {
-    const record = value as Record<string, unknown>;
     return Object.fromEntries(
-      Object.entries(record)
+      Object.entries(value as Record<string, unknown>)
         .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
         .map(([key, entry]) => [key, canonicalize(entry)]),
     );
@@ -100,7 +92,20 @@ function canonicalize(value: unknown): unknown {
   return value;
 }
 
-export function validateFederationEnvelope(envelope: FederationEnvelope | UnsignedFederationEnvelope): void {
+export function federationPayloadDigest(payload: FederationEnvelopePayload): string {
+  return createHash("sha256").update(JSON.stringify(canonicalize(payload))).digest("hex");
+}
+
+export function canonicalizeFederationEnvelope(envelope: UnsignedFederationEnvelope | FederationEnvelope): string {
+  const { signature: _ignoredSignature, ...unsigned } = envelope as FederationEnvelope;
+  return JSON.stringify(canonicalize(unsigned));
+}
+
+export function federationSigningBytes(envelope: UnsignedFederationEnvelope | FederationEnvelope): string {
+  return canonicalizeFederationEnvelope(envelope);
+}
+
+export function validateFederationEnvelope(envelope: FederationEnvelope): void {
   assertNonEmpty("protocolVersion", envelope.protocolVersion);
   assertNonEmpty("schema", envelope.schema);
   assertNonEmpty("schemaVersion", envelope.schemaVersion);
@@ -112,74 +117,59 @@ export function validateFederationEnvelope(envelope: FederationEnvelope | Unsign
   assertNonEmpty("provenanceId", envelope.provenanceId);
   assertNonEmpty("replayNonce", envelope.replayNonce);
   assertNonEmpty("payload.type", envelope.payload.type);
-  assertNonEmpty("signatureAlgorithm", envelope.signatureAlgorithm);
+  if (envelope.signatureAlgorithm !== FEDERATION_SIGNATURE_ALGORITHM) {
+    throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation signature algorithm: ${envelope.signatureAlgorithm}`);
+  }
+  assertNonEmpty("signature", envelope.signature);
   assertIso("time.occurredAt", envelope.time.occurredAt);
   assertIso("time.observedAt", envelope.time.observedAt);
-  if (envelope.time.expiresAt !== undefined) assertIso("time.expiresAt", envelope.time.expiresAt);
-  if (envelope.time.expiresAt !== undefined && Date.parse(envelope.time.expiresAt) <= Date.parse(envelope.time.observedAt)) {
-    throw new TypeError("time.expiresAt must be after time.observedAt");
+  if (envelope.time.expiresAt !== undefined) {
+    assertIso("time.expiresAt", envelope.time.expiresAt);
+    if (Date.parse(envelope.time.expiresAt) <= Date.parse(envelope.time.observedAt)) throw new TypeError("time.expiresAt must be after time.observedAt");
   }
   if (envelope.eventId !== undefined && envelope.eventId === envelope.messageId) {
     throw new FederationProtocolError("INTEGRITY_FAILURE", "MESSAGE IDENTITY must remain distinct from EVENT IDENTITY");
   }
-  const expectedPayloadDigest = createHash("sha256").update(Buffer.from(JSON.stringify(canonicalize(envelope.payload)), "utf8")).digest("hex");
-  if (expectedPayloadDigest !== envelope.payloadDigest) {
+  if (federationPayloadDigest(envelope.payload) !== envelope.payloadDigest) {
     throw new FederationProtocolError("INTEGRITY_FAILURE", "payloadDigest does not match the canonical payload");
   }
-  const capabilities = sortCapabilities(envelope.capabilities);
-  if (JSON.stringify(capabilities) !== JSON.stringify(envelope.capabilities)) {
+  const canonicalCapabilities = sortCapabilities(envelope.capabilities);
+  if (JSON.stringify(canonicalCapabilities) !== JSON.stringify(envelope.capabilities)) {
     throw new FederationProtocolError("INTEGRITY_FAILURE", "capabilities must use deterministic canonical ordering");
   }
-  assertNonEmpty("signature", envelope.signature);
-}
-
-export function canonicalizeFederationEnvelope(envelope: UnsignedFederationEnvelope | FederationEnvelope): string {
-  const unsigned = {
-    ...envelope,
-    signature: undefined,
-  };
-  delete (unsigned as Partial<FederationEnvelope>).signature;
-  return JSON.stringify(canonicalize(unsigned));
-}
-
-export function federationSigningBytes(envelope: UnsignedFederationEnvelope | FederationEnvelope): Buffer {
-  return Buffer.from(canonicalizeFederationEnvelope(envelope), "utf8");
-}
-
-export function federationPayloadDigest(payload: FederationEnvelopePayload): string {
-  return createHash("sha256").update(Buffer.from(JSON.stringify(canonicalize(payload)), "utf8")).digest("hex");
-}
-
-export function signFederationEnvelope(envelope: UnsignedFederationEnvelope, privateKey: KeyObject | string | Buffer): FederationEnvelope {
-  validateUnsignedEnvelope(envelope);
-  const signature = sign(null, federationSigningBytes(envelope), typeof privateKey === "string" ? createPrivateKey(privateKey) : privateKey).toString("base64url");
-  return { ...envelope, signature };
-}
-
-export function verifyFederationEnvelope(envelope: FederationEnvelope, publicKey: KeyObject | string | Buffer): void {
-  validateFederationEnvelope(envelope);
-  const key = typeof publicKey === "string" ? createPublicKey(publicKey) : publicKey;
-  const valid = verify(null, federationSigningBytes(envelope), key, Buffer.from(envelope.signature, "base64url"));
-  if (!valid) throw new FederationProtocolError("INVALID_SIGNATURE", "Federated envelope signature verification failed");
-}
-
-function validateUnsignedEnvelope(envelope: UnsignedFederationEnvelope): void {
-  if (envelope.signatureAlgorithm !== FEDERATION_SIGNATURE_ALGORITHM) {
-    throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation signature algorithm: ${envelope.signatureAlgorithm}`);
-  }
-  const expectedPayloadDigest = federationPayloadDigest(envelope.payload);
-  if (expectedPayloadDigest !== envelope.payloadDigest) {
-    throw new FederationProtocolError("INTEGRITY_FAILURE", "payloadDigest does not match the canonical payload");
-  }
-  validateFederationEnvelope({ ...envelope, signature: "_unsigned_" });
 }
 
 export function createUnsignedFederationEnvelope(input: Omit<UnsignedFederationEnvelope, "payloadDigest" | "signatureAlgorithm">): UnsignedFederationEnvelope {
   if (input.protocol !== FEDERATION_PROTOCOL) throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", "Unsupported federation protocol");
-  return {
+  const result: UnsignedFederationEnvelope = {
     ...input,
     capabilities: sortCapabilities(input.capabilities),
     payloadDigest: federationPayloadDigest(input.payload),
     signatureAlgorithm: FEDERATION_SIGNATURE_ALGORITHM,
   };
+  validateUnsignedFederationEnvelope(result);
+  return result;
+}
+
+function validateUnsignedFederationEnvelope(envelope: UnsignedFederationEnvelope): void {
+  if (envelope.signatureAlgorithm !== FEDERATION_SIGNATURE_ALGORITHM) {
+    throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", `Unsupported federation signature algorithm: ${envelope.signatureAlgorithm}`);
+  }
+  if (federationPayloadDigest(envelope.payload) !== envelope.payloadDigest) {
+    throw new FederationProtocolError("INTEGRITY_FAILURE", "payloadDigest does not match the canonical payload");
+  }
+  const signedView = { ...envelope, signature: "unsigned" } as FederationEnvelope;
+  validateFederationEnvelope(signedView);
+}
+
+export function signFederationEnvelope(envelope: UnsignedFederationEnvelope, signer: FederationSigner): FederationEnvelope {
+  validateUnsignedFederationEnvelope(envelope);
+  return { ...envelope, signature: signer.sign(federationSigningBytes(envelope)) };
+}
+
+export function verifyFederationEnvelope(envelope: FederationEnvelope, verifier: FederationVerifier): void {
+  validateFederationEnvelope(envelope);
+  if (!verifier.verify(federationSigningBytes(envelope), envelope.signature)) {
+    throw new FederationProtocolError("INVALID_SIGNATURE", "Federated envelope signature verification failed");
+  }
 }

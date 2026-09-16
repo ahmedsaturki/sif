@@ -50,6 +50,13 @@ test("mismatched trust-anchor binding fails closed", () => {
   assert.throws(() => b.authenticate({ identity: peer().identity, trustAnchorId: "other-anchor" }, "2026-09-16T01:00:00.000Z"), FederationProtocolError);
 });
 
+test("transport binding mismatch fails closed without changing peer identity lookup", () => {
+  const b = boundary();
+  b.registerPeer(peer());
+  const observed = { ...peer().identity, transportBinding: "transport://remote-a/rotated-workload" };
+  assert.throws(() => b.authenticate({ identity: observed, trustAnchorId: anchor.id }, "2026-09-16T01:00:00.000Z"), FederationProtocolError);
+});
+
 test("revoked peer fails closed", () => {
   const b = boundary();
   b.registerPeer(peer());

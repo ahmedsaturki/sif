@@ -9,7 +9,7 @@ function err(e: unknown): string | undefined { return e instanceof EvaluationObs
 function ex(action: () => unknown, want: string): void { let got: unknown; try { action(); } catch (e: unknown) { got = e; } assert.equal(err(got), want); }
 async function axe(action: () => Promise<unknown>, want: string): Promise<void> { let got: unknown; try { await action(); } catch (e: unknown) { got = e; } assert.equal(err(got), want); }
 function r(over: Partial<EvaluationRecord> = {}): EvaluationRecord {
-  return createEvaluationRecord({
+  const args = {
     evaluationCase: {
       suiteId: "s",
       caseId: over.caseId ?? "c",
@@ -21,9 +21,10 @@ function r(over: Partial<EvaluationRecord> = {}): EvaluationRecord {
     measured: true,
     status: over.status ?? "PASS",
     trace: normalizeTraceContext(T, L),
-    evidenceRefs: over.evidenceRefs,
-    failure: over.failure,
-  }, L);
+    ...(over.evidenceRefs === undefined ? {} : { evidenceRefs: over.evidenceRefs }),
+    ...(over.failure === undefined ? {} : { failure: over.failure }),
+  } as const;
+  return createEvaluationRecord(args, L);
 }
 function tr(): ReturnType<typeof normalizeTraceContext> { return normalizeTraceContext(T, L); }
 

@@ -60,6 +60,36 @@ test("message identity cannot equal event identity", () => {
   assert.throws(() => createUnsignedFederationEnvelope(bad), FederationProtocolError);
 });
 
+test("F3-008: missing mandatory federation envelope field fails closed", () => {
+  const malformed = input({ messageId: "" });
+  assert.throws(() => createUnsignedFederationEnvelope(malformed), TypeError);
+});
+
+test("F3-010: distinct event identities remain distinct even when transported by related messages", () => {
+  const a = createUnsignedFederationEnvelope(input({ messageId: "msg-a", eventId: "evt-a", replayNonce: "nonce-a" }));
+  const b = createUnsignedFederationEnvelope(input({ messageId: "msg-b", eventId: "evt-b", replayNonce: "nonce-b" }));
+  assert.notEqual(a.messageId, b.messageId);
+  assert.notEqual(a.eventId, b.eventId);
+  assert.equal(a.correlationId, b.correlationId);
+});
+
+test("F3-011: signed content modification fails integrity/signature verification", () => {
+  const signed = signFederationEnvelope(createUnsignedFederationEnvelope(input()), signer);
+  const tampered = { ...signed, payload: { ...signed.payload, data: { ...signed.payload.data, a: 777 } } };
+  assert.throws(() => verifyFederationEnvelope(tampered, verifier), FederationProtocolError);
+});
+
+test("F3-012: invalid signature fails closed", () => {
+  const signed = signFederationEnvelope(createUnsignedFederationEnvelope(input()), signer);
+  assert.throws(() => verifyFederationEnvelope({ ...signed, signature: "invalid-signature" }, verifier), FederationProtocolError);
+});
+
+test("F3-013: valid signature cannot be reused with a changed declared sender", () => {
+  const signed = signFederationEnvelope(createUnsignedFederationEnvelope(input()), signer);
+  const wrongSender = { ...signed, sender: { ...signed.sender, subject: "different-workload" } };
+  assert.throws(() => verifyFederationEnvelope(wrongSender, verifier), FederationProtocolError);
+});
+
 test("unsupported protocol and signature algorithm fail closed", () => {
   assert.throws(() => createUnsignedFederationEnvelope(input({ protocol: "other" as typeof FEDERATION_PROTOCOL })), FederationProtocolError);
   const unsigned = createUnsignedFederationEnvelope(input());

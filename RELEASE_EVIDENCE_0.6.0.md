@@ -3,11 +3,12 @@
 ## Candidate
 
 - Branch: `feat/sif-core-0.6.0-live-postgres`
+- Final branch HEAD verified: `31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba`
 - Package version: `0.5.0` (release artifact version intentionally not bumped yet)
-- Implementation verification baseline: GitHub Actions run `93`
+- Final-head verification: GitHub Actions run `136`
 - PostgreSQL service: `16`
 
-## Verified implementation gates — run 93
+## Verified final-head gates — run 136
 
 | Gate | Result |
 |---|---|
@@ -56,4 +57,4 @@ A `0.6.0` package release requires a fresh source archive and npm package built 
 
 ## Final-head rule
 
-Run 93 verified the implementation before the final documentation/evidence-only commits. The final branch HEAD must pass a fresh complete CI run before artifact publication or promotion.
+**Satisfied.** GitHub Actions run `136` is a fresh complete verification of the final branch HEAD `31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba`. The remaining release gate is artifact production and independent byte-level verification; the package version remains `0.5.0` until that gate is completed.

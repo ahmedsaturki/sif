@@ -15,11 +15,9 @@ The verified kernel includes append-only event streams, deterministic replay, op
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run 73 executed the committed SIF Core against a real PostgreSQL 16 service and passed the complete live integration suite. The four scenarios exercise the actual compiled implementation and verify concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
+GitHub Actions run 93 executed the committed SIF Core against a real PostgreSQL 16 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
 
-The live suite passed **4/4 scenarios**. The same CI job also passed artifact identity verification, the strict TypeScript build, the 27-test unit suite, and PostgreSQL schema bootstrap.
-
-This milestone does not claim arbitrary crash-point recovery, production-scale PostgreSQL performance/HA, network fault tolerance, distributed consensus, or exactly-once external effects.
+The same CI run also passed a direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
 
 ## Verification
 
@@ -28,7 +26,9 @@ Local TypeScript build: PASS
 Local tests: 27/27 PASS
 GitHub Actions artifact identity: PASS
 GitHub Actions committed build/test: PASS
+GitHub Actions PostgreSQL schema bootstrap: PASS
 GitHub Actions live PostgreSQL integration: 4/4 PASS
+GitHub Actions crash-window characterization: PASS
 ```
 
 ## Continuity and preserved knowledge
@@ -55,7 +55,7 @@ The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the per
 
 ## Verification boundary
 
-The 0.6 live-Persistence milestone does not claim TLS/mTLS/SPIFFE federation transport, OPA/Cedar adapters, KMS/HSM integration, distributed consensus, production OpenTelemetry exporters, exactly-once external side effects, arbitrary crash-point recovery, or production-scale PostgreSQL HA/performance characterization.
+The 0.6 live-Persistence milestone does not claim arbitrary crash-point coverage, full recovery/reconciliation after external database/network faults, network-partition recovery, TLS/mTLS/SPIFFE federation transport, OPA/Cedar adapters, KMS/HSM integration, distributed consensus, production OpenTelemetry exporters, exactly-once external side effects, or production-scale PostgreSQL HA/performance characterization.
 
 ## Release discipline
 

@@ -63,6 +63,9 @@ jobs:
       - name: Run live PostgreSQL integration
         working-directory: packages/sif-core
         run: node integration/postgres-live.test.mjs
+      - name: Run federated inbox crash-window characterization
+        working-directory: packages/sif-core
+        run: node integration/federation-inbox-crash-window.test.mjs
       - name: Run PostgreSQL crash-window characterization
         working-directory: packages/sif-core
         shell: bash

@@ -116,11 +116,22 @@ test("missing inbox identity is typed as replay detection rather than implicit s
   );
 });
 
+test("declared retention window admits delayed delivery before expiry and rejects delivery after expiry", () => {
+  const inbox = new InMemoryFederatedInbox();
+  const delayed = inbox.accept(baseEnvelope, "consumer-a", "2026-09-16T06:59:59.999Z");
+  assert.equal(delayed.accepted, true);
+  assert.equal(delayed.record.receivedAt, "2026-09-16T06:59:59.999Z");
+  assert.throws(
+    () => inbox.accept(withMessage("msg-expired"), "consumer-a", "2026-09-16T07:00:00.000Z"),
+    (error: unknown) => error instanceof FederationProtocolError && error.code === "REPLAY_DETECTED",
+  );
+});
+
 test("concurrent deliveries of the same logical message produce one accepted record", async () => {
   const inbox = new InMemoryFederatedInbox();
   const results = await Promise.all(
     Array.from({ length: 16 }, () =>
-      Promise.resolve().then(() => inbox.accept(baseEnvelope, "consumer-a")),
+      Promise.resolve().then(() => inbox.accept({ ...baseEnvelope, time: { ...baseEnvelope.time, expiresAt: "2026-09-16T07:00:00.000Z" } }, "consumer-a")),
     ),
   );
 

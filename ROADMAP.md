@@ -9,25 +9,29 @@ Event sourcing, integrity, CAS, authority, policy, provenance, persistence, outb
 Status: verified kernel baseline preserved.
 
 ## Phase 2 — Live Persistence 0.6
-Real PostgreSQL integration, migration harness, concurrency tests, crash-window characterization, durable projections and production-style worker lifecycle.
+Real PostgreSQL integration, migration harness, concurrency tests, crash-window characterization, durable projections and worker lifecycle.
 
 Status: implementation-level persistence gates remain preserved and regression-tested by later candidate CI.
 
 ## Phase 3 — Secure Federation
-SPIFFE/mTLS adapter boundary, trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation, durable inbox, retry/recovery and resource controls.
+Trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation, durable inbox, retry/recovery and resource controls.
 
-Status: implementation candidate verified by exact-head CI on its dedicated branch. No publication, merge to main, or production federation claim.
+Status: verified implementation candidate preserved on its dedicated branch. No publication, merge to main, or production federation claim.
 
 ## Phase 4 — Policy and Governance
-Versioned policy bundles, immutable policy digests, explicit lifecycle, timestamp-aware historical resolution, local deny-overrides/default-deny, provider-neutral OPA/Cedar-shaped adapters, attributable decision evidence, bounded evaluation resources, and federation-to-local-policy sovereignty.
+Versioned policy bundles, immutable policy digests, explicit lifecycle, historical resolution, deny-overrides/default-deny, provider-neutral OPA/Cedar-shaped adapters, attributable evidence, bounded evaluation, and federation-to-local-policy sovereignty.
 
-Status: implementation candidate on `feat/sif-core-0.8.0-policy-governance`; F4-001..F4-040 executable acceptance coverage and exact-head CI verification are present. Promotion remains a separate explicit boundary.
+Status: verified implementation candidate preserved on its dedicated branch. Promotion remains a separate explicit boundary.
 
 ## Phase 5 — Evaluation and Observability
-OpenTelemetry, trace/evidence correlation, replayable evaluations, fault injection, regression suites and production-to-eval qualification.
+Trace/evidence correlation, replayable evaluations, fault injection, bounded regression execution, and promotion evidence.
+
+Status: verified implementation candidate preserved; production telemetry deployment is not claimed.
 
 ## Phase 6 — Knowledge / Semantic Plane
-Versioned ontology, semantic compatibility, epistemic state, semantic replay, provenance graph and legacy knowledge handoff.
+Versioned immutable ontology, semantic compatibility, epistemic state, semantic replay, provenance graph and legacy knowledge handoff.
+
+Status: current implementation candidate on `feat/sif-core-1.0.0-knowledge-semantic`; F6-001..F6-060 executable acceptance coverage and exact-head CI verification are present. Promotion remains a separate explicit boundary.
 
 ## Phase 7 — Systemic / Ecological Plane
 Agents, players, strategies, markets, institutions, system dynamics, event simulation and bounded world-model experiments.

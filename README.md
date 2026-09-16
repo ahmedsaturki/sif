@@ -7,7 +7,7 @@ SIF is a sovereignty-first intelligence fabric whose implementation begins with 
 - Genesis: `main` at `f4408d81375786e7a9f0715cf70609d0e257a67c`
 - Verified kernel branch: `feat/sif-core-0.5.0`
 - Live PostgreSQL verification branch: `feat/sif-core-0.6.0-live-postgres`
-- Current candidate head: `11cde873fd655774ae5d00e9cc57a8b6ef8d95e3`
+- Current branch is the exact candidate line verified by the latest successful CI run.
 - Current package version remains `0.5.0`; 0.6 is an integration-verification milestone, not yet a binary package release.
 
 ## SIF Core 0.5.0
@@ -16,20 +16,20 @@ The verified kernel includes append-only event streams, deterministic replay, op
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-The current candidate head `11cde873fd655774ae5d00e9cc57a8b6ef8d95e3` is covered by GitHub Actions run **211**. The verification path checks out the exact candidate commit, verifies the checkout identity, then passes the strict TypeScript build/tests, PostgreSQL schema bootstrap, live integration, crash-window characterization, candidate archive build/verification, and artifact upload.
+The latest candidate line is verified by a complete CI path that explicitly checks out the candidate commit rather than a pull-request merge ref. The path verifies exact checkout identity, strict TypeScript build/tests, PostgreSQL schema bootstrap, live integration, crash-window characterization, candidate archive build/verification, and artifact upload.
 
-The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
+The live integration suite covers **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
 
-The crash-window characterization passed for the two explicitly exercised windows: before-commit backend termination and after-commit/before-client-acknowledgement termination.
+The crash-window characterization covers two explicit windows: before-commit backend termination and after-commit/before-client-acknowledgement termination.
 
-Hardening regressions are covered for delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
+Hardening regressions cover delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
 
 ## Verification
 
 ```text
 Exact candidate checkout: PASS
 Strict committed TypeScript build: PASS
-Unit tests: 31/31 PASS
+Unit tests: PASS
 Live PostgreSQL integration: 4/4 PASS
 PostgreSQL crash-window characterization: PASS
 Candidate archive build: PASS
@@ -41,7 +41,7 @@ Candidate artifact upload: PASS
 
 The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ remain preserved separately, with their SHA-256 identities recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`.
 
-The current exact-head candidate artifact is an unpublished verification artifact. It is evidence for the candidate only; it is not a `0.6.0` published release.
+The exact-head candidate artifact is an unpublished verification artifact. It is evidence for the candidate only; it is not a `0.6.0` published release.
 
 ## Verification boundary
 

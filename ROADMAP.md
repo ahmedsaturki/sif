@@ -11,11 +11,11 @@ Status: verified kernel baseline preserved.
 ## Phase 2 — Live Persistence 0.6
 Real PostgreSQL integration, migration harness, concurrency tests, crash-window characterization, durable projections and production-style worker lifecycle.
 
-Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16.15**. Latest CI run `211` checked out exact candidate head `11cde873fd655774ae5d00e9cc57a8b6ef8d95e3` and passed exact-checkout verification, strict TypeScript build/tests, schema bootstrap, four live PostgreSQL scenarios, explicit crash-window characterization, candidate archive build/verification, and artifact upload.
+Current status: **implementation-level 0.6 persistence gates verified by the latest successful CI run on the exact candidate checkout.** The workflow verifies exact checkout identity, strict TypeScript build/tests, schema bootstrap, four live PostgreSQL scenarios, explicit crash-window characterization, candidate archive build/verification, and artifact upload.
 
-Hardening included regression coverage for delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
+Hardening includes regression coverage for delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
 
-The artifact/evidence gate for the current candidate is complete. The package version remains intentionally `0.5.0`; no `0.6.0` tag or publication has been performed.
+The artifact/evidence gate is complete for the verified candidate line. The package version remains intentionally `0.5.0`; no `0.6.0` tag or publication has been performed.
 
 Release boundary remains explicit: arbitrary crash-point coverage and full recovery/reconciliation after external database/network faults are not claimed. Production-scale PostgreSQL performance/HA, network-partition recovery, secure federation, distributed consensus, and exactly-once external effects remain later-stage work.
 

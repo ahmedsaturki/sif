@@ -13,7 +13,7 @@
 - `main` remains at Genesis `f4408d81375786e7a9f0715cf70609d0e257a67c`.
 - `feat/sif-core-0.5.0` remains the preserved kernel baseline.
 - `feat/sif-core-0.6.0-live-postgres` is the live-persistence candidate line.
-- Current candidate head: `11cde873fd655774ae5d00e9cc57a8b6ef8d95e3`.
+- The branch is maintained as an evidence-gated candidate line; the latest successful CI run is the authoritative verification record for its exact HEAD.
 - PR #2 remains open and unmerged.
 
 ## Verified Kernel
@@ -38,22 +38,11 @@ Implemented and tested:
 - self-model/reconstruction verification
 
 ## Live PostgreSQL 0.6 Verification
-Latest CI run `211` checks out the exact candidate commit `11cde873fd655774ae5d00e9cc57a8b6ef8d95e3` rather than a pull-request merge ref. The complete verification job passed.
+The latest successful CI run checks out the exact candidate commit rather than a pull-request merge ref. It verifies exact checkout identity, strict TypeScript build/tests, PostgreSQL schema bootstrap, four live PostgreSQL scenarios, explicit crash-window characterization, candidate archive build/verification, and artifact upload.
 
-Verified gates:
-1. Exact candidate checkout.
-2. Strict TypeScript build and unit tests.
-3. PostgreSQL schema bootstrap.
-4. Four live PostgreSQL scenarios: concurrent append serialization, atomic rollback, projection checkpoint persistence, and owner-fenced outbox leasing/reclaim.
-5. Explicit before-commit and after-commit/before-ack crash-window characterization.
-6. Candidate source ZIP and npm TGZ build, verification, and upload.
-7. Exact-candidate artifact provenance check in the workflow.
-
-Hardening regressions are covered for delegated-authority lifetime, locale-independent canonicalization, application metadata binding in event digests, and PostgreSQL inherited-append/stream-head synchronization.
+The live scenarios cover concurrent append serialization, atomic rollback of event/head/outbox, durable projection checkpoints, and owner-fenced outbox lease lifecycle.
 
 ## Evidence State
-- Current candidate head: `11cde873fd655774ae5d00e9cc57a8b6ef8d95e3`
-- Latest verification run: GitHub Actions `211`
 - Exact candidate checkout: PASS
 - Strict TypeScript build + tests: PASS
 - Unit tests: 31/31 PASS
@@ -65,19 +54,12 @@ Hardening regressions are covered for delegated-authority lifetime, locale-indep
 - Candidate artifact upload: PASS
 
 ## Artifact State
-CI produced an unpublished candidate artifact from the exact branch head. It was downloaded and independently inspected outside the CI execution environment.
-
-- Artifact ID: `10433161584`
-- Artifact name: `sif-core-unpublished-candidate-11cde873fd655774ae5d00e9cc57a8b6ef8d95e3`
-- GitHub wrapper SHA-256: `31aa341717629f6f78499a597a9c82b888caa198bc440642ff662a88412cbb54`
-- Source ZIP SHA-256: `93541f32f05ecef97b93ee3dd492a8eb7f98c5e16306a80292705e57bd0fe648`
-- npm TGZ SHA-256: `ac735987335e47aef3ca954c33c0459b2d9fd8f6eb393d8fb22f657598630d93`
-- Package identity: `sif-core@0.5.0`
+The candidate artifact is produced from the exact checked-out candidate commit. It is independently downloaded and inspected outside the CI execution environment. The artifact/evidence record is maintained in `RELEASE_EVIDENCE_0.6.0.md` and the preserved local/Library evidence bundle.
 
 ## Release / Promotion State
 `0.6.0` is **not a released package**. No version bump, tag, registry publication, or merge to `main` has been performed.
 
-The artifact/evidence gate is complete for the current candidate. Actual release promotion remains a separate explicit operation.
+The artifact/evidence gate is complete for the verified candidate line. Actual release promotion remains a separate explicit operation.
 
 ## Explicit Unknown / Not Claimed
 - arbitrary process/database crash-point coverage

@@ -76,26 +76,26 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 
 ## Current Verification Boundary
 
-Current candidate HEAD:
+The code-bearing Secure Federation candidate is:
 `64c7beee9343be25809179bc59ea60577cc2d394`
 
-Exact-head CI:
+Its exact-head CI record is:
 - SIF Core CI Run #371 / `35136067984`
 - conclusion: `success`
-- exact checkout verified against `64c7beee9343be25809179bc59ea60577cc2d394`
+- exact checkout verified
 - build and test: 123/123 passed
 - live PostgreSQL integration: 7/7 passed
 - federated inbox crash-window characterization: passed
 - PostgreSQL crash-window characterization: passed
 - unpublished candidate archives built and SHA-256 verified
-- exact candidate archive manifest records `commit=64c7beee9343be25809179bc59ea60577cc2d394`
-- candidate artifact uploaded as `sif-core-unpublished-candidate-64c7beee9343be25809179bc59ea60577cc2d394`
 - artifact ID: `10462904785`
 - artifact ZIP digest: `sha256:4d9dfae825c4e245db421e4d137ea0a618b222a4a86062902e4285f01922322d`
 
+The repository may contain subsequent documentation-only provenance commits; those commits do not change the federation code semantics. The final branch HEAD must always be established and verified from the exact SHA of the CI run associated with that HEAD, rather than inferred from this log entry.
+
 The final committed test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
 
-`PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence. The exact-head CI covers the candidate tree containing that ledger and the related acceptance tests.
+`PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence.
 
 F3-050 remains deliberately bounded to the provider-neutral kernel: the executable test proves that encrypted transport metadata does not authenticate or establish trust for an unauthenticated peer. It does not claim a production TLS/mTLS/SPIFFE deployment.
 

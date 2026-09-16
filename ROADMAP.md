@@ -11,7 +11,7 @@ Status: verified kernel baseline preserved.
 ## Phase 2 — Live Persistence 0.6
 Real PostgreSQL integration, migration harness, concurrency tests, crash recovery, durable projections and production-style worker lifecycle.
 
-Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16**. GitHub Actions run 93 passed strict build, 27/27 unit tests, schema bootstrap, four live integration scenarios, and explicit before-commit/after-commit backend termination characterization. Subsequent commits only refreshed documentation/evidence, so a fresh CI run on the final branch HEAD is required before promotion.
+Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16**. GitHub Actions run 93 passed strict build, 27/27 unit tests, schema bootstrap, four live integration scenarios, and explicit before-commit/after-commit backend termination characterization. Subsequent changes only refresh documentation/evidence, so final-head CI remains the last promotion gate before artifacts.
 
 Release boundary remains explicit: arbitrary crash-point coverage and full recovery/reconciliation after external database/network faults are not claimed. Production-scale PostgreSQL performance/HA, network-partition recovery, secure federation, distributed consensus, and exactly-once external effects remain later-stage work.
 

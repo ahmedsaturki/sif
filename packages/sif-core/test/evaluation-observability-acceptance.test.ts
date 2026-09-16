@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { EvaluationObservabilityError, InMemoryObservationSink, NoopObservationSink, RegressionSuiteRunner, assertPromotionEvidence, createEvaluationRecord, createObservation, emitObservationSafely, makeReplayDescriptor, normalizeTraceContext, verifyReplayDescriptor, type EvaluationObservabilityLimits, type EvaluationRecord, type TraceContext } from "../src/index.js";
+import { BoundedFaultInjector, EvaluationObservabilityError, InMemoryObservationSink, NoopObservationSink, RegressionSuiteRunner, assertPromotionEvidence, createEvaluationRecord, createObservation, emitObservationSafely, makeReplayDescriptor, normalizeTraceContext, verifyReplayDescriptor, type EvaluationObservabilityLimits, type EvaluationRecord, type TraceContext } from "../src/index.js";
 
-const L: EvaluationObservabilityLimits = { maxTraceBaggageEntries: 4, maxTraceBaggageBytes: 1000, maxObservationBytes: 4000, maxObservationAttributes: 4, maxEvaluationInputBytes: 1000, maxEvaluationRecords: 10, maxConcurrentEvaluations: 1, maxFaultActions: 4 };
+const L: EvaluationObservabilityLimits = { maxTraceBaggageEntries: 4, maxTraceBaggageBytes: 1000, maxObservationBytes: 4000, maxObservationAttributes: 4, maxEvaluationInputBytes: 1000, maxEvaluationRecordBytes: 5000, maxEvaluationRecords: 10, maxConcurrentEvaluations: 2, maxFaultActions: 4 };
 const T: TraceContext = { traceId: "t", spanId: "s", correlationId: "c", baggage: { a: "b" } };
 const C = "candidate"; const E = "env";
 function err(e: unknown): string | undefined { return e instanceof EvaluationObservabilityError ? e.code : undefined; }
@@ -72,16 +72,16 @@ test("F5-038",()=>assert.deepEqual(makeReplayDescriptor(r(),"a"),makeReplayDescr
 test("F5-039",()=>ex(()=>makeReplayDescriptor(r(),""),"INVALID_TRACE"));
 test("F5-040",()=>assert.equal(makeReplayDescriptor(r(),"a").environmentFingerprint,E));
 
-test("F5-041",async()=>{const s=new InMemoryObservationSink();const z=await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{}}],tr());assert.equal(z.passed,1);});
+test("F5-041",async()=>{const s=new InMemoryObservationSink();let active=0,max=0;const cs=Array.from({length:4},(_,i)=>({id:`c${i}`,run:async()=>{active++;max=Math.max(max,active);await new Promise<void>((resolve)=>setTimeout(resolve,5));active--;}}));const z=await new RegressionSuiteRunner(s,L).run("s",C,cs,tr());assert.equal(z.passed,4);assert.equal(max,2);});
 test("F5-042",async()=>{const s=new InMemoryObservationSink();const z=await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{throw new Error("boom");}}],tr());assert.equal(z.failed,1);});
 test("F5-043",async()=>{const s=new InMemoryObservationSink();await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{}}],tr());assert.equal(s.all().length,1);});
 test("F5-044",async()=>{const s=new InMemoryObservationSink();const z=await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{}}],tr());assert.equal(z.candidateCommit,C);});
 test("F5-045",async()=>{const s=new InMemoryObservationSink();const cs=Array.from({length:11},(_,i)=>({id:`c${i}`,run:async()=>{}}));await axe(()=>new RegressionSuiteRunner(s,L).run("s",C,cs,tr()),"RESOURCE_EXHAUSTED");});
-test("F5-046",()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r()],faults:[]}));
-test("F5-047",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[],faults:[]}),"EVIDENCE_INCOMPLETE"));
-test("F5-048",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r({candidateCommit:"x"})],faults:[]}),"CANDIDATE_MISMATCH"));
-test("F5-049",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r({status:"FAIL"})],faults:[]}),"EVIDENCE_INCOMPLETE"));
-test("F5-050",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r()],faults:[{faultId:"f",requested:true,observed:false,status:"NOT_OBSERVED"}]}),"FAULT_NOT_PROVEN"));
+test("F5-046",async()=>{const injector=new BoundedFaultInjector({execute:async(request)=>({observed:true,evidenceRef:`evidence:${request.faultId}`})},L);const observed=await injector.inject({faultId:"f1",boundary:"transport",action:"disconnect"});assert.equal(observed.status,"OBSERVED");assert.equal(observed.observed,true);assert.equal(observed.evidenceRef,"evidence:f1");});
+test("F5-047",async()=>{const injector=new BoundedFaultInjector({execute:async()=>({observed:false,reason:"fault did not trigger"})},L);const observed=await injector.inject({faultId:"f2",boundary:"transport",action:"disconnect"});assert.equal(observed.status,"NOT_OBSERVED");assert.equal(observed.observed,false);});
+test("F5-048",async()=>{const injector=new BoundedFaultInjector({execute:async()=>{throw new Error("evaluator down");}},L);const observed=await injector.inject({faultId:"f3",boundary:"evaluator",action:"crash"});assert.equal(observed.status,"EVALUATION_FAILED");assert.equal(observed.observed,false);});
+test("F5-049",async()=>{const injector=new BoundedFaultInjector({execute:async()=>({observed:false,reason:"backend unavailable"})},L);const observed=await injector.inject({faultId:"f4",boundary:"backend",action:"disable"});assert.equal(observed.status,"NOT_OBSERVED");assert.equal(observed.reason,"backend unavailable");});
+test("F5-050",async()=>{const injector=new BoundedFaultInjector({execute:async(request)=>({observed:true,evidenceRef:`ok:${request.faultId}`})},L);for(let i=0;i<L.maxFaultActions;i++)await injector.inject({faultId:`f${i}`,boundary:"x",action:"y"});await axe(()=>injector.inject({faultId:"overflow",boundary:"x",action:"y"}),"RESOURCE_EXHAUSTED");});
 
 test("F5-051",async()=>{const s=new NoopObservationSink();await s.emit(createObservation({kind:"METRIC",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr()},L));});
 test("F5-052",()=>ex(()=>assertPromotionEvidence({candidateCommit:"",artifactDigest:"a",evaluations:[r()],faults:[]}),"INVALID_TRACE"));

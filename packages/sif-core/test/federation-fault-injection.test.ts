@@ -77,6 +77,17 @@ function negotiated(sessionId: string) {
   });
 }
 
+async function expectFederationError(action: () => Promise<unknown> | unknown, code: FederationProtocolError["code"]): Promise<void> {
+  try {
+    await action();
+  } catch (error) {
+    assert.equal(error instanceof FederationProtocolError, true);
+    if (error instanceof FederationProtocolError) assert.equal(error.code, code);
+    return;
+  }
+  assert.fail(`expected FederationProtocolError(${code})`);
+}
+
 class ForcedAuthenticationFaultAdapter implements FederationTransportAdapter {
   openCalls = 0;
 
@@ -144,10 +155,7 @@ test("F3-053: forced authentication fault occurs before transport admission", as
   const boundary = new FederationTransportBoundary(adapter);
   const n = negotiated("fault-auth");
 
-  await assert.rejects(
-    () => boundary.open("domain-b", peer, n.scope, n),
-    (error: unknown) => error instanceof FederationProtocolError && error.code === "AUTHENTICATION_FAILURE",
-  );
+  await expectFederationError(() => boundary.open("domain-b", peer, n.scope, n), "AUTHENTICATION_FAILURE");
   assert.equal(adapter.openCalls, 1, "the forced authentication fault must actually execute");
 });
 
@@ -216,7 +224,7 @@ test("F3-056: forced peer outage is observed and recovery delivers without chang
 
   const outage = await boundary.send(session, msg, 100, 0);
   assert.equal(outage.outcome, "PEER_UNAVAILABLE");
-  assert.match(outage.error ?? "", /forced peer outage/);
+  assert.equal(/forced peer outage/.test(outage.error ?? ""), true);
   assert.equal(adapter.sendCalls, 1);
   assert.equal(classifyFederationRetry(outage.outcome), "RETRY");
 

@@ -47,14 +47,15 @@ function envelope() {
 }
 
 async function expectFederationError(action: () => Promise<unknown> | unknown, code: FederationProtocolError["code"]): Promise<void> {
+  let caught = false;
   try {
     await action();
   } catch (error) {
+    caught = true;
     assert.equal(error instanceof FederationProtocolError, true);
     if (error instanceof FederationProtocolError) assert.equal(error.code, code);
-    return;
   }
-  assert.fail(`expected FederationProtocolError(${code})`);
+  assert.equal(caught, true);
 }
 
 test("transport boundary binds session identity and local domain", async () => {

@@ -8,11 +8,13 @@ export type FederationFailureCode =
   | "AUTHENTICATION_FAILURE"
   | "AUTHORIZATION_DENIED"
   | "PROTOCOL_INCOMPATIBLE"
+  | "CAPABILITY_INCOMPATIBLE"
   | "INVALID_SIGNATURE"
   | "INTEGRITY_FAILURE"
   | "REPLAY_DETECTED"
   | "UNKNOWN_OUTCOME"
-  | "TRANSIENT_DELIVERY_FAILURE";
+  | "TRANSIENT_DELIVERY_FAILURE"
+  | "RESOURCE_EXHAUSTED";
 
 export type FederationFailureKind = "peer" | "message" | "delivery" | "authorization";
 

@@ -11,23 +11,24 @@
 - Outbox uniqueness remains `(event_id, destination)`.
 - PostgreSQL schema includes stream heads, events, outbox, artifact metadata, and projection checkpoints.
 - PostgreSQL artifact metadata and projection checkpoint runtime contracts are implemented.
-- Durable PostgreSQL outbox leasing/reclaim semantics are implemented by contract.
+- Durable PostgreSQL outbox leasing/reclaim semantics are implemented by contract and live-verified below.
 - PostgreSQL inbox idempotency with retryable failure cleanup is implemented by contract.
-- Resumable projection runner with persisted checkpoints is implemented by contract.
+- Resumable projection runner with persisted checkpoints is implemented by contract and its checkpoint persistence is live-verified below.
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run 64 executed against a real PostgreSQL 16 service and passed the live integration step using the compiled `PostgresTransactionalEventStore` implementation through a dependency-free PostgreSQL wire-protocol test harness.
+GitHub Actions run 73 executed the committed tree against a real PostgreSQL 16 service and passed the complete live integration suite using the compiled implementation through a dependency-free PostgreSQL wire-protocol test harness.
 
-Verified behavior:
+Live scenarios verified:
 
-- two independent PostgreSQL connections concurrently target the same stream at version 1;
-- the `sif_stream_heads ... FOR UPDATE` serialization point admits exactly one writer for the expected version;
-- the losing writer observes the post-lock version mismatch and is rejected rather than creating a conflicting event;
-- exactly one event and one durable outbox row remain for the test stream;
-- cleanup is performed after verification.
+1. **Concurrent same-stream append serialization** — two independent PostgreSQL connections contend for version 1; the stream-head row lock serializes the writers and exactly one event/outbox pair remains.
+2. **Atomic rollback** — a constraint failure after event/head work causes PostgreSQL to roll back the event, stream head, and outbox together; no partial commit remains.
+3. **Projection checkpoint lifecycle** — checkpoint state persists in PostgreSQL and round-trips deterministically for resumable projection progress.
+4. **Outbox worker lifecycle** — leases are exclusive, expired leases are reclaimable, and delivery/attempt updates are fenced to the current lease owner.
 
-This verifies live database connectivity and the core per-stream transactional serialization path. It does not establish production-scale performance, network fault tolerance, or exactly-once external side effects.
+The live integration result was **4/4 PASS**. The CI job also passed artifact identity verification, strict build, the 27-test unit suite, and PostgreSQL schema bootstrap.
+
+This establishes live behavior for the covered PostgreSQL transaction, checkpoint, and worker-lease paths. It does not establish production-scale performance, database HA, arbitrary crash-point recovery, network fault tolerance, or exactly-once external side effects.
 
 ## Local verification
 
@@ -40,6 +41,8 @@ Skipped: 0
 
 ## Not claimed as live-verified
 
+- Arbitrary process/database crash-point characterization beyond the exercised transaction rollback scenario.
+- Full recovery/reconciliation behavior after external PostgreSQL/network faults.
 - TLS/mTLS/SPIFFE federation transport.
 - OPA/Cedar adapter.
 - KMS/HSM secret integration.

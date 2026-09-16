@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { InMemoryEventStore, SifEventWriter, digest } from '../src/index.js';
 import { ResumableProjection } from '../src/projector.js';
 import { PostgresInbox, PostgresOutboxWorker, consumeIdempotently } from '../src/worker.js';
+import { PostgresTransactionalEventStore } from '../src/postgres.js';
 import type { PgClientLike, PgPoolLike } from '../src/postgres.js';
 import type { EventEnvelope } from '../src/types.js';
 import type { ProjectionCheckpoint } from '../src/replay.js';
@@ -28,7 +29,25 @@ class FakeDb implements PgClientLike {
   }
 }
 class FakePool extends FakeDb { async connect():Promise<PgClientLike&{release?:()=>void;query:PgClientLike['query']}>{return{query:this.query.bind(this),release(){}};} }
+class AppendOnlyTxPool implements PgPoolLike {
+  heads=new Map<string,number>(); events:Row[]=[];
+  async query<T=Row>():Promise<{rows:T[];rowCount:number}>{throw new Error('pool-level query is not expected');}
+  async connect():Promise<PgClientLike&{release?:()=>void;query:PgClientLike['query']}>{
+    const pool=this;
+    return { release(){}, async query<T=Row>(text:string,values:readonly unknown[]=[]):Promise<{rows:T[];rowCount:number}> {
+      if(text==='BEGIN'||text==='COMMIT'||text==='ROLLBACK')return {rows:[],rowCount:0};
+      if(text.startsWith('INSERT INTO sif_stream_heads')){const stream=String(values[0]);if(!pool.heads.has(stream))pool.heads.set(stream,0);return {rows:[],rowCount:1};}
+      if(text.startsWith('SELECT stream_version FROM sif_stream_heads')){const stream=String(values[0]);return {rows:[{stream_version:pool.heads.get(stream)??0} as T],rowCount:1};}
+      if(text.startsWith('SELECT event_digest FROM sif_events'))return {rows:[],rowCount:0};
+      if(text.startsWith('INSERT INTO sif_events')){pool.events.push({stream_id:values[0],stream_version:values[1],event_id:values[2]});return {rows:[],rowCount:1};}
+      if(text.startsWith('UPDATE sif_stream_heads')){pool.heads.set(String(values[0]),Number(values[1]));return {rows:[],rowCount:1};}
+      throw new Error(`Unhandled append SQL: ${text}`);
+    }};
+  }
+}
 function event(v:number):EventEnvelope{return{eventId:`e${v}`,eventType:'set',streamId:'s',streamVersion:v,occurredAt:'2026-09-16T00:00:00.000Z',observedAt:'2026-09-16T00:00:00.000Z',actorId:'a',correlationId:'c',payload:{value:v}};}
+
+test('PostgresTransactionalEventStore append keeps stream head synchronized',async()=>{const db=new AppendOnlyTxPool();const store=new PostgresTransactionalEventStore(db);await store.append(event(1),{expectedStreamVersion:0});await store.append(event(2),{expectedStreamVersion:1});assert.equal(db.heads.get('s'),2);assert.equal(db.events.length,2);});
 
 test('ResumableProjection checkpoints new versions and remains deterministic',async()=>{const store=new InMemoryEventStore();const writer=new SifEventWriter(store);writer.write({streamId:'s',eventType:'set',actorId:'a',correlationId:'c',payload:{value:1}});writer.write({streamId:'s',eventType:'set',actorId:'a',correlationId:'c',payload:{value:2}});const db=new FakeDb();const cps={save:(c:ProjectionCheckpoint)=>db.query('INSERT INTO sif_projection_checkpoints',[c.projectionId,c.streamId,c.streamVersion,c.stateDigest,c.updatedAt]).then(()=>undefined),get:(p:string,s:string)=>db.query<Row>('SELECT * FROM sif_projection_checkpoints',[p,s]).then(r=>r.rows[0]?({projectionId:String(r.rows[0].projection_id),streamId:String(r.rows[0].stream_id),streamVersion:Number(r.rows[0].stream_version),stateDigest:String(r.rows[0].state_digest),updatedAt:String(r.rows[0].updated_at)}):undefined)};const runner=new ResumableProjection(store,cps,'p',()=>({value:0}),(state,e)=>({value:Number((e.payload as {value:number}).value)}));const first=await runner.run('s');assert.equal(first.applied,2);assert.equal(first.state.value,2);writer.write({streamId:'s',eventType:'set',actorId:'a',correlationId:'c',payload:{value:3}});const second=await runner.run('s');assert.equal(second.applied,1);assert.equal(second.state.value,3);assert.equal(second.checkpoint.stateDigest,digest({value:3}));});
 

@@ -139,7 +139,7 @@ export class BoundedFaultInjector implements FaultInjector {
           requested: true,
           observed: true,
           status: "OBSERVED",
-          evidenceRef: result.evidenceRef,
+          ...(result.evidenceRef === undefined ? {} : { evidenceRef: result.evidenceRef }),
           ...(result.reason === undefined ? {} : { reason: result.reason }),
         };
       }

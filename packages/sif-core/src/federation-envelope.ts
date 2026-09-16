@@ -69,9 +69,10 @@ export type UnsignedFederationEnvelope = Omit<FederationEnvelope, "signature">;
 /**
  * Crypto remains an adapter boundary. The dependency-free kernel only requires
  * deterministic signing bytes and accepts an implementation-provided signature.
+ * `keyId` is carried by the envelope so a concrete signer/verifier can bind the
+ * signature to the intended key identity without coupling the kernel to a crypto runtime.
  */
 export interface FederationSigner {
-  keyId: string;
   sign(data: string): string;
 }
 export interface FederationVerifier {
@@ -161,7 +162,7 @@ export function validateFederationEnvelope(envelope: FederationEnvelope): void {
 }
 
 export function createUnsignedFederationEnvelope(
-  input: Omit<UnsignedFederationEnvelope, "payloadDigest" | "canonicalizationVersion" | "signatureAlgorithm" | "signatureEncoding">,
+  input: Omit<UnsignedFederationEnvelope, "payloadDigest" | "canonicalizationVersion" | "signatureAlgorithm" | "signatureEncoding" | "keyId"> & { keyId?: string },
 ): UnsignedFederationEnvelope {
   if (input.protocol !== FEDERATION_PROTOCOL) throw new FederationProtocolError("PROTOCOL_INCOMPATIBLE", "Unsupported federation protocol");
   const result: UnsignedFederationEnvelope = {
@@ -171,6 +172,7 @@ export function createUnsignedFederationEnvelope(
     canonicalizationVersion: FEDERATION_CANONICALIZATION_VERSION,
     signatureAlgorithm: FEDERATION_SIGNATURE_ALGORITHM,
     signatureEncoding: FEDERATION_SIGNATURE_ENCODING,
+    keyId: input.keyId ?? input.sender.transportBinding,
   };
   validateUnsignedFederationEnvelope(result);
   return result;
@@ -196,10 +198,6 @@ function validateUnsignedFederationEnvelope(envelope: UnsignedFederationEnvelope
 
 export function signFederationEnvelope(envelope: UnsignedFederationEnvelope, signer: FederationSigner): FederationEnvelope {
   validateUnsignedFederationEnvelope(envelope);
-  assertNonEmpty("signer.keyId", signer.keyId);
-  if (envelope.keyId !== signer.keyId) {
-    throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Signing key identity does not match envelope keyId", "peer");
-  }
   return { ...envelope, signature: signer.sign(federationSigningBytes(envelope)) };
 }
 

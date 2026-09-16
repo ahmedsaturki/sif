@@ -46,7 +46,11 @@ Unknown infrastructure is never represented as verified implementation.
 - Detected and fixed nondeterministic assumptions in the live outbox test; final verification uses one destination and deterministic sequencing.
 - Detected and fixed SQL syntax in crash-window verification queries.
 - GitHub Actions run 93 passed build, unit tests, schema bootstrap, 4/4 live PostgreSQL scenarios, and crash-window characterization.
-- Refreshed package/root documentation and added a dedicated `RELEASE_EVIDENCE_0.6.0.md` record.
+- Refreshed package/root documentation, roadmap, 360° state, and dedicated release-evidence record.
+
+### Final-head rule
+
+Run 93 verified the implementation commit before documentation/evidence-only commits. The final branch HEAD must pass a fresh complete CI run before artifact publication or promotion.
 
 ### Release Boundary
 

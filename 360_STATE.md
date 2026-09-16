@@ -9,6 +9,14 @@
 - Core dependency policy: dependency-free kernel
 - Primary persistence target: PostgreSQL
 
+## Repository State
+
+- `main` remains at Genesis `f4408d81375786e7a9f0715cf70609d0e257a67c`.
+- `feat/sif-core-0.5.0` remains the preserved kernel baseline.
+- `feat/sif-core-0.6.0-live-postgres` is the live-persistence candidate line.
+- Current candidate commit: `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`.
+- PR #2 remains open and unmerged.
+
 ## Verified Kernel
 
 Implemented and tested:
@@ -33,7 +41,7 @@ Implemented and tested:
 
 ## Live PostgreSQL 0.6 Verification
 
-GitHub Actions **run 136** verified the **final branch HEAD `31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba`** against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and a direct SQL crash-window characterization.
+GitHub Actions **run 143** verified commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51` against a real PostgreSQL 16 service. The actual compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and direct SQL crash-window characterization.
 
 Verified live scenarios:
 
@@ -45,16 +53,21 @@ Verified live scenarios:
 
 ## Evidence State
 
-- Local TypeScript build: PASS
-- Local tests: 27/27 PASS
-- GitHub Actions artifact identity: PASS
-- GitHub Actions committed build/test: PASS
+- Final-head CI: PASS — run 143
+- Artifact identity manifest: PASS
+- Strict committed TypeScript build + tests: PASS
+- Unit tests: 27/27 PASS
 - PostgreSQL schema bootstrap: PASS
-- GitHub Actions live PostgreSQL integration: 4/4 PASS
-- GitHub Actions crash-window characterization: PASS
-- Final-head CI requirement: SATISFIED by run 136
+- Live PostgreSQL integration: 4/4 PASS
+- Crash-window characterization: PASS
 
-Run 136 is the fresh complete verification of the final branch HEAD.
+The final-head CI gate is satisfied for the current candidate commit.
+
+## Release / Promotion State
+
+The implementation milestone is verified, but `0.6.0` is **not yet an artifact release**. Package version remains `0.5.0` until a fresh source ZIP and npm TGZ are built from the promotion commit, SHA-256 identities are recorded, byte-preserving artifacts are preserved, and the artifacts are independently verified.
+
+The 0.5.0 binary artifacts remain preserved in the persistent Library. Run 143 produced no GitHub Actions artifacts, and the current execution environment cannot safely clone from `github.com` because DNS resolution is unavailable; therefore no unverified 0.6.0 binary is fabricated or claimed.
 
 ## Explicit Unknown / Not Claimed
 
@@ -68,12 +81,6 @@ Run 136 is the fresh complete verification of the final branch HEAD.
 - production OpenTelemetry exporter
 - exactly-once external side effects
 - production-scale PostgreSQL performance/HA characterization
-
-## Release / Promotion State
-
-`feat/sif-core-0.5.0` remains the verified kernel baseline.
-`feat/sif-core-0.6.0-live-postgres` contains the completed core live-persistence implementation milestone plus evidence/documentation updates.
-Binary package versioning remains 0.5.0 until a new 0.6.0 release artifact is built, hashed, preserved, and independently verified from the final promotion commit. No merge or binary publication is implied by CI success alone.
 
 ## Governing Laws
 

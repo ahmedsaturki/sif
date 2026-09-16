@@ -15,12 +15,12 @@ new_uuid() {
   node -e "console.log(require('node:crypto').randomUUID())"
 }
 
-wait_for_pid() {
-  local file="$1"
+wait_for_backend_pid() {
+  local log_file="$1"
   for _ in $(seq 1 30); do
-    if [[ -s "$file" ]]; then
+    if [[ -s "$log_file" ]]; then
       local pid
-      pid="$(grep -m1 -E '^[0-9]+$' "$file" || true)"
+      pid="$(grep -m1 -E '^[0-9]+$' "$log_file" || true)"
       if [[ -n "$pid" ]]; then
         printf '%s\n' "$pid"
         return 0
@@ -28,7 +28,7 @@ wait_for_pid() {
     fi
     sleep 1
   done
-  echo "Timed out waiting for PostgreSQL backend PID in $file" >&2
+  echo "Timed out waiting for PostgreSQL backend PID in $log_file" >&2
   return 1
 }
 
@@ -36,6 +36,7 @@ cleanup_stream() {
   local stream_id="$1"
   psql_query "DELETE FROM sif_outbox WHERE event_id IN (SELECT event_id FROM sif_events WHERE stream_id='${stream_id}'); DELETE FROM sif_events WHERE stream_id='${stream_id}'; DELETE FROM sif_stream_heads WHERE stream_id='${stream_id}';" >/dev/null || true
 }
+
 
 echo 'before-commit crash window'
 STREAM_BEFORE="$(new_uuid)"
@@ -45,7 +46,6 @@ TX_LOG_BEFORE="$(mktemp)"
 cleanup_stream "$STREAM_BEFORE"
 trap 'rm -f "$PID_FILE_BEFORE" "$TX_LOG_BEFORE"' EXIT
 
-psql_base=(psql -v ON_ERROR_STOP=1 -X -A -t -q)
 psql -v ON_ERROR_STOP=1 -X -A -t -q >"$TX_LOG_BEFORE" 2>&1 <<SQL &
 BEGIN;
 SELECT pg_backend_pid();
@@ -58,11 +58,11 @@ COMMIT;
 SQL
 TX_PID_BEFORE=$!
 printf '%s\n' "$TX_PID_BEFORE" >"$PID_FILE_BEFORE"
-BACKEND_BEFORE="$(wait_for_pid "$TX_LOG_BEFORE")"
+BACKEND_BEFORE="$(wait_for_backend_pid "$TX_LOG_BEFORE")"
 psql_query "SELECT pg_terminate_backend($BACKEND_BEFORE);" >/dev/null
 wait "$TX_PID_BEFORE" || true
 
-BEFORE_STATE="$(psql_query "SELECT (SELECT count(*) FROM sif_events WHERE stream_id='$STREAM_BEFORE'), (SELECT count(*) FROM sif_stream_heads WHERE stream_id='$STREAM_BEFORE'), (SELECT count(*) FROM sif_outbox o JOIN sif_events e ON e.event_id=o.event_id WHERE e.stream_id='$STREAM_BEFORE';")"
+BEFORE_STATE="$(psql_query "SELECT (SELECT count(*) FROM sif_events WHERE stream_id='$STREAM_BEFORE'), (SELECT count(*) FROM sif_stream_heads WHERE stream_id='$STREAM_BEFORE'), (SELECT count(*) FROM sif_outbox o JOIN sif_events e ON e.event_id=o.event_id WHERE e.stream_id='$STREAM_BEFORE')")"
 if [[ "$BEFORE_STATE" != '0|0|0' ]]; then
   echo "before-commit crash window left partial state: $BEFORE_STATE" >&2
   exit 1
@@ -70,7 +70,7 @@ fi
 
 # Retry after the aborted transaction: the same stream must be writable again.
 psql_query "INSERT INTO sif_stream_heads (stream_id, stream_version) VALUES ('$STREAM_BEFORE', 0);" >/dev/null
-RETRY_STATE="$(psql_query "SELECT stream_version FROM sif_stream_heads WHERE stream_id='$STREAM_BEFORE';")"
+RETRY_STATE="$(psql_query "SELECT stream_version FROM sif_stream_heads WHERE stream_id='$STREAM_BEFORE'")"
 [[ "$RETRY_STATE" == '0' ]] || { echo "retry admission failed: $RETRY_STATE" >&2; exit 1; }
 cleanup_stream "$STREAM_BEFORE"
 trap - EXIT
@@ -97,11 +97,11 @@ SELECT pg_sleep(60);
 SQL
 TX_PID_AFTER=$!
 printf '%s\n' "$TX_PID_AFTER" >"$PID_FILE_AFTER"
-BACKEND_AFTER="$(wait_for_pid "$TX_LOG_AFTER")"
+BACKEND_AFTER="$(wait_for_backend_pid "$TX_LOG_AFTER")"
 psql_query "SELECT pg_terminate_backend($BACKEND_AFTER);" >/dev/null
 wait "$TX_PID_AFTER" || true
 
-AFTER_STATE="$(psql_query "SELECT (SELECT stream_version FROM sif_stream_heads WHERE stream_id='$STREAM_AFTER'), (SELECT count(*) FROM sif_events WHERE stream_id='$STREAM_AFTER'), (SELECT count(*) FROM sif_outbox o JOIN sif_events e ON e.event_id=o.event_id WHERE e.stream_id='$STREAM_AFTER';")"
+AFTER_STATE="$(psql_query "SELECT (SELECT stream_version FROM sif_stream_heads WHERE stream_id='$STREAM_AFTER'), (SELECT count(*) FROM sif_events WHERE stream_id='$STREAM_AFTER'), (SELECT count(*) FROM sif_outbox o JOIN sif_events e ON e.event_id=o.event_id WHERE e.stream_id='$STREAM_AFTER')")"
 if [[ "$AFTER_STATE" != '1|1|0' ]]; then
   echo "after-commit window lost committed state: $AFTER_STATE" >&2
   exit 1

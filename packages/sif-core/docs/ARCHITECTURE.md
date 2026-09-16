@@ -24,9 +24,11 @@ Outbox records are idempotent per `(event_id, destination)`. The durable JSONL i
 
 The PostgreSQL schema lives in `sql/postgres-schema.sql`.
 
-## Verification boundary
+## Live verification
 
-The automated tests verify the contract with a fake PostgreSQL client. A live PostgreSQL deployment still requires a real integration test with the selected driver, connection/TLS settings, migration tooling and multi-client concurrency behavior.
+GitHub Actions run 143 exercises the committed implementation against a real PostgreSQL 16 service. The live harness uses two independent database connections for same-stream contention and directly verifies transaction, checkpoint, outbox lease, reclaim, owner-fencing, and crash-window behavior.
+
+Verified scenarios are documented in `RELEASE_EVIDENCE_0.6.0.md` and `VERIFICATION_MATRIX.md`. This is implementation-level integration evidence, not a claim of arbitrary production failure coverage.
 
 ## Durable delivery
 
@@ -35,3 +37,7 @@ The PostgreSQL path uses a transactional outbox. A worker claims pending rows us
 ## Resumable projections
 
 Projection checkpoints are derived state. A runner reads the checkpoint, replays the authoritative event stream needed to reconstruct the projection, applies only new events, verifies contiguous versions, computes a deterministic state digest, and persists the new checkpoint.
+
+## Remaining boundaries
+
+Arbitrary crash-point coverage, full external database/network recovery and reconciliation, production-scale PostgreSQL performance/HA, network partitions, SPIFFE/mTLS, OPA/Cedar, KMS/HSM, distributed consensus, production OpenTelemetry export, and exactly-once external side effects remain outside the verified milestone.

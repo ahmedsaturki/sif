@@ -9,6 +9,14 @@ test("retry classifier keeps unknown outcome separate from transient retry", () 
   assert.equal(classifyFederationRetry("AUTHORIZATION_DENIED"), "STOP");
 });
 
+test("F3-028: authentication failure is terminal and cannot trigger automatic retry", () => {
+  assert.equal(classifyFederationRetry("AUTHENTICATION_FAILURE"), "STOP");
+  const controller = new FederationRetryController({ maxAttempts: 5, baseDelayMs: 10, maxDelayMs: 100 });
+  const state = controller.record("auth-denied", "AUTHENTICATION_FAILURE", "2026-09-16T08:00:00.000Z");
+  assert.equal(state.decision, "STOP");
+  assert.equal(controller.canRetry("auth-denied", "2026-09-16T08:10:00.000Z"), false);
+});
+
 test("transient failures use bounded exponential backoff and retain idempotency key", () => {
   const controller = new FederationRetryController({ maxAttempts: 4, baseDelayMs: 100, maxDelayMs: 250 });
   const initial = controller.begin("msg-1");

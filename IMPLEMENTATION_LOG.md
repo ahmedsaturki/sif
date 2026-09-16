@@ -51,14 +51,18 @@ Unknown infrastructure is never represented as verified implementation.
 
 The implementation-level 0.6 persistence milestone is verified through the latest successful CI candidate line. The package version remains `0.5.0`; the 0.6 milestone is an integration-verification boundary, not a published package release.
 
-### 0.7 Secure Federation — SPEC / CONTRACT START
+### 0.7 Secure Federation — SPEC / CONTRACT / IMPLEMENT START
 
 - Defined `PHASE_3_FEDERATION_SPEC.md` as the normative Phase 3 boundary.
 - Defined `PHASE_3_IMPLEMENTATION_CONTRACT.md` with component boundaries, typed failures, processing state machine, security/resource/provenance invariants, implementation order, and promotion gates.
 - Defined `PHASE_3_TEST_MATRIX.md` with 60 required acceptance scenarios spanning identity, trust, signatures, capability negotiation, authority, inbox/idempotency, retry/recovery, reconciliation, resource abuse, time semantics, provenance, concurrency, fault injection, and artifact provenance.
 - Created dedicated branch `feat/sif-core-0.7.0-secure-federation` from the exact verified Phase 2 candidate.
 - Opened draft PR #3 against `feat/sif-core-0.6.0-live-postgres` to keep Phase 3 isolated from `main` and from the unpublished Phase 2 release boundary.
-- No Phase 3 runtime implementation, package version bump, registry publication, or merge is claimed.
+- Implemented the first narrow runtime slice: canonical federation envelope domain types, typed failure taxonomy, deterministic payload/envelope canonicalization, payload SHA-256 integrity digest, provider-neutral signing/verifier interfaces, fail-closed protocol/signature-algorithm validation, MESSAGE IDENTITY vs EVENT IDENTITY separation, and deterministic capability ordering.
+- Added 6 contract/regression tests for the first envelope slice.
+- The first CI attempt exposed an invalid dependency boundary assumption: concrete Node key-object/Buffer crypto APIs were not available in the repository's declared TypeScript environment. The implementation was corrected to keep concrete crypto providers outside the dependency-free kernel and expose only deterministic signing/verifier adapters.
+- Subsequent CI is required to establish the corrected implementation candidate as verified.
+- No package version bump, registry publication, or merge is claimed.
 
 ### Release Boundary
 

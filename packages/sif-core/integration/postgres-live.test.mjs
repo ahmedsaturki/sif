@@ -313,7 +313,7 @@ test('live PostgreSQL outbox leases are exclusive, reclaimable after expiry, and
     assert.equal(stillUndelivered.rows[0].delivered_at, null);
     await b.markDelivered(claimedB[0].outboxId, 'worker-b', '2026-09-16T00:32:00.000Z');
     const delivered = await check.query(`SELECT delivered_at, lease_owner, leased_until FROM sif_outbox WHERE outbox_id='${claimedB[0].outboxId}'`);
-    assert.equal(delivered.rows[0].delivered_at, '2026-09-16T00:32:00.000Z+00');
+    assert.equal(new Date(delivered.rows[0].delivered_at).toISOString(), '2026-09-16T00:32:00.000Z');
     assert.equal(delivered.rows[0].lease_owner, null);
     assert.equal(delivered.rows[0].leased_until, null);
   } finally {

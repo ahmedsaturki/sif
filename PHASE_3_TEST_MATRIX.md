@@ -76,6 +76,20 @@ A test result is valid only when:
 | F3-059 | Concurrency | Concurrent reconciliation updates | Conflicts explicit; no silent history mutation | Required |
 | F3-060 | Artifact | Candidate archive built from exact checkout | Manifest and archive provenance match exact candidate commit | Required |
 
+## Implemented Coverage Notes
+
+The current candidate line now has executable coverage for:
+- canonical federation envelopes, integrity and provider-neutral signing;
+- trust anchors, peer bindings, revocation and effective-time validation;
+- versioned trust-bundle activation/retirement and deterministic resolution;
+- durable federated inbox state progression and PostgreSQL crash-window characterization;
+- session-scoped capability negotiation and semantic compatibility;
+- sovereign local admission through the existing policy engine;
+- bounded reconciliation with duplicate/divergence/conflict behavior;
+- bounded delivery retry with explicit `RETRY`, `STOP`, and `RECONCILE` decisions;
+- provider-neutral transport session/send/close contracts;
+- resource governance for sessions, inbox work, replay retention, rate limits and reconciliation batch size.
+
 ## Minimum Scenario Classes
 The implementation must include at least one executable test for every Required row and additional cases where implementation details create new failure modes.
 

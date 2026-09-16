@@ -17,7 +17,33 @@ export * from "./self-model.js";
 export * from "./integrity.js";
 export * from "./cas.js";
 export * from "./policy.js";
-export * from "./policy-governance.js";
+
+export {
+  InMemoryPolicyDecisionLedger,
+  LocalDeterministicPolicyAdapter,
+  PolicyGovernance,
+  PolicyGovernanceError,
+  PolicyRegistry,
+  computePolicyDigest,
+  normalizePolicyRequest,
+  type FederatedPolicyContext,
+  type ExternalPolicyResult,
+  type GovernanceEffect,
+  type NormalizedPolicyRequest,
+  type PolicyBundle,
+  type PolicyBundleContent,
+  type PolicyDecisionAdapter,
+  type PolicyDecisionEvidence,
+  type PolicyDecisionLedger,
+  type PolicyGovernanceErrorCode,
+  type PolicyGovernanceLimits,
+  type PolicyLifecycle,
+  type PolicyPrimitive,
+  type PolicyProviderOutcome,
+  type PolicyRegistryOptions,
+  type PolicyRequest,
+} from "./policy-governance.js";
+
 export * from "./outbox.js";
 export * from "./postgres.js";
 

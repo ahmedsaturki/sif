@@ -54,6 +54,23 @@ CREATE TABLE IF NOT EXISTS sif_inbox (
 );
 CREATE INDEX IF NOT EXISTS sif_inbox_message_idx ON sif_inbox(message_id, consumer_id);
 
+CREATE TABLE IF NOT EXISTS sif_federated_inbox (
+  consumer_id TEXT NOT NULL,
+  message_id TEXT NOT NULL,
+  sender_domain TEXT NOT NULL,
+  replay_key TEXT NOT NULL,
+  state TEXT NOT NULL CHECK (state IN ('DELIVERED','PROCESSED','COMMITTED','VERIFIED')),
+  received_at TIMESTAMPTZ NOT NULL,
+  processed_at TIMESTAMPTZ,
+  committed_at TIMESTAMPTZ,
+  verified_at TIMESTAMPTZ,
+  result_digest TEXT,
+  PRIMARY KEY (consumer_id, message_id),
+  UNIQUE (consumer_id, replay_key)
+);
+CREATE INDEX IF NOT EXISTS sif_federated_inbox_sender_idx ON sif_federated_inbox(sender_domain, consumer_id, received_at);
+CREATE INDEX IF NOT EXISTS sif_federated_inbox_state_idx ON sif_federated_inbox(state, received_at);
+
 CREATE TABLE IF NOT EXISTS sif_artifacts (
   digest TEXT PRIMARY KEY,
   media_type TEXT NOT NULL,

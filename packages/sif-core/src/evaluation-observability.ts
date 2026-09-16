@@ -10,6 +10,7 @@ export interface EvaluationObservabilityLimits {
   maxObservationBytes: number;
   maxObservationAttributes: number;
   maxEvaluationInputBytes: number;
+  maxEvaluationRecordBytes: number;
   maxEvaluationRecords: number;
   maxConcurrentEvaluations: number;
   maxFaultActions: number;
@@ -105,8 +106,40 @@ export interface FaultObservation {
   reason?: string;
 }
 
+export interface FaultExecutionResult {
+  observed: boolean;
+  evidenceRef?: string;
+  reason?: string;
+}
+
+export interface FaultExecutor {
+  execute(request: FaultRequest): Promise<FaultExecutionResult>;
+}
+
 export interface FaultInjector {
   inject(request: FaultRequest): Promise<FaultObservation>;
+}
+
+export class BoundedFaultInjector implements FaultInjector {
+  private usedActions = 0;
+  constructor(private readonly executor: FaultExecutor, private readonly limits: EvaluationObservabilityLimits) {
+    positive("maxFaultActions", limits.maxFaultActions);
+  }
+  async inject(request: FaultRequest): Promise<FaultObservation> {
+    text("faultId", request.faultId); text("boundary", request.boundary); text("action", request.action);
+    if (this.usedActions >= this.limits.maxFaultActions) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Fault action limit exceeded");
+    this.usedActions += 1;
+    try {
+      const result = await this.executor.execute(clone(request));
+      if (result.observed) {
+        text("fault evidenceRef", result.evidenceRef ?? "");
+        return { faultId: request.faultId, requested: true, observed: true, status: "OBSERVED", evidenceRef: result.evidenceRef, reason: result.reason };
+      }
+      return { faultId: request.faultId, requested: true, observed: false, status: "NOT_OBSERVED", reason: result.reason };
+    } catch (error) {
+      return { faultId: request.faultId, requested: true, observed: false, status: "EVALUATION_FAILED", reason: String(error) };
+    }
+  }
 }
 
 export interface RegressionCase {
@@ -229,7 +262,7 @@ export function createEvaluationRecord(args: {
     ...(args.failure === undefined ? {} : { failure: args.failure }),
   };
   if (jsonBytes(args.evaluationCase.input) > limits.maxEvaluationInputBytes) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Evaluation input exceeds byte limit");
-  if (jsonBytes(recordBase) > limits.maxEvaluationRecords * 1024) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Evaluation record exceeds bounded storage envelope");
+  if (jsonBytes(recordBase) > limits.maxEvaluationRecordBytes) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Evaluation record exceeds byte limit");
   return { evaluationId: digest(recordBase), ...recordBase };
 }
 
@@ -256,34 +289,38 @@ export async function emitObservationSafely(sink: ObservationSink, record: Obser
 }
 
 export class RegressionSuiteRunner {
-  private active = 0;
   constructor(private readonly sink: ObservationSink, private readonly limits: EvaluationObservabilityLimits) {
-    positive("maxEvaluationRecords", limits.maxEvaluationRecords); positive("maxConcurrentEvaluations", limits.maxConcurrentEvaluations);
+    positive("maxEvaluationRecords", limits.maxEvaluationRecords); positive("maxConcurrentEvaluations", limits.maxConcurrentEvaluations); positive("maxEvaluationRecordBytes", limits.maxEvaluationRecordBytes);
   }
   async run(suiteId: string, candidateCommit: string, cases: RegressionCase[], context: NormalizedTraceContext): Promise<RegressionResult> {
     if (cases.length > this.limits.maxEvaluationRecords) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Regression case count exceeds limit");
-    const results: EvaluationRecord[] = [];
-    for (const regressionCase of cases) {
-      if (this.active >= this.limits.maxConcurrentEvaluations) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Regression concurrency bound exceeded");
-      this.active += 1;
-      try {
+    const results = new Array<EvaluationRecord>(cases.length);
+    let nextIndex = 0;
+    const worker = async (): Promise<void> => {
+      while (true) {
+        const index = nextIndex++;
+        if (index >= cases.length) return;
+        const regressionCase = cases[index]!;
         const evaluationCase: EvaluationCase = { suiteId, caseId: regressionCase.id, candidateCommit, environmentFingerprint: context.contextDigest, input: { caseId: regressionCase.id }, expected: true };
         try {
           await regressionCase.run();
           const record = createEvaluationRecord({ evaluationCase, measured: true, status: "PASS", trace: context }, this.limits);
-          results.push(record);
+          results[index] = record;
           await emitObservationSafely(this.sink, createObservation({ kind: "TRACE", name: `evaluation.${regressionCase.id}`, occurredAt: new Date().toISOString(), trace: context, evidenceRefs: [record.evaluationId] }, this.limits));
         } catch (error) {
-          results.push(createEvaluationRecord({ evaluationCase, measured: String(error), status: "FAIL", trace: context, failure: String(error) }, this.limits));
+          results[index] = createEvaluationRecord({ evaluationCase, measured: String(error), status: "FAIL", trace: context, failure: String(error) }, this.limits);
         }
-      } finally { this.active -= 1; }
-    }
+      }
+    };
+    const workerCount = Math.min(this.limits.maxConcurrentEvaluations, cases.length);
+    await Promise.all(Array.from({ length: workerCount }, () => worker()));
+    const completed = results.filter((record): record is EvaluationRecord => record !== undefined);
     return {
-      suiteId, candidateCommit, completed: results.length,
-      passed: results.filter((x) => x.status === "PASS").length,
-      failed: results.filter((x) => x.status === "FAIL").length,
-      indeterminate: results.filter((x) => x.status === "INDETERMINATE" || x.status === "UNAVAILABLE").length,
-      results,
+      suiteId, candidateCommit, completed: completed.length,
+      passed: completed.filter((x) => x.status === "PASS").length,
+      failed: completed.filter((x) => x.status === "FAIL").length,
+      indeterminate: completed.filter((x) => x.status === "INDETERMINATE" || x.status === "UNAVAILABLE").length,
+      results: completed,
     };
   }
 }
@@ -293,5 +330,5 @@ export function assertPromotionEvidence(input: PromotionEvidenceInput): void {
   if (input.evaluations.length === 0) throw new EvaluationObservabilityError("EVIDENCE_INCOMPLETE", "No evaluation evidence supplied");
   if (input.evaluations.some((record) => record.candidateCommit !== input.candidateCommit)) throw new EvaluationObservabilityError("CANDIDATE_MISMATCH", "Evaluation evidence references another candidate");
   if (input.evaluations.some((record) => record.status !== "PASS")) throw new EvaluationObservabilityError("EVIDENCE_INCOMPLETE", "Not all promotion evidence passed");
-  if (input.faults.some((fault) => fault.requested && !fault.observed)) throw new EvaluationObservabilityError("FAULT_NOT_PROVEN", "A requested fault was not proven observed");
+  if (input.faults.some((fault) => fault.requested && (!fault.observed || fault.status !== "OBSERVED" || fault.evidenceRef === undefined || fault.evidenceRef.length === 0))) throw new EvaluationObservabilityError("FAULT_NOT_PROVEN", "A requested fault was not proven observed");
 }

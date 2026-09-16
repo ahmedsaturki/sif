@@ -14,7 +14,7 @@
 - `main` remains at Genesis `f4408d81375786e7a9f0715cf70609d0e257a67c`.
 - `feat/sif-core-0.5.0` remains the preserved kernel baseline.
 - `feat/sif-core-0.6.0-live-postgres` is the live-persistence candidate line.
-- Current candidate commit: `33421ea6855dedd31e5c1357f3aa946cfe863738`.
+- Current candidate commit before this state-document reconciliation: `53e1918afb23c5313be601db76c2ac5d76ad39e8`.
 - PR #2 remains open and unmerged.
 
 ## Verified Kernel
@@ -41,7 +41,7 @@ Implemented and tested:
 
 ## Live PostgreSQL 0.6 Verification
 
-GitHub Actions **run 166** verified the current candidate commit `33421ea6855dedd31e5c1357f3aa946cfe863738` against a real PostgreSQL 16 service. The compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and direct SQL crash-window characterization.
+GitHub Actions **run 169** verified commit `3f1a248b226122696dd612cd7740e3c851c9a31f` against a real PostgreSQL 16.15 service. The compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and direct SQL crash-window characterization.
 
 Verified live scenarios:
 
@@ -53,7 +53,8 @@ Verified live scenarios:
 
 ## Evidence State
 
-- Final candidate CI: PASS — run 166
+- Final verified implementation commit: `3f1a248b226122696dd612cd7740e3c851c9a31f`
+- Final CI: PASS — run 169
 - Artifact identity manifest: PASS
 - Strict committed TypeScript build + tests: PASS
 - Unit tests: 27/27 PASS
@@ -61,7 +62,7 @@ Verified live scenarios:
 - Live PostgreSQL integration: 4/4 PASS
 - Crash-window characterization: PASS
 
-The implementation-level 0.6 persistence milestone is verified on the current candidate.
+The implementation-level 0.6 persistence milestone is verified.
 
 ## Release / Promotion State
 

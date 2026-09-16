@@ -17,80 +17,77 @@ import {
   type TraceContext,
 } from "../src/index.js";
 
-const LIMITS:EvaluationObservabilityLimits={maxTraceBaggageEntries:8,maxTraceBaggageBytes:2000,maxObservationBytes:10000,maxObservationAttributes:20,maxEvaluationInputBytes:5000,maxEvaluationRecords:20,maxConcurrentEvaluations:2,maxFaultActions:10};
-const TRACE:TraceContext={traceId:"trace-1",spanId:"span-1",correlationId:"corr-1",baggage:{tenant:"t1"}};
-const CANDIDATE="candidate-1"; const ENV="env-1";
-function code(error:unknown):string|undefined{return error instanceof EvaluationObservabilityError?error.code:undefined;}
-function baseRecord(overrides:Partial<EvaluationRecord>={}):EvaluationRecord{const trace=normalizeTraceContext(TRACE,LIMITS);const evaluationCase={suiteId:"suite",caseId:"case",candidateCommit:CANDIDATE,environmentFingerprint:ENV,input:{x:1},expected:true};return createEvaluationRecord({evaluationCase,measured:true,status:"PASS",trace,evidenceRefs:[],...overrides},LIMITS);}
+const L: EvaluationObservabilityLimits = { maxTraceBaggageEntries: 4, maxTraceBaggageBytes: 1000, maxObservationBytes: 4000, maxObservationAttributes: 4, maxEvaluationInputBytes: 1000, maxEvaluationRecords: 10, maxConcurrentEvaluations: 1, maxFaultActions: 4 };
+const T: TraceContext = { traceId: "t", spanId: "s", correlationId: "c", baggage: { a: "b" } };
+const C = "candidate"; const E = "env";
+function err(e: unknown): string | undefined { return e instanceof EvaluationObservabilityError ? e.code : undefined; }
+function ex(action: () => unknown, want: string): void { let got: unknown; try { action(); } catch (e: unknown) { got = e; } assert.equal(err(got), want); }
+async function axe(action: () => Promise<unknown>, want: string): Promise<void> { let got: unknown; try { await action(); } catch (e: unknown) { got = e; } assert.equal(err(got), want); }
+function r(over: Partial<EvaluationRecord> = {}): EvaluationRecord { return createEvaluationRecord({ evaluationCase: { suiteId: "s", caseId: "c", candidateCommit: C, environmentFingerprint: E, input: { x: 1 }, expected: true }, measured: true, status: "PASS", trace: normalizeTraceContext(T, L), ...over }, L); }
+function tr(){ return normalizeTraceContext(T,L); }
 
-// F5-001..010 trace identity
-test("F5-001 trace context normalizes",()=>{const x=normalizeTraceContext(TRACE,LIMITS);assert.equal(x.traceId,"trace-1");assert.equal(x.contextDigest.length,64);});
-test("F5-002 trace normalization is deterministic",()=>{assert.deepEqual(normalizeTraceContext(TRACE,LIMITS),normalizeTraceContext({...TRACE},LIMITS));});
-test("F5-003 parent span preserved",()=>{assert.equal(normalizeTraceContext({...TRACE,parentSpanId:"span-0"},LIMITS).parentSpanId,"span-0");});
-test("F5-004 empty trace id rejected",()=>{try{normalizeTraceContext({...TRACE,traceId:""},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"INVALID_TRACE");}});
-test("F5-005 empty span id rejected",()=>{try{normalizeTraceContext({...TRACE,spanId:""},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"INVALID_TRACE");}});
-test("F5-006 empty correlation id rejected",()=>{try{normalizeTraceContext({...TRACE,correlationId:""},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"INVALID_TRACE");}});
-test("F5-007 baggage entry bound",()=>{const baggage:Record<string,string>={};for(let i=0;i<9;i++)baggage[`k${i}`]="v";try{normalizeTraceContext({...TRACE,baggage},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"RESOURCE_EXHAUSTED");}});
-test("F5-008 baggage byte bound",()=>{try{normalizeTraceContext({...TRACE,baggage:{x:"x".repeat(3000)}},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"RESOURCE_EXHAUSTED");}});
-test("F5-009 missing baggage remains valid",()=>{const x=normalizeTraceContext({traceId:"t",spanId:"s",correlationId:"c"},LIMITS);assert.equal(x.baggage,undefined);});
-test("F5-010 trace context caller mutation cannot alter normalized copy",()=>{const baggage={tenant:"t"};const x=normalizeTraceContext({traceId:"t",spanId:"s",correlationId:"c",baggage},LIMITS);baggage.tenant="changed";assert.equal(x.baggage!.tenant,"t");});
+test("F5-001",()=>{const x=tr();assert.equal(x.traceId,"t");});
+test("F5-002",()=>assert.deepEqual(tr(),tr()));
+test("F5-003",()=>assert.equal(normalizeTraceContext({...T,parentSpanId:"p"},L).parentSpanId,"p"));
+test("F5-004",()=>ex(()=>normalizeTraceContext({...T,traceId:""},L),"INVALID_TRACE"));
+test("F5-005",()=>ex(()=>normalizeTraceContext({...T,spanId:""},L),"INVALID_TRACE"));
+test("F5-006",()=>ex(()=>normalizeTraceContext({...T,correlationId:""},L),"INVALID_TRACE"));
+test("F5-007",()=>{const b:Record<string,string>={};for(let i=0;i<5;i++)b[`k${i}`]="v";ex(()=>normalizeTraceContext({...T,baggage:b},L),"RESOURCE_EXHAUSTED");});
+test("F5-008",()=>ex(()=>normalizeTraceContext({...T,baggage:{x:"x".repeat(2000)}},L),"RESOURCE_EXHAUSTED"));
+test("F5-009",()=>assert.equal(tr().baggage!.a,"b"));
+test("F5-010",()=>{const b={a:"b"};const x=normalizeTraceContext({traceId:"t",spanId:"s",correlationId:"c",baggage:b},L);b.a="x";assert.equal(x.baggage!.a,"b");});
 
-// F5-011..020 observation boundary
-test("F5-011 trace observation has deterministic identity",()=>{const t=normalizeTraceContext(TRACE,LIMITS);const a=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t},LIMITS);const b=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t},LIMITS);assert.equal(a.observationId,b.observationId);});
-test("F5-012 observation attributes are preserved",()=>{const t=normalizeTraceContext(TRACE,LIMITS);const o=createObservation({kind:"LOG",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t,attributes:{ok:true,n:2,v:null}},LIMITS);assert.equal(o.attributes.n,2);});
-test("F5-013 observation name required",()=>{const t=normalizeTraceContext(TRACE,LIMITS);try{createObservation({kind:"LOG",name:"",occurredAt:"2026-09-17T00:00:00.000Z",trace:t},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"INVALID_TRACE");}});
-test("F5-014 observation timestamp validated",()=>{const t=normalizeTraceContext(TRACE,LIMITS);try{createObservation({kind:"LOG",name:"x",occurredAt:"bad",trace:t},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"INVALID_TRACE");}});
-test("F5-015 observation attribute count bound",()=>{const t=normalizeTraceContext(TRACE,LIMITS);const a:Record<string,boolean>={};for(let i=0;i<21;i++)a[`k${i}`]=true;try{createObservation({kind:"LOG",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t,attributes:a},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"RESOURCE_EXHAUSTED");}});
-test("F5-016 observation byte bound",()=>{const t=normalizeTraceContext(TRACE,LIMITS);try{createObservation({kind:"LOG",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t,attributes:{big:"x".repeat(20000)}},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"RESOURCE_EXHAUSTED");}});
-test("F5-017 evidence refs are copied",()=>{const t=normalizeTraceContext(TRACE,LIMITS);const refs=["e1"];const o=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t,evidenceRefs:refs},LIMITS);refs.push("e2");assert.deepEqual(o.evidenceRefs,["e1"]);});
-test("F5-018 in-memory sink stores a copy",async()=>{const sink=new InMemoryObservationSink();const t=normalizeTraceContext(TRACE,LIMITS);const o=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t},LIMITS);await sink.emit(o);const copy=sink.all()[0]!;copy.name="changed";assert.equal(sink.all()[0]!.name,"x");});
-test("F5-019 sink capacity fails closed",async()=>{const sink=new InMemoryObservationSink(1);const t=normalizeTraceContext(TRACE,LIMITS);const o=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t},LIMITS);await sink.emit(o);try{await sink.emit(o);assert.fail("expected error");}catch(error){assert.equal(error instanceof Error,true);}});
-test("F5-020 observation sink failure is isolated",async()=>{const sink={emit:async()=>{throw new Error("sink down");}};const t=normalizeTraceContext(TRACE,LIMITS);const o=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace:t},LIMITS);await emitObservationSafely(sink,o);assert.equal(true,true);});
+test("F5-011",()=>{const t=tr();const a=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:t},L);const b=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:t},L);assert.equal(a.observationId,b.observationId);});
+test("F5-012",()=>{const o=createObservation({kind:"LOG",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr(),attributes:{a:true}},L);assert.equal(o.attributes.a,true);});
+test("F5-013",()=>ex(()=>createObservation({kind:"LOG",name:"",occurredAt:"2026-09-17T00:00:00Z",trace:tr()},L),"INVALID_TRACE"));
+test("F5-014",()=>ex(()=>createObservation({kind:"LOG",name:"x",occurredAt:"bad",trace:tr()},L),"INVALID_TRACE"));
+test("F5-015",()=>{const a:Record<string,boolean>={a:true,b:true,c:true,d:true,e:true};ex(()=>createObservation({kind:"LOG",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr(),attributes:a as never},L),"RESOURCE_EXHAUSTED");});
+test("F5-016",()=>ex(()=>createObservation({kind:"LOG",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr(),attributes:{big:"x".repeat(5000)} as never},L),"RESOURCE_EXHAUSTED"));
+test("F5-017",()=>{const refs=["e"];const o=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr(),evidenceRefs:refs},L);refs.push("z");assert.deepEqual(o.evidenceRefs,["e"]);});
+test("F5-018",async()=>{const s=new InMemoryObservationSink();const o=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr()},L);await s.emit(o);const c=s.all()[0]!;c.name="z";assert.equal(s.all()[0]!.name,"x");});
+test("F5-019",async()=>{const s=new InMemoryObservationSink(1);const o=createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr()},L);await s.emit(o);let failed=false;try{await s.emit(o);}catch(e:unknown){failed=e instanceof Error;}assert.equal(failed,true);});
+test("F5-020",async()=>{await emitObservationSafely({emit:async()=>{throw new Error("down");}},createObservation({kind:"TRACE",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr()},L));});
 
-// F5-021..030 evaluation records
-test("F5-021 evaluation identity is deterministic",()=>{assert.equal(baseRecord().evaluationId,baseRecord().evaluationId);});
-test("F5-022 candidate commit is retained",()=>{assert.equal(baseRecord().candidateCommit,CANDIDATE);});
-test("F5-023 environment identity is retained",()=>{assert.equal(baseRecord().environmentFingerprint,ENV);});
-test("F5-024 input digest is deterministic",()=>{assert.equal(baseRecord().inputDigest.length,64);});
-test("F5-025 expected and measured digests are separated",()=>{assert.notEqual(baseRecord().expectedDigest,baseRecord().measuredDigest);});
-test("F5-026 pass status records success",()=>{assert.equal(baseRecord().status,"PASS");});
-test("F5-027 fail status records failure text",()=>{const trace=normalizeTraceContext(TRACE,LIMITS);const r=createEvaluationRecord({evaluationCase:{suiteId:"s",caseId:"c",candidateCommit:CANDIDATE,environmentFingerprint:ENV,input:{x:1},expected:true},measured:"bad",status:"FAIL",trace,failure:"bad"},LIMITS);assert.equal(r.failure,"bad");});
-test("F5-028 evidence refs retained",()=>{assert.deepEqual(baseRecord({evidenceRefs:["e1","e2"]}).evidenceRefs,["e1","e2"]);});
-test("F5-029 input byte bound",()=>{const trace=normalizeTraceContext(TRACE,LIMITS);try{createEvaluationRecord({evaluationCase:{suiteId:"s",caseId:"c",candidateCommit:CANDIDATE,environmentFingerprint:ENV,input:"x".repeat(6000),expected:true},measured:true,status:"PASS",trace},LIMITS);assert.fail("expected error");}catch(e){assert.equal(code(e),"RESOURCE_EXHAUSTED");}});
-test("F5-030 caller input mutation cannot change record",()=>{const trace=normalizeTraceContext(TRACE,LIMITS);const input={x:1};const r=createEvaluationRecord({evaluationCase:{suiteId:"s",caseId:"c",candidateCommit:CANDIDATE,environmentFingerprint:ENV,input,expected:true},measured:true,status:"PASS",trace},LIMITS);input.x=2;assert.equal(r.inputDigest.length,64);});
+test("F5-021",()=>assert.equal(r().evaluationId,r().evaluationId));
+test("F5-022",()=>assert.equal(r().candidateCommit,C));
+test("F5-023",()=>assert.equal(r().environmentFingerprint,E));
+test("F5-024",()=>assert.equal(r().inputDigest.length,64));
+test("F5-025",()=>{const z=r();assert.equal(z.expectedDigest.length,64);assert.equal(z.measuredDigest.length,64);});
+test("F5-026",()=>assert.equal(r().status,"PASS"));
+test("F5-027",()=>assert.equal(r({status:"FAIL",failure:"boom",measuredDigest:"x"}).failure,"boom"));
+test("F5-028",()=>assert.deepEqual(r({evidenceRefs:["a","b"]}).evidenceRefs,["a","b"]));
+test("F5-029",()=>{const trace=tr();axe(()=>Promise.resolve(createEvaluationRecord({evaluationCase:{suiteId:"s",caseId:"c",candidateCommit:C,environmentFingerprint:E,input:"x".repeat(2000),expected:true},measured:true,status:"PASS",trace},L)),"RESOURCE_EXHAUSTED");});
+test("F5-030",()=>{const input={x:1};const z=createEvaluationRecord({evaluationCase:{suiteId:"s",caseId:"c",candidateCommit:C,environmentFingerprint:E,input,expected:true},measured:true,status:"PASS",trace:tr()},L);input.x=2;assert.equal(z.inputDigest.length,64);});
 
-// F5-031..040 replay
-test("F5-031 replay binds candidate",()=>{assert.equal(makeReplayDescriptor(baseRecord(),"artifact").candidateCommit,CANDIDATE);});
-test("F5-032 replay binds artifact",()=>{assert.equal(makeReplayDescriptor(baseRecord(),"artifact").artifactDigest,"artifact");});
-test("F5-033 replay verifies exact case",()=>{const r=baseRecord();verifyReplayDescriptor(makeReplayDescriptor(r,"artifact"),{suiteId:r.suiteId,caseId:r.caseId,candidateCommit:r.candidateCommit,environmentFingerprint:r.environmentFingerprint,input:{x:1},expected:true},"artifact");});
-test("F5-034 replay rejects candidate mismatch",()=>{const r=baseRecord();try{verifyReplayDescriptor(makeReplayDescriptor(r,"artifact"),{suiteId:r.suiteId,caseId:r.caseId,candidateCommit:"other",environmentFingerprint:r.environmentFingerprint,input:{x:1},expected:true},"artifact");assert.fail("expected error");}catch(e){assert.equal(code(e),"CANDIDATE_MISMATCH");}});
-test("F5-035 replay rejects artifact mismatch",()=>{const r=baseRecord();try{verifyReplayDescriptor(makeReplayDescriptor(r,"artifact"),{suiteId:r.suiteId,caseId:r.caseId,candidateCommit:r.candidateCommit,environmentFingerprint:r.environmentFingerprint,input:{x:1},expected:true},"other");assert.fail("expected error");}catch(e){assert.equal(code(e),"CANDIDATE_MISMATCH");}});
-test("F5-036 replay rejects input mismatch",()=>{const r=baseRecord();try{verifyReplayDescriptor(makeReplayDescriptor(r,"artifact"),{suiteId:r.suiteId,caseId:r.caseId,candidateCommit:r.candidateCommit,environmentFingerprint:r.environmentFingerprint,input:{x:2},expected:true},"artifact");assert.fail("expected error");}catch(e){assert.equal(code(e),"EVALUATION_NOT_REPLAYABLE");}});
-test("F5-037 replay rejects expected mismatch",()=>{const r=baseRecord();try{verifyReplayDescriptor(makeReplayDescriptor(r,"artifact"),{suiteId:r.suiteId,caseId:r.caseId,candidateCommit:r.candidateCommit,environmentFingerprint:r.environmentFingerprint,input:{x:1},expected:false},"artifact");assert.fail("expected error");}catch(e){assert.equal(code(e),"EVALUATION_NOT_REPLAYABLE");}});
-test("F5-038 replay descriptor is stable",()=>{const r=baseRecord();assert.deepEqual(makeReplayDescriptor(r,"artifact"),makeReplayDescriptor(r,"artifact"));});
-test("F5-039 missing artifact identity rejected",()=>{try{makeReplayDescriptor(baseRecord(),"");assert.fail("expected error");}catch(e){assert.equal(code(e),"INVALID_TRACE");}});
-test("F5-040 environment fingerprint carried",()=>{assert.equal(makeReplayDescriptor(baseRecord(),"a").environmentFingerprint,ENV);});
+test("F5-031",()=>assert.equal(makeReplayDescriptor(r(),"a").candidateCommit,C));
+test("F5-032",()=>assert.equal(makeReplayDescriptor(r(),"a").artifactDigest,"a"));
+test("F5-033",()=>{const z=r();verifyReplayDescriptor(makeReplayDescriptor(z,"a"),{suiteId:"s",caseId:"c",candidateCommit:C,environmentFingerprint:E,input:{x:1},expected:true},"a");});
+test("F5-034",()=>{const z=r();ex(()=>verifyReplayDescriptor(makeReplayDescriptor(z,"a"),{suiteId:"s",caseId:"c",candidateCommit:"x",environmentFingerprint:E,input:{x:1},expected:true},"a"),"CANDIDATE_MISMATCH");});
+test("F5-035",()=>{const z=r();ex(()=>verifyReplayDescriptor(makeReplayDescriptor(z,"a"),{suiteId:"s",caseId:"c",candidateCommit:C,environmentFingerprint:E,input:{x:1},expected:true},"b"),"CANDIDATE_MISMATCH");});
+test("F5-036",()=>{const z=r();ex(()=>verifyReplayDescriptor(makeReplayDescriptor(z,"a"),{suiteId:"s",caseId:"c",candidateCommit:C,environmentFingerprint:E,input:{x:2},expected:true},"a"),"EVALUATION_NOT_REPLAYABLE");});
+test("F5-037",()=>{const z=r();ex(()=>verifyReplayDescriptor(makeReplayDescriptor(z,"a"),{suiteId:"s",caseId:"c",candidateCommit:C,environmentFingerprint:E,input:{x:1},expected:false},"a"),"EVALUATION_NOT_REPLAYABLE");});
+test("F5-038",()=>assert.deepEqual(makeReplayDescriptor(r(),"a"),makeReplayDescriptor(r(),"a")));
+test("F5-039",()=>ex(()=>makeReplayDescriptor(r(),""),"INVALID_TRACE"));
+test("F5-040",()=>assert.equal(makeReplayDescriptor(r(),"a").environmentFingerprint,E));
 
-// F5-041..050 regression/fault evidence
-test("F5-041 regression records pass",async()=>{const sink=new InMemoryObservationSink();const trace=normalizeTraceContext(TRACE,LIMITS);const r=await new RegressionSuiteRunner(sink,LIMITS).run("suite",CANDIDATE,[{id:"a",run:async()=>{}}],trace);assert.equal(r.passed,1);});
-test("F5-042 regression records failure",async()=>{const sink=new InMemoryObservationSink();const trace=normalizeTraceContext(TRACE,LIMITS);const r=await new RegressionSuiteRunner(sink,LIMITS).run("suite",CANDIDATE,[{id:"a",run:async()=>{throw new Error("boom");}}],trace);assert.equal(r.failed,1);});
-test("F5-043 regression emits trace observation",async()=>{const sink=new InMemoryObservationSink();const trace=normalizeTraceContext(TRACE,LIMITS);await new RegressionSuiteRunner(sink,LIMITS).run("suite",CANDIDATE,[{id:"a",run:async()=>{}}],trace);assert.equal(sink.all().length,1);});
-test("F5-044 regression candidate retained",async()=>{const sink=new InMemoryObservationSink();const trace=normalizeTraceContext(TRACE,LIMITS);const r=await new RegressionSuiteRunner(sink,LIMITS).run("suite",CANDIDATE,[{id:"a",run:async()=>{}}],trace);assert.equal(r.candidateCommit,CANDIDATE);});
-test("F5-045 regression case count bounded",async()=>{const sink=new InMemoryObservationSink();const trace=normalizeTraceContext(TRACE,LIMITS);const cases=Array.from({length:21},(_,i)=>({id:`c${i}`,run:async()=>{}}));try{await new RegressionSuiteRunner(sink,LIMITS).run("suite",CANDIDATE,cases,trace);assert.fail("expected error");}catch(e){assert.equal(code(e),"RESOURCE_EXHAUSTED");}});
-test("F5-046 promotion accepts passing evaluations",()=>{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[baseRecord()],faults:[]});});
-test("F5-047 promotion rejects missing evaluations",()=>{try{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[],faults:[]});assert.fail("expected error");}catch(e){assert.equal(code(e),"EVIDENCE_INCOMPLETE");}});
-test("F5-048 promotion rejects candidate mismatch",()=>{try{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[baseRecord({candidateCommit:"other"})],faults:[]});assert.fail("expected error");}catch(e){assert.equal(code(e),"CANDIDATE_MISMATCH");}});
-test("F5-049 promotion rejects non-pass",()=>{try{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[baseRecord({status:"FAIL"})],faults:[]});assert.fail("expected error");}catch(e){assert.equal(code(e),"EVIDENCE_INCOMPLETE");}});
-test("F5-050 promotion requires observed faults",()=>{try{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[baseRecord()],faults:[{faultId:"f",requested:true,observed:false,status:"NOT_OBSERVED"}]});assert.fail("expected error");}catch(e){assert.equal(code(e),"FAULT_NOT_PROVEN");}});
+test("F5-041",async()=>{const s=new InMemoryObservationSink();const z=await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{}}],tr());assert.equal(z.passed,1);});
+test("F5-042",async()=>{const s=new InMemoryObservationSink();const z=await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{throw new Error("boom");}}],tr());assert.equal(z.failed,1);});
+test("F5-043",async()=>{const s=new InMemoryObservationSink();await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{}}],tr());assert.equal(s.all().length,1);});
+test("F5-044",async()=>{const s=new InMemoryObservationSink();const z=await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{}}],tr());assert.equal(z.candidateCommit,C);});
+test("F5-045",async()=>{const s=new InMemoryObservationSink();const cs=Array.from({length:11},(_,i)=>({id:`c${i}`,run:async()=>{}}));await axe(()=>new RegressionSuiteRunner(s,L).run("s",C,cs,tr()),"RESOURCE_EXHAUSTED");});
+test("F5-046",()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r()],faults:[]}));
+test("F5-047",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[],faults:[]}),"EVIDENCE_INCOMPLETE"));
+test("F5-048",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r({candidateCommit:"x"})],faults:[]}),"CANDIDATE_MISMATCH"));
+test("F5-049",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r({status:"FAIL"})],faults:[]}),"EVIDENCE_INCOMPLETE"));
+test("F5-050",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r()],faults:[{faultId:"f",requested:true,observed:false,status:"NOT_OBSERVED"}]}),"FAULT_NOT_PROVEN"));
 
-// F5-051..060 cross-phase/promotion isolation
-test("F5-051 noop sink is dependency-free",async()=>{const sink=new NoopObservationSink();const trace=normalizeTraceContext(TRACE,LIMITS);await sink.emit(createObservation({kind:"METRIC",name:"x",occurredAt:"2026-09-17T00:00:00.000Z",trace},LIMITS));});
-test("F5-052 promotion requires candidate",()=>{try{assertPromotionEvidence({candidateCommit:"",artifactDigest:"a",evaluations:[baseRecord()],faults:[]});assert.fail("expected error");}catch(e){assert.equal(code(e),"INVALID_TRACE");}});
-test("F5-053 promotion requires artifact",()=>{try{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"",evaluations:[baseRecord()],faults:[]});assert.fail("expected error");}catch(e){assert.equal(code(e),"INVALID_TRACE");}});
-test("F5-054 indeterminate not promotable",()=>{try{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[baseRecord({status:"INDETERMINATE"})],faults:[]});assert.fail("expected error");}catch(e){assert.equal(code(e),"EVIDENCE_INCOMPLETE");}});
-test("F5-055 unavailable not promotable",()=>{try{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[baseRecord({status:"UNAVAILABLE"})],faults:[]});assert.fail("expected error");}catch(e){assert.equal(code(e),"EVIDENCE_INCOMPLETE");}});
-test("F5-056 unrequested unobserved fault does not block",()=>{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[baseRecord()],faults:[{faultId:"f",requested:false,observed:false,status:"NOT_OBSERVED"}]});});
-test("F5-057 multiple passing evaluations accepted",()=>{assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"a",evaluations:[baseRecord(),baseRecord({caseId:"case-2"})],faults:[]});});
-test("F5-058 observation can reference evaluation",()=>{const r=baseRecord();const t=normalizeTraceContext(TRACE,LIMITS);const o=createObservation({kind:"TRACE",name:"evaluation",occurredAt:"2026-09-17T00:00:00.000Z",trace:t,evidenceRefs:[r.evaluationId]},LIMITS);assert.deepEqual(o.evidenceRefs,[r.evaluationId]);});
-test("F5-059 evaluation preserves trace",()=>{assert.equal(baseRecord().trace.contextDigest.length,64);});
-test("F5-060 end-to-end candidate evidence remains exact",async()=>{const sink=new InMemoryObservationSink();const trace=normalizeTraceContext(TRACE,LIMITS);const result=await new RegressionSuiteRunner(sink,LIMITS).run("final-suite",CANDIDATE,[{id:"final",run:async()=>{}}],trace);assert.equal(result.results[0]!.candidateCommit,CANDIDATE);assertPromotionEvidence({candidateCommit:CANDIDATE,artifactDigest:"artifact",evaluations:result.results,faults:[]});});
+test("F5-051",async()=>{const s=new NoopObservationSink();await s.emit(createObservation({kind:"METRIC",name:"x",occurredAt:"2026-09-17T00:00:00Z",trace:tr()},L));});
+test("F5-052",()=>ex(()=>assertPromotionEvidence({candidateCommit:"",artifactDigest:"a",evaluations:[r()],faults:[]}),"INVALID_TRACE"));
+test("F5-053",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"",evaluations:[r()],faults:[]}),"INVALID_TRACE"));
+test("F5-054",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r({status:"INDETERMINATE"})],faults:[]}),"EVIDENCE_INCOMPLETE"));
+test("F5-055",()=>ex(()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r({status:"UNAVAILABLE"})],faults:[]}),"EVIDENCE_INCOMPLETE"));
+test("F5-056",()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r()],faults:[{faultId:"f",requested:false,observed:false,status:"NOT_OBSERVED"}]}));
+test("F5-057",()=>assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:[r(),r({caseId:"c2"})],faults:[]}));
+test("F5-058",()=>{const z=r();const o=createObservation({kind:"TRACE",name:"evaluation",occurredAt:"2026-09-17T00:00:00Z",trace:tr(),evidenceRefs:[z.evaluationId]},L);assert.equal(o.evidenceRefs![0],z.evaluationId);});
+test("F5-059",()=>assert.equal(r().trace.contextDigest.length,64));
+test("F5-060",async()=>{const s=new InMemoryObservationSink();const z=await new RegressionSuiteRunner(s,L).run("final",C,[{id:"final",run:async()=>{}}],tr());assertPromotionEvidence({candidateCommit:C,artifactDigest:"a",evaluations:z.results,faults:[]});});

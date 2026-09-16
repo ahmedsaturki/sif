@@ -17,22 +17,22 @@
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run 143 executed the committed final-head implementation against a real PostgreSQL 16 service and passed every persistence gate in the workflow.
+GitHub Actions run 169 executed verified code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f` against a real PostgreSQL 16.15 service and passed every persistence gate in the workflow.
 
 Verified live scenarios:
 
-1. **Concurrent same-stream append** — two independent PostgreSQL connections contend for version 1; the `sif_stream_heads ... FOR UPDATE` serialization point accepts exactly one writer, leaving one event and one durable outbox row.
+1. **Concurrent same-stream append** — two independent PostgreSQL connections contend for the same expected version; the `sif_stream_heads ... FOR UPDATE` serialization point accepts exactly one writer, leaving one event and one durable outbox row.
 2. **Atomic rollback** — a constraint failure during a transactional append leaves event, stream-head update, and outbox state rolled back together.
 3. **Projection checkpoint durability** — a checkpoint persists and round-trips deterministically through PostgreSQL.
 4. **Outbox lease lifecycle** — one worker owns the item, another worker is blocked while the lease is valid, the item is reclaimed after expiry, stale-owner delivery is fenced, and the new owner can mark it delivered.
 5. **Crash-window characterization** — terminating a PostgreSQL backend before commit leaves no partial stream/event/outbox state and permits retry; terminating the backend after commit but before acknowledgement preserves the committed event and stream head, with no outbox item in the direct SQL scenario.
 
-## Final-head CI evidence
+## Final candidate CI evidence
 
 ```text
-Final verified commit: b01ba3f56aa7cd20436ddec8e0628944e99c6b51
-GitHub Actions run: 143
-PostgreSQL service: 16
+Verified code candidate: 3f1a248b226122696dd612cd7740e3c851c9a31f
+GitHub Actions run: 169
+PostgreSQL service: 16.15
 Artifact identity: PASS
 Strict committed build + tests: PASS
 Unit tests: 27/27 PASS

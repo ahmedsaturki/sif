@@ -53,7 +53,7 @@ Verified live scenarios:
 - GitHub Actions live PostgreSQL integration: 4/4 PASS
 - GitHub Actions crash-window characterization: PASS
 
-Run 93 is the implementation verification baseline. Final documentation/evidence commits were added afterward, so fresh CI on the final branch HEAD is required before promotion.
+Run 93 verified the implementation commit. Later commits are documentation/evidence-only; a fresh CI run on the final branch HEAD is required before promotion.
 
 ## Explicit Unknown / Not Claimed
 

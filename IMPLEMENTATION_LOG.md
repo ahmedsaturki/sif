@@ -33,3 +33,21 @@ Consumer-side event identity is persisted so duplicate delivery does not imply d
 The project records what was actually run and separates local unit/integration contract verification, live infrastructure verification, and future integration requirements.
 
 Unknown infrastructure is never represented as verified implementation.
+
+## 0.6 Live PostgreSQL Milestone
+
+- Added dependency-free PostgreSQL wire-protocol integration harness.
+- Added real PostgreSQL 16 service to GitHub Actions.
+- Verified concurrent same-stream transactional serialization.
+- Verified atomic rollback across event, stream head, and outbox on constraint failure.
+- Verified durable projection checkpoint persistence and deterministic round-trip.
+- Verified outbox lease exclusivity, expiry/reclaim, stale-owner fencing, and successful current-owner delivery.
+- Added direct PostgreSQL crash-window characterization for before-commit and after-commit termination windows.
+- Detected and fixed nondeterministic assumptions in the live outbox test; final verification uses one destination and deterministic sequencing.
+- Detected and fixed SQL syntax in crash-window verification queries.
+- GitHub Actions run 93 passed build, unit tests, schema bootstrap, 4/4 live PostgreSQL scenarios, and crash-window characterization.
+- Refreshed package/root documentation and added a dedicated `RELEASE_EVIDENCE_0.6.0.md` record.
+
+### Release Boundary
+
+SIF Core package version remains `0.5.0`. A future `0.6.0` artifact release still requires fresh artifacts built from the final promotion commit, SHA-256 identities, byte-preserving preservation, and independent verification. CI success does not imply merge or binary publication.

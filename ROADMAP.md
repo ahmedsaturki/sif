@@ -9,11 +9,13 @@ Event sourcing, integrity, CAS, authority, policy, provenance, persistence, outb
 Status: verified kernel baseline preserved.
 
 ## Phase 2 — Live Persistence 0.6
-Real PostgreSQL integration, migration harness, concurrency tests, crash recovery, durable projections and production-style worker lifecycle.
+Real PostgreSQL integration, migration harness, concurrency tests, crash-window characterization, durable projections and production-style worker lifecycle.
 
-Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16**. GitHub Actions run 93 passed strict build, 27/27 unit tests, schema bootstrap, four live integration scenarios, and explicit before-commit/after-commit backend termination characterization. Subsequent changes only refresh documentation/evidence, so final-head CI remains the last promotion gate before artifacts.
+Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16**. GitHub Actions run 143 passed strict build, 27/27 unit tests, schema bootstrap, four live integration scenarios, and explicit before-commit/after-commit backend termination characterization on candidate `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`.
 
 Release boundary remains explicit: arbitrary crash-point coverage and full recovery/reconciliation after external database/network faults are not claimed. Production-scale PostgreSQL performance/HA, network-partition recovery, secure federation, distributed consensus, and exactly-once external effects remain later-stage work.
+
+The remaining 0.6 release gate is binary artifact production and independent verification; the package version is intentionally still `0.5.0`.
 
 ## Phase 3 — Secure Federation
 SPIFFE/mTLS boundary, trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation.

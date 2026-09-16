@@ -6,8 +6,12 @@ Repository identity, architecture record, verification discipline.
 ## Phase 1 — Verified Kernel 0.1–0.5
 Event sourcing, integrity, CAS, authority, policy, provenance, persistence, outbox/inbox, workers.
 
+Status: verified kernel baseline preserved.
+
 ## Phase 2 — Live Persistence 0.6
 Real PostgreSQL integration, migration harness, concurrency tests, crash recovery, durable projections and production-style worker lifecycle.
+
+Current status: **live PostgreSQL connectivity and concurrent same-stream serialization verified** against PostgreSQL 16 in GitHub Actions. Remaining 0.6 gates: crash-after-commit/before-commit characterization, recovery/reconciliation scenarios, durable projection lifecycle, and production-style worker lifecycle verification.
 
 ## Phase 3 — Secure Federation
 SPIFFE/mTLS boundary, trust bundles, capability negotiation, signed federated messages/events, replay-safe reconciliation.

@@ -26,7 +26,7 @@ The PostgreSQL schema lives in `sql/postgres-schema.sql`.
 
 ## Live verification
 
-GitHub Actions run 143 exercises the committed implementation against a real PostgreSQL 16 service. The live harness uses two independent database connections for same-stream contention and directly verifies transaction, checkpoint, outbox lease, reclaim, owner-fencing, and crash-window behavior.
+GitHub Actions run 169 exercises the committed candidate `3f1a248b226122696dd612cd7740e3c851c9a31f` against a real PostgreSQL 16.15 service. The live harness uses two independent database connections for same-stream contention and directly verifies transaction, checkpoint, outbox lease, reclaim, owner-fencing, and crash-window behavior.
 
 Verified scenarios are documented in `RELEASE_EVIDENCE_0.6.0.md` and `VERIFICATION_MATRIX.md`. This is implementation-level integration evidence, not a claim of arbitrary production failure coverage.
 

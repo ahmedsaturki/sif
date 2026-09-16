@@ -15,7 +15,7 @@
 - `feat/sif-core-0.5.0` remains the preserved kernel baseline.
 - `feat/sif-core-0.6.0-live-postgres` remains the preserved Phase 2/live-persistence candidate line at `0ede9babeba1303c44ea592812a48bcd874db1e4`.
 - `feat/sif-core-0.7.0-secure-federation` is the current Phase 3 candidate line.
-- Current Phase 3 exact candidate HEAD: `6bb4d5ba6373b628b7ddc2763e7dad008050e8ea`.
+- Current Phase 3 exact candidate HEAD: `20ac532932ededa4357b43887584982a3e6fd50c`.
 - PR #3 is open, draft, unmerged, and mergeable; it targets `feat/sif-core-0.6.0-live-postgres`.
 - The candidate line is evidence-gated; the latest successful exact-head CI run is the authoritative verification record for the current candidate.
 
@@ -81,12 +81,12 @@ Implemented slices on the current candidate include:
 - F3-050 remains provider-neutral: encrypted transport metadata does not establish trust by itself.
 
 ## Current Exact Candidate Artifact
-- Workflow Run: `#393`
-- Run ID: `35146395812`
-- Candidate SHA: `6bb4d5ba6373b628b7ddc2763e7dad008050e8ea`
-- Artifact: `sif-core-unpublished-candidate-6bb4d5ba6373b628b7ddc2763e7dad008050e8ea`
-- Artifact ID: `10467048705`
-- ZIP SHA-256: `92e80cb7044ab8fe488ce3f136adeeca1d63bf1b7b1de289ab5e0a56535baf0a`
+- Workflow Run: `#394`
+- Run ID: `35148139795`
+- Candidate SHA: `20ac532932ededa4357b43887584982a3e6fd50c`
+- Artifact: `sif-core-unpublished-candidate-20ac532932ededa4357b43887584982a3e6fd50c`
+- Artifact ID: `10467704822`
+- ZIP SHA-256: `63e6edcb9f8b211b46217917d9113f031b9e8015ee0551d8623a611a58ad3cd9`
 - Artifact is currently present and unexpired.
 
 ## Release / Promotion State

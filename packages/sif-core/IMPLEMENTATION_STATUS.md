@@ -1,4 +1,4 @@
-# SIF Core 0.5.0 + Live PostgreSQL Verification
+# SIF Core — 0.5.0 Kernel + 0.6 Live PostgreSQL Verification
 
 ## Verified kernel
 
@@ -9,15 +9,15 @@
 - PostgreSQL transactional append uses a dedicated per-stream head row with `FOR UPDATE`, avoiding the empty-set `MAX(...)` locking problem.
 - Event and outbox rows are committed in one transaction.
 - Outbox uniqueness remains `(event_id, destination)`.
-- PostgreSQL schema includes stream heads, events, outbox, artifact metadata, and projection checkpoints.
+- PostgreSQL schema includes stream heads, events, outbox, artifact metadata, inbox, and projection checkpoints.
 - PostgreSQL artifact metadata and projection checkpoint runtime contracts are implemented.
-- Durable PostgreSQL outbox leasing/reclaim semantics are implemented by contract.
+- Durable PostgreSQL outbox leasing/reclaim semantics are implemented.
 - PostgreSQL inbox idempotency with retryable failure cleanup is implemented by contract.
-- Resumable projection runner with persisted checkpoints is implemented by contract.
+- Resumable projection runner with persisted checkpoints is implemented.
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run 93 executed the committed implementation against a real PostgreSQL 16 service and passed every persistence gate in the workflow.
+GitHub Actions run 143 executed the committed final-head implementation against a real PostgreSQL 16 service and passed every persistence gate in the workflow.
 
 Verified live scenarios:
 
@@ -27,10 +27,11 @@ Verified live scenarios:
 4. **Outbox lease lifecycle** — one worker owns the item, another worker is blocked while the lease is valid, the item is reclaimed after expiry, stale-owner delivery is fenced, and the new owner can mark it delivered.
 5. **Crash-window characterization** — terminating a PostgreSQL backend before commit leaves no partial stream/event/outbox state and permits retry; terminating the backend after commit but before acknowledgement preserves the committed event and stream head, with no outbox item in the direct SQL scenario.
 
-## CI evidence
+## Final-head CI evidence
 
 ```text
-Implementation verification baseline: GitHub Actions run 93
+Final verified commit: b01ba3f56aa7cd20436ddec8e0628944e99c6b51
+GitHub Actions run: 143
 PostgreSQL service: 16
 Artifact identity: PASS
 Strict committed build + tests: PASS
@@ -40,7 +41,9 @@ Live PostgreSQL integration: 4/4 PASS
 Crash-window characterization: PASS
 ```
 
-Run 93 verified the implementation commit before the final documentation-only evidence commits. A fresh CI run on the final branch HEAD is required before promotion or artifact publication.
+## Release boundary
+
+The implementation milestone is verified. Package version remains `0.5.0` until a dedicated `0.6.0` artifact set is built from the final promotion commit, SHA-256 hashed, byte-preserved, and independently verified.
 
 ## Explicit boundaries / not claimed
 
@@ -57,5 +60,3 @@ Run 93 verified the implementation commit before the final documentation-only ev
 - production OpenTelemetry export
 
 The durable delivery model remains at-least-once. Exactly-once external effects require transactional participation by the side effect or independently idempotent consumers.
-
-Package version remains `0.5.0` until a dedicated `0.6.0` artifact set is built, SHA-256 hashed, preserved, and independently verified.

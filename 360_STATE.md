@@ -3,7 +3,8 @@
 ## Identity
 - Repository: `ahmedsaturki/sif`
 - Product: Sovereign Intelligence Fabric
-- Current verified kernel baseline: `SIF Core 0.5.0`
+- Current package baseline: `SIF Core 0.5.0`
+- Current integration verification milestone: `0.6 Live PostgreSQL`
 - Implementation language: TypeScript
 - Core dependency policy: dependency-free kernel
 - Primary persistence target: PostgreSQL
@@ -28,55 +29,49 @@ Implemented and tested:
 - explicit per-stream row serialization
 - Ed25519 attestations
 - capability-gated execution
-- self-model verification
-- reconstruction verification
+- self-model/reconstruction verification
 
-## Core Laws
+## Live PostgreSQL 0.6 Verification
 
-- exit status alone never proves success.
-- configured, available, usable, verified and production-safe are different states.
-- events are authoritative history; projections are derived state.
-- historical events are never silently mutated.
-- trust never grants authority.
-- delegation cannot increase authority.
-- remote authority never becomes local authority automatically.
-- memory is not policy.
-- knowledge is not truth.
-- evidence requires provenance, scope and freshness.
-- retry requires idempotency.
-- recovery requires reconciliation.
-- self-reported verification is not independent verification.
-- simulation is not reality.
-- counterfactuals are not history.
-- latest is not necessarily authoritative.
-- external side effects are not exactly-once merely because an outbox is durable.
+GitHub Actions run 64 verified the committed PostgreSQL integration against a real PostgreSQL 16 service. The actual `PostgresTransactionalEventStore` was exercised from independent database connections and the test confirmed that concurrent writers using the same expected stream version are serialized at the `sif_stream_heads` row lock, leaving one version-1 event and one durable outbox row.
 
-## Conceptual Intelligence Layers
+## Evidence State
 
-SIF research has established design layers for systemic, ecological, institutional, federated, long-horizon, reflexive, continuity, knowledge/legacy and semantic intelligence. These are architecture research targets, not all-current runtime features.
+- Local TypeScript build: PASS
+- Local tests: 27/27 PASS
+- GitHub Actions artifact identity: PASS
+- GitHub Actions committed build/test: PASS
+- GitHub Actions live PostgreSQL integration: PASS
 
-## Current Unknowns / Boundaries
+## Explicit Unknown / Not Claimed
 
-1. A live PostgreSQL instance is required for wire-level concurrency validation.
-2. Real federation requires authenticated transport and trust-domain verification.
-3. Policy adapters must be tested against the selected policy engine.
-4. Key custody requires KMS/HSM or an explicitly bounded deployment strategy.
-5. Distributed consensus is not provided by the current kernel.
-6. Production telemetry requires an OpenTelemetry implementation and privacy policy.
-7. External effects need consumer-side idempotency or a shared transaction for stronger guarantees.
+- TLS/mTLS/SPIFFE federation transport
+- OPA/Cedar adapter
+- KMS/HSM secret integration
+- distributed consensus
+- production OpenTelemetry exporter
+- exactly-once external side effects
+- production-scale PostgreSQL performance/HA characterization
 
-## Next Engineering Gates
+## Release / Promotion State
 
-Gate A — repository completeness: every tested source/test file must be present in Git.
+`feat/sif-core-0.5.0` remains the verified kernel baseline.
+`feat/sif-core-0.6.0-live-postgres` contains the live persistence verification milestone.
+Binary package versioning remains 0.5.0 until a new 0.6.0 release artifact is built, hashed, preserved, and independently verified.
 
-Gate B — CI: build and tests run from the committed tree.
+## Governing Laws
 
-Gate C — live PostgreSQL: migrations, concurrency, crash/restart, leases, reclaim and idempotency.
+- configured != live != usable != production-safe
+- exit code != semantic success
+- event history is authoritative
+- snapshots/projections are derived
+- no promotion without reproducible evidence
+- no authority without explicit scope
+- retry requires idempotency
+- recovery requires reconciliation
+- remote evidence does not become local authority automatically
+- conceptual research is not implementation evidence
 
-Gate D — transport/security: authenticated federation boundary.
+## Release Discipline
 
-Gate E — evaluation: replay, fault injection, regression and evidence reports.
-
-## Preservation
-
-The complete local 0.5.0 source tree and npm artifact are preserved in the working artifact set. The repository stores inventories and verification boundaries; binary artifacts should be attached to a release or artifact store when release infrastructure is intentionally established.
+`SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

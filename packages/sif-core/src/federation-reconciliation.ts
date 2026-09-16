@@ -91,12 +91,18 @@ export class InMemoryFederationReconciler {
     }
 
     const ordered = [...input.observations].sort(compareObservations);
+
+    // Validate the full batch before mutating reconciliation state. A malformed
+    // observation must not leave a partially-applied prefix behind.
+    for (const observation of ordered) validateObservation(observation);
+
     const accepted: FederatedObservation[] = [];
     const duplicates: FederatedObservation[] = [];
     const conflicts: ReconciliationConflict[] = [];
+    let cursorBlocked = false;
+    let nextCursor: string | null = null;
 
     for (const observation of ordered) {
-      validateObservation(observation);
       const identity = observationIdentity(observation);
       const existing = this.seen.get(identity);
       const remoteDigest = digestOf(observation);
@@ -104,9 +110,11 @@ export class InMemoryFederationReconciler {
       if (existing) {
         if (digestOf(existing) === remoteDigest && logicalIdentity(existing) === logicalIdentity(observation)) {
           duplicates.push(cloneObservation(observation));
+          if (!cursorBlocked) nextCursor = observation.cursor;
           continue;
         }
         conflicts.push(this.recordConflict(observation, digestOf(existing), remoteDigest, "REMOTE_OBSERVATION_DIVERGENCE"));
+        cursorBlocked = true;
         continue;
       }
 
@@ -114,20 +122,21 @@ export class InMemoryFederationReconciler {
         const localDigest = input.localEventDigests?.get(observation.eventId);
         if (localDigest !== undefined && localDigest !== remoteDigest) {
           conflicts.push(this.recordConflict(observation, localDigest, remoteDigest, "LOCAL_EVENT_DIVERGENCE"));
+          cursorBlocked = true;
           continue;
         }
       }
 
       this.seen.set(identity, cloneObservation(observation));
       accepted.push(cloneObservation(observation));
+      if (!cursorBlocked) nextCursor = observation.cursor;
     }
 
-    const last = ordered[ordered.length - 1];
     return {
       accepted,
       duplicates,
       conflicts,
-      nextCursor: last?.cursor ?? null,
+      nextCursor,
     };
   }
 

@@ -10,6 +10,7 @@ export * from "./federation-capability.js";
 export * from "./federation-admission.js";
 export * from "./federation-reconciliation.js";
 export * from "./federation-retry.js";
+export * from "./federation-transport.js";
 export * from "./federation-inbox.js";
 export * from "./self-model.js";
 export * from "./integrity.js";

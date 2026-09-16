@@ -3,12 +3,12 @@
 ## Candidate
 
 - Branch: `feat/sif-core-0.6.0-live-postgres`
-- Final branch HEAD verified: `31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba`
+- Current candidate commit: `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`
 - Package version: `0.5.0` (release artifact version intentionally not bumped yet)
-- Final-head verification: GitHub Actions run `136`
+- Final-head verification: GitHub Actions run `143`
 - PostgreSQL service: `16`
 
-## Verified final-head gates — run 136
+## Verified final-head gates — run 143
 
 | Gate | Result |
 |---|---|
@@ -53,8 +53,14 @@ Not established by this milestone:
 
 ## Release rule
 
-A `0.6.0` package release requires a fresh source archive and npm package built from the final promotion commit, SHA-256 identities, byte-preserving artifact preservation, and independent verification. CI success alone does not publish or merge the candidate.
+A `0.6.0` package release requires a fresh source archive and npm package built from the promotion commit, SHA-256 identities, byte-preserving artifact preservation, and independent verification. CI success alone does not publish or merge the candidate.
 
-## Final-head rule
+## Current release status
 
-**Satisfied.** GitHub Actions run `136` is a fresh complete verification of the final branch HEAD `31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba`. The remaining release gate is artifact production and independent byte-level verification; the package version remains `0.5.0` until that gate is completed.
+**Implementation verification: complete.**
+
+The final-head gate is satisfied by run `143` on commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`.
+
+**Binary release: pending artifact channel.**
+
+The repository currently contains no 0.6.0 binary artifact set. Run 143 produced no Actions artifacts, and the current execution environment cannot safely clone from `github.com` because DNS resolution is unavailable. Therefore no unverified binary is fabricated or claimed.

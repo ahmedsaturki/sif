@@ -77,24 +77,25 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 ## Current Verification Boundary
 
 Current candidate HEAD:
-`adc52430dd8fb63df8a7d3cce302939a2bc9a95c`
+`ec5634d1333210e68892032ffa1b7af70cb290a5`
 
 Exact-head CI:
-- SIF Core CI Run #369 / `35135466735`
+- SIF Core CI Run #370 / `35135795186`
 - conclusion: `success`
+- exact checkout verified against `ec5634d1333210e68892032ffa1b7af70cb290a5`
 - build and test: 123/123 passed
 - live PostgreSQL integration: 7/7 passed
 - federated inbox crash-window characterization: passed
 - PostgreSQL crash-window characterization: passed
 - unpublished candidate archives built and SHA-256 verified
-- exact candidate archive manifest records `commit=adc52430dd8fb63df8a7d3cce302939a2bc9a95c`
-- candidate artifact uploaded as `sif-core-unpublished-candidate-adc52430dd8fb63df8a7d3cce302939a2bc9a95c`
-- artifact ID: `10462579392`
-- artifact ZIP digest: `sha256:d9fc685a8d81e372467f5310b5ccf2eaaff0bf85de2073fd4b99e7b3ce4490a2`
+- exact candidate archive manifest records `commit=ec5634d1333210e68892032ffa1b7af70cb290a5`
+- candidate artifact uploaded as `sif-core-unpublished-candidate-ec5634d1333210e68892032ffa1b7af70cb290a5`
+- artifact ID: `10462964238`
+- artifact ZIP digest: `sha256:ff22bf80b4a60a9fc29b5c632886494123646753a4ad919aac6392014a45f9e2`
 
 The final committed test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
 
-`PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence. The exact-head Run #369 covered the candidate containing that ledger and the related acceptance tests.
+`PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence. Run #370 covered the exact candidate containing that ledger and the related acceptance tests.
 
 F3-050 remains deliberately bounded to the provider-neutral kernel: the executable test proves that encrypted transport metadata does not authenticate or establish trust for an unauthenticated peer. It does not claim a production TLS/mTLS/SPIFFE deployment.
 

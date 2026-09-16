@@ -23,6 +23,7 @@ class PgWireClient {
     });
     this.socket.on('data', (chunk) => this.onData(chunk));
     this.socket.on('error', (error) => this.rejectActive(error));
+    this.socket.on('close', () => this.rejectActive(new Error('PostgreSQL socket closed')));
     const params = Buffer.from(`user\0${USER}\0database\0${DATABASE}\0\0`);
     const body = Buffer.allocUnsafe(4 + params.length);
     body.writeInt32BE(196608, 0);

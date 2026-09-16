@@ -11,6 +11,7 @@ import {
   canonicalizeFederationEnvelope,
   signFederationEnvelope,
   verifyFederationEnvelope,
+  type FederationEnvelope,
 } from "../src/federation-envelope.js";
 
 type BuildInput = Parameters<typeof createUnsignedFederationEnvelope>[0];
@@ -57,16 +58,20 @@ test("signing contract metadata is explicit and signed", () => {
   assert.equal(unsigned.keyId, unsigned.sender.transportBinding);
 
   const signed = signFederationEnvelope(unsigned, signer);
+  const keyIdTampered = { ...signed, keyId: "different-key" } satisfies FederationEnvelope;
+  const canonicalizationTampered = { ...signed, canonicalizationVersion: "other" } as unknown as FederationEnvelope;
+  const encodingTampered = { ...signed, signatureEncoding: "hex" } as unknown as FederationEnvelope;
+
   assert.throws(
-    () => verifyFederationEnvelope({ ...signed, keyId: "different-key" }, verifier),
+    () => verifyFederationEnvelope(keyIdTampered, verifier),
     (error: unknown) => error instanceof FederationProtocolError && error.code === "INVALID_SIGNATURE",
   );
   assert.throws(
-    () => verifyFederationEnvelope({ ...signed, canonicalizationVersion: "other" as typeof FEDERATION_CANONICALIZATION_VERSION }, verifier),
+    () => verifyFederationEnvelope(canonicalizationTampered, verifier),
     (error: unknown) => error instanceof FederationProtocolError && error.code === "PROTOCOL_INCOMPATIBLE",
   );
   assert.throws(
-    () => verifyFederationEnvelope({ ...signed, signatureEncoding: "hex" as typeof FEDERATION_SIGNATURE_ENCODING }, verifier),
+    () => verifyFederationEnvelope(encodingTampered, verifier),
     (error: unknown) => error instanceof FederationProtocolError && error.code === "PROTOCOL_INCOMPATIBLE",
   );
 });

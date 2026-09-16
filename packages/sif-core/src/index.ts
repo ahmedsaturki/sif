@@ -8,6 +8,7 @@ export * from "./federation-trust.js";
 export * from "./federation-trust-bundle.js";
 export * from "./federation-capability.js";
 export * from "./federation-admission.js";
+export * from "./federation-reconciliation.js";
 export * from "./federation-inbox.js";
 export * from "./self-model.js";
 export * from "./integrity.js";

@@ -15,20 +15,20 @@ The verified kernel includes append-only event streams, deterministic replay, op
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run 93 executed the implementation commit against a real PostgreSQL 16 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
+GitHub Actions run **136** verified the **final branch HEAD `31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba`** against a real PostgreSQL 16 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
 
 The same run also passed direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
 
-The implementation was then followed by documentation/evidence-only commits. A fresh CI run on the final branch HEAD remains required before package artifact publication or promotion.
+The final-head CI requirement is now satisfied. The implementation remains unpromoted because package artifact publication still requires a fresh 0.6.0 artifact set, SHA-256 identities, byte-preserving preservation, and independent verification.
 
 ## Verification
 
 ```text
-Implementation verification baseline (run 93): PASS
-Local TypeScript build: PASS
-Local tests: 27/27 PASS
+Final branch HEAD: 31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba
+GitHub Actions run 136: PASS
+Strict committed TypeScript build + tests: PASS
+Unit tests: 27/27 PASS
 GitHub Actions artifact identity: PASS
-GitHub Actions committed build/test: PASS
 GitHub Actions PostgreSQL schema bootstrap: PASS
 GitHub Actions live PostgreSQL integration: 4/4 PASS
 GitHub Actions crash-window characterization: PASS

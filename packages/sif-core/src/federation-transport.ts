@@ -59,6 +59,10 @@ function assertIso(name: string, value: string): void {
   if (!Number.isFinite(Date.parse(value))) throw new TypeError(`${name} must be a valid ISO date`);
 }
 
+function canonicalPeerId(peer: FederationPeerIdentity): string {
+  return `${peer.domain}/${peer.subject}`;
+}
+
 function cloneNegotiated(negotiated: NegotiatedFederationCapabilities): NegotiatedFederationCapabilities {
   return { ...negotiated, scope: { ...negotiated.scope }, capabilities: negotiated.capabilities.map((item) => ({ ...item })) };
 }
@@ -75,6 +79,9 @@ function validateSession(session: FederationTransportSession): void {
   assertNonEmpty("session.peerIdentity.transportBinding", session.peerIdentity.transportBinding);
   assertIso("session.establishedAt", session.establishedAt);
   if (!session.authenticated) throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Transport session is not authenticated", "peer");
+  if (session.negotiated.scope.peerId !== canonicalPeerId(session.peerIdentity)) {
+    throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Negotiated peer scope does not match the authenticated transport identity", "peer");
+  }
 }
 
 /**
@@ -95,6 +102,9 @@ export class FederationTransportBoundary {
     assertNonEmpty("peer.subject", peer.subject);
     assertNonEmpty("peer.transportBinding", peer.transportBinding);
     assertFederationNegotiationScope(negotiated, scope);
+    if (scope.peerId !== canonicalPeerId(peer)) {
+      throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Negotiated peer scope does not match the requested transport peer", "peer");
+    }
     const session = await this.adapter.open({ localDomain, peer, scope, negotiated });
     validateSession(session);
     if (session.localDomain !== localDomain) {
@@ -104,6 +114,9 @@ export class FederationTransportBoundary {
       throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Transport adapter returned an identity-mismatched session", "peer");
     }
     assertFederationNegotiationScope(session.negotiated, scope);
+    if (session.negotiated.scope.peerId !== canonicalPeerId(session.peerIdentity)) {
+      throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Transport adapter returned a session with an identity-mismatched negotiated peer scope", "peer");
+    }
     return cloneSession(session);
   }
 
@@ -116,6 +129,9 @@ export class FederationTransportBoundary {
   ): Promise<FederationTransportResult> {
     validateSession(session);
     assertFederationNegotiationScope(session.negotiated, scope);
+    if (scope.peerId !== canonicalPeerId(session.peerIdentity)) {
+      throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Transport scope peer does not match the authenticated session identity", "peer");
+    }
     if (envelope.sender.domain !== session.peerIdentity.domain || envelope.sender.subject !== session.peerIdentity.subject || envelope.sender.transportBinding !== session.peerIdentity.transportBinding) {
       throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Envelope sender does not match the authenticated transport peer", "peer");
     }

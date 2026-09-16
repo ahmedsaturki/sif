@@ -3,6 +3,7 @@ export * from "./core.js";
 
 export * from "./persistence.js";
 export * from "./federation.js";
+export * from "./federation-envelope.js";
 export * from "./self-model.js";
 export * from "./integrity.js";
 export * from "./cas.js";

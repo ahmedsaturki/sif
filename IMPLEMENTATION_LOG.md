@@ -45,13 +45,13 @@ Unknown infrastructure is never represented as verified implementation.
 - Added direct PostgreSQL crash-window characterization for before-commit and after-commit termination windows.
 - Detected and fixed nondeterministic assumptions in the live outbox test; final verification uses one destination and deterministic sequencing.
 - Detected and fixed SQL syntax in crash-window verification queries.
-- GitHub Actions run 93 passed build, unit tests, schema bootstrap, 4/4 live PostgreSQL scenarios, and crash-window characterization.
-- Refreshed package/root documentation, roadmap, 360° state, and dedicated release-evidence record.
+- GitHub Actions run 143 passed final-head build, unit tests, schema bootstrap, 4/4 live PostgreSQL scenarios, and crash-window characterization on commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`.
+- Reconciled README, 360° state, verification matrix, architecture, roadmap, implementation status, and release evidence with the final verified state.
 
-### Final-head rule
+### Final verification state
 
-Run 93 verified the implementation commit before documentation/evidence-only commits. The final branch HEAD must pass a fresh complete CI run before artifact publication or promotion.
+The implementation-level 0.6 persistence milestone is verified on real PostgreSQL 16. The current candidate remains unmerged and the package version remains `0.5.0`.
 
 ### Release Boundary
 
-SIF Core package version remains `0.5.0`. A future `0.6.0` artifact release still requires fresh artifacts built from the final promotion commit, SHA-256 identities, byte-preserving preservation, and independent verification. CI success does not imply merge or binary publication.
+A future `0.6.0` artifact release requires fresh artifacts built from the promotion commit, SHA-256 identities, byte-preserving preservation, and independent verification. CI success does not imply merge or binary publication.

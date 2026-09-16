@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, rmSync } from "node:fs";
-import { AuthorityRegistry, CapabilityRegistry, ConcurrencyError, EvidenceRegistry, GovernedExecutor, InMemoryEventStore, IntegrityError, KnowledgeRegistry, LineageRegistry, Projection, ReconstructionVerifier, SemanticRegistry, SifEventWriter, digest } from "../src/index.js";
+import { AuthorityRegistry, CapabilityRegistry, ConcurrencyError, EvidenceRegistry, GovernedExecutor, InMemoryEventStore, IntegrityError, KnowledgeRegistry, LineageRegistry, Projection, ReconstructionVerifier, SemanticRegistry, SifEventWriter, digest, stableStringify } from "../src/index.js";
 
 test("append-only event store enforces optimistic concurrency and replay", () => {
   const store = new InMemoryEventStore(); const writer = new SifEventWriter(store);
@@ -28,8 +28,10 @@ test("semantic registry keeps concepts versioned and mappings explicit", () => {
 
 test("delegation cannot increase authority and cannot outlive parent", () => {
   const auth = new AuthorityRegistry(); auth.grant({ grantId: "g1", subjectId: "root", scope: "local", capabilities: ["read", "write"], issuedAt: "2026-01-01T00:00:00.000Z", expiresAt: "2026-12-31T00:00:00.000Z", issuerId: "system" }); auth.grant({ grantId: "g2", subjectId: "child", scope: "local", capabilities: ["read"], issuedAt: "2026-02-01T00:00:00.000Z", expiresAt: "2026-11-01T00:00:00.000Z", issuerId: "root", parentGrantId: "g1" });
-  assert.equal(auth.can("child", "read", "2026-03-01T00:00:00.000Z"), true); assert.equal(auth.can("child", "write", "2026-03-01T00:00:00.000Z"), false); assert.throws(() => auth.grant({ grantId: "g3", subjectId: "child2", scope: "local", capabilities: ["admin"], issuedAt: "2026-02-01T00:00:00.000Z", issuerId: "root", parentGrantId: "g1" }));
+  assert.equal(auth.can("child", "read", "2026-03-01T00:00:00.000Z"), true); assert.equal(auth.can("child", "write", "2026-03-01T00:00:00.000Z"), false); assert.throws(() => auth.grant({ grantId: "g3", subjectId: "child2", scope: "local", capabilities: ["admin"], issuedAt: "2026-02-01T00:00:00.000Z", issuerId: "root", parentGrantId: "g1" })); assert.throws(() => auth.grant({ grantId: "g4", subjectId: "child3", scope: "local", capabilities: ["read"], issuedAt: "2026-02-01T00:00:00.000Z", issuerId: "root", parentGrantId: "g1" }), /must not outlive its parent/);
 });
+
+test("canonical stringify is stable across equivalent insertion order and non-ASCII keys", () => { assert.equal(stableStringify({ z: 1, "ä": 2, a: 3 }), stableStringify({ "ä": 2, a: 3, z: 1 })); });
 
 test("capability is usable only when all gates are healthy", () => { const caps = new CapabilityRegistry(); caps.register({ capabilityId: "browser", name: "Browser", version: "1", available: true, usable: true, verified: true, authorized: true, healthy: true }); caps.register({ capabilityId: "gpu", name: "GPU", version: "1", available: true, usable: true, verified: true, authorized: false, healthy: true }); assert.equal(caps.usable("browser"), true); assert.equal(caps.usable("gpu"), false); });
 

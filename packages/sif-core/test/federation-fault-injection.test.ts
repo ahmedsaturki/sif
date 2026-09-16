@@ -78,14 +78,15 @@ function negotiated(sessionId: string) {
 }
 
 async function expectFederationError(action: () => Promise<unknown> | unknown, code: FederationProtocolError["code"]): Promise<void> {
+  let caught = false;
   try {
     await action();
   } catch (error) {
+    caught = true;
     assert.equal(error instanceof FederationProtocolError, true);
     if (error instanceof FederationProtocolError) assert.equal(error.code, code);
-    return;
   }
-  assert.fail(`expected FederationProtocolError(${code})`);
+  assert.equal(caught, true);
 }
 
 class ForcedAuthenticationFaultAdapter implements FederationTransportAdapter {
@@ -242,6 +243,8 @@ test("F3-057: forced connection loss after send creates UNKNOWN_OUTCOME and reco
   const n = negotiated("fault-unknown");
   const session = await boundary.open("domain-b", peer, n.scope, n);
   const msg = envelope("msg-unknown-001", "nonce-unknown-001");
+  const eventId = msg.eventId;
+  if (eventId === undefined) throw new Error("test envelope must carry eventId");
 
   const result = await boundary.send(session, msg, 100, 0);
   assert.equal(adapter.sent, true, "the forced post-send connection loss must execute after actual provider send");
@@ -256,7 +259,7 @@ test("F3-057: forced connection loss after send creates UNKNOWN_OUTCOME and reco
         sourceDomain: peer.domain,
         observationId: "obs-unknown-001",
         cursor: "1",
-        eventId: msg.eventId,
+        eventId,
         eventDigest: federatedEffectDigest(msg.payload),
         occurredAt: msg.time.occurredAt,
         observedAt: fixedObservedAt,

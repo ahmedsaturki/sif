@@ -11,7 +11,7 @@ Status: verified kernel baseline preserved.
 ## Phase 2 — Live Persistence 0.6
 Real PostgreSQL integration, migration harness, concurrency tests, crash-window characterization, durable projections and production-style worker lifecycle.
 
-Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16**. GitHub Actions run 143 passed strict build, 27/27 unit tests, schema bootstrap, four live integration scenarios, and explicit before-commit/after-commit backend termination characterization on candidate `b01ba3f56aa7cd20436ddec8e0628944e99c6b51`.
+Current status: **implementation-level 0.6 persistence gates verified on PostgreSQL 16.15**. GitHub Actions run 169 passed strict TypeScript build, 27/27 unit tests, schema bootstrap, four live integration scenarios, and explicit before-commit/after-commit backend termination characterization on verified code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`.
 
 Release boundary remains explicit: arbitrary crash-point coverage and full recovery/reconciliation after external database/network faults are not claimed. Production-scale PostgreSQL performance/HA, network-partition recovery, secure federation, distributed consensus, and exactly-once external effects remain later-stage work.
 

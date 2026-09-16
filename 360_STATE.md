@@ -15,7 +15,7 @@
 - `feat/sif-core-0.5.0` remains the preserved kernel baseline.
 - `feat/sif-core-0.6.0-live-postgres` remains the preserved Phase 2/live-persistence candidate line at `0ede9babeba1303c44ea592812a48bcd874db1e4`.
 - `feat/sif-core-0.7.0-secure-federation` is the current Phase 3 candidate line.
-- Current Phase 3 exact candidate HEAD: `b22defacf9f3d7abc42b3185fcbd00ed26300af0`.
+- The current candidate identity is the branch HEAD; exact verification is recorded by the CI run and artifact for that same commit.
 - PR #3 is open, draft, unmerged, and mergeable; it targets `feat/sif-core-0.6.0-live-postgres`.
 - The candidate line is evidence-gated; the latest successful exact-head CI run is the authoritative verification record for the current candidate.
 
@@ -68,26 +68,23 @@ Implemented slices on the current candidate include:
 
 ## Phase 3 Evidence State
 - Required acceptance rows: `F3-001..F3-060`
-- Exact candidate checkout: PASS
-- Strict committed TypeScript build/tests: PASS
-- Build/test count: `124/124`
-- Live PostgreSQL integration: `7/7` PASS
-- Federated inbox crash-window characterization: PASS
-- PostgreSQL crash-window characterization: PASS, including before-commit rollback and after-commit persistence
-- Candidate archive build: PASS
-- Candidate archive verification: PASS
-- Candidate artifact upload: PASS
+- Exact candidate checkout: PASS when verified by the authoritative exact-head CI run.
+- Strict committed TypeScript build/tests: PASS in the latest successful exact-head CI run.
+- Live PostgreSQL integration: PASS in the latest successful exact-head CI run.
+- Federated inbox crash-window characterization: PASS in the latest successful exact-head CI run.
+- PostgreSQL crash-window characterization: PASS, including before-commit rollback and after-commit persistence.
+- Candidate archive build: PASS in the latest successful exact-head CI run.
+- Candidate archive verification: PASS in the latest successful exact-head CI run.
+- Candidate artifact upload: PASS in the latest successful exact-head CI run.
 - Failure taxonomy is aligned between contract and public implementation.
 - F3-050 remains provider-neutral: encrypted transport metadata does not establish trust by itself.
+- Dynamic run number, run ID, artifact ID, and artifact digest are intentionally not committed here because changing them would change the candidate HEAD and immediately stale the recorded values.
 
-## Current Exact Candidate Artifact
-- Workflow Run: `#395`
-- Run ID: `35148754862`
-- Candidate SHA: `b22defacf9f3d7abc42b3185fcbd00ed26300af0`
-- Artifact: `sif-core-unpublished-candidate-b22defacf9f3d7abc42b3185fcbd00ed26300af0`
-- Artifact ID: `10468420893`
-- ZIP SHA-256: `1bd65c02ca5416dad54b9bda6c82b612e4465b9f1cd8bb75e6df77e776967737`
-- Artifact is currently present and unexpired.
+## Verification / Artifact Provenance
+- The authoritative verification record is the successful SIF Core CI workflow run whose `head_sha` exactly equals the current branch HEAD.
+- That run's uploaded candidate artifact and digest are the authoritative artifact provenance for that exact commit.
+- The CI workflow independently checks exact checkout identity, runs build/tests and PostgreSQL/crash-window characterization, builds the unpublished candidate archives, verifies their contents and hashes, and uploads the resulting artifact.
+- PR metadata may summarize the latest verified run, but it is not the canonical source of candidate identity; the branch HEAD plus exact-head CI record are.
 
 ## Release / Promotion State
 - `sif-core` package remains `0.5.0`.

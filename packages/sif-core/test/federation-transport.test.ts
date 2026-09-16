@@ -48,7 +48,7 @@ function envelope() {
 }
 
 function scope(sessionId: string) {
-  return { peerId: peer.domain, sessionId, protocolVersion: "0.1" };
+  return { peerId: `${peer.domain}/${peer.subject}`, sessionId, protocolVersion: "0.1" };
 }
 
 async function expectFederationError(action: () => Promise<unknown> | unknown, code: FederationProtocolError["code"]): Promise<void> {
@@ -72,6 +72,17 @@ test("transport boundary binds session identity and local domain", async () => {
   assert.equal(session.peerIdentity.domain, "domain-a");
   assert.equal(session.authenticated, true);
   assert.equal(session.encrypted, false);
+  assert.equal(session.negotiated.scope.peerId, "domain-a/workload-a");
+});
+
+test("negotiated peer scope must match the authenticated transport identity", async () => {
+  const negotiated = negotiateFederationCapabilities(profile, profile, { ...scope("session-scope-mismatch"), peerId: "domain-a/other-workload" });
+  const adapter = new InMemoryFederationTransportAdapter("2026-09-16T06:00:02.000Z");
+  const boundary = new FederationTransportBoundary(adapter);
+  await expectFederationError(
+    () => boundary.open("domain-b", peer, negotiated.scope, negotiated),
+    "AUTHENTICATION_FAILURE",
+  );
 });
 
 test("matching envelope is delivered and preserved", async () => {

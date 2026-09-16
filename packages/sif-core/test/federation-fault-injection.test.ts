@@ -100,6 +100,7 @@ class ForcedAuthenticationFaultAdapter implements FederationTransportAdapter {
       peerIdentity: { ...context.peer },
       establishedAt: fixedObservedAt,
       authenticated: false,
+      encrypted: false,
       negotiated: { ...context.negotiated, scope: { ...context.negotiated.scope }, capabilities: [] },
     };
   }

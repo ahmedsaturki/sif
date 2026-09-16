@@ -63,7 +63,7 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 - Added durable federated inbox state progression `DELIVERED → PROCESSED → COMMITTED → VERIFIED`, replay/idempotency protection, PostgreSQL transaction boundary, and crash-window characterization.
 - Added session-scoped capability negotiation with semantic matching and negotiated message/attachment limits.
 - Added sovereign local admission through the existing `PolicyEngine`; remote trust does not become local authority.
-- Added bounded deterministic reconciliation with duplicate, delayed, divergence, explicit conflict, cursor, and batch-limit handling.
+- Added bounded deterministic reconciliation with duplicate, cursor, divergence, explicit conflict, and batch-limit handling.
 - Added bounded delivery retry semantics with explicit `RETRY`, `STOP`, and `RECONCILE` classification, including `UNKNOWN_OUTCOME` handling.
 - Added provider-neutral transport session/send/close boundary with explicit local-domain binding, peer identity binding, negotiated-scope enforcement, and result identity validation.
 - Added resource/abuse governance for concurrent sessions, inbox work, replay retention, reconciliation batch size, and per-peer/global session rate limits.
@@ -77,25 +77,25 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 ## Current Verification Boundary
 
 Current candidate HEAD:
-`ec5634d1333210e68892032ffa1b7af70cb290a5`
+`64c7beee9343be25809179bc59ea60577cc2d394`
 
 Exact-head CI:
-- SIF Core CI Run #370 / `35135795186`
+- SIF Core CI Run #371 / `35136067984`
 - conclusion: `success`
-- exact checkout verified against `ec5634d1333210e68892032ffa1b7af70cb290a5`
+- exact checkout verified against `64c7beee9343be25809179bc59ea60577cc2d394`
 - build and test: 123/123 passed
 - live PostgreSQL integration: 7/7 passed
 - federated inbox crash-window characterization: passed
 - PostgreSQL crash-window characterization: passed
 - unpublished candidate archives built and SHA-256 verified
-- exact candidate archive manifest records `commit=ec5634d1333210e68892032ffa1b7af70cb290a5`
-- candidate artifact uploaded as `sif-core-unpublished-candidate-ec5634d1333210e68892032ffa1b7af70cb290a5`
-- artifact ID: `10462964238`
-- artifact ZIP digest: `sha256:ff22bf80b4a60a9fc29b5c632886494123646753a4ad919aac6392014a45f9e2`
+- exact candidate archive manifest records `commit=64c7beee9343be25809179bc59ea60577cc2d394`
+- candidate artifact uploaded as `sif-core-unpublished-candidate-64c7beee9343be25809179bc59ea60577cc2d394`
+- artifact ID: `10462904785`
+- artifact ZIP digest: `sha256:4d9dfae825c4e245db421e4d137ea0a618b222a4a86062902e4285f01922322d`
 
 The final committed test execution contains explicit scenarios for F3-031, F3-033, F3-036, F3-043, F3-044, F3-046, F3-047, F3-048, F3-049, F3-051, F3-052, F3-053..057, plus the existing federation, resource, retry, transport, trust, inbox, reconciliation, concurrency, and PostgreSQL integration coverage.
 
-`PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence. Run #370 covered the exact candidate containing that ledger and the related acceptance tests.
+`PHASE_3_EVIDENCE_LEDGER.md` maps all F3-001..F3-060 Required rows to executable tests or explicit boundary evidence. The exact-head CI covers the candidate tree containing that ledger and the related acceptance tests.
 
 F3-050 remains deliberately bounded to the provider-neutral kernel: the executable test proves that encrypted transport metadata does not authenticate or establish trust for an unauthenticated peer. It does not claim a production TLS/mTLS/SPIFFE deployment.
 

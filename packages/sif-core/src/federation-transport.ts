@@ -1,6 +1,6 @@
 import type { ISODate } from "./types.js";
 import { FederationProtocolError, type FederationEnvelope, type FederationPeerIdentity } from "./federation-envelope.js";
-import type { FederationNegotiationScope, NegotiatedFederationCapabilities } from "./federation-capability.js";
+import type { FederationNegotiationProfile, FederationNegotiationScope, NegotiatedFederationCapabilities } from "./federation-capability.js";
 import { assertFederationNegotiationScope, assertFederationMessageWithinNegotiatedLimits } from "./federation-capability.js";
 
 export type FederationTransportOutcome =
@@ -21,6 +21,13 @@ export interface FederationTransportSession {
   negotiated: NegotiatedFederationCapabilities;
 }
 
+export interface FederationTransportOpenContext {
+  localDomain: string;
+  peer: FederationPeerIdentity;
+  scope: FederationNegotiationScope;
+  negotiated: NegotiatedFederationCapabilities;
+}
+
 export interface FederationTransportSendContext {
   session: FederationTransportSession;
   envelope: FederationEnvelope;
@@ -38,7 +45,7 @@ export interface FederationTransportResult {
 }
 
 export interface FederationTransportAdapter {
-  open(peer: FederationPeerIdentity, scope: FederationNegotiationScope, negotiated: NegotiatedFederationCapabilities): Promise<FederationTransportSession>;
+  open(context: FederationTransportOpenContext): Promise<FederationTransportSession>;
   send(context: FederationTransportSendContext): Promise<FederationTransportResult>;
   close(session: FederationTransportSession): Promise<void>;
 }
@@ -49,6 +56,14 @@ function assertNonEmpty(name: string, value: string): void {
 
 function assertIso(name: string, value: string): void {
   if (!Number.isFinite(Date.parse(value))) throw new TypeError(`${name} must be a valid ISO date`);
+}
+
+function cloneNegotiated(negotiated: NegotiatedFederationCapabilities): NegotiatedFederationCapabilities {
+  return { ...negotiated, scope: { ...negotiated.scope }, capabilities: negotiated.capabilities.map((item) => ({ ...item })) };
+}
+
+function cloneSession(session: FederationTransportSession): FederationTransportSession {
+  return { ...session, peerIdentity: { ...session.peerIdentity }, negotiated: cloneNegotiated(session.negotiated) };
 }
 
 function validateSession(session: FederationTransportSession): void {
@@ -67,17 +82,27 @@ function validateSession(session: FederationTransportSession): void {
 export class FederationTransportBoundary {
   constructor(private readonly adapter: FederationTransportAdapter) {}
 
-  async open(peer: FederationPeerIdentity, scope: FederationNegotiationScope, negotiated: NegotiatedFederationCapabilities): Promise<FederationTransportSession> {
+  async open(
+    localDomain: string,
+    peer: FederationPeerIdentity,
+    scope: FederationNegotiationScope,
+    negotiated: NegotiatedFederationCapabilities,
+  ): Promise<FederationTransportSession> {
+    assertNonEmpty("localDomain", localDomain);
     assertNonEmpty("peer.domain", peer.domain);
     assertNonEmpty("peer.subject", peer.subject);
     assertNonEmpty("peer.transportBinding", peer.transportBinding);
     assertFederationNegotiationScope(negotiated, scope);
-    const session = await this.adapter.open(peer, scope, negotiated);
+    const session = await this.adapter.open({ localDomain, peer, scope, negotiated });
     validateSession(session);
+    if (session.localDomain !== localDomain) {
+      throw new FederationProtocolError("INTEGRITY_FAILURE", "Transport adapter returned an incorrect local domain", "delivery");
+    }
     if (session.peerIdentity.domain !== peer.domain || session.peerIdentity.subject !== peer.subject || session.peerIdentity.transportBinding !== peer.transportBinding) {
       throw new FederationProtocolError("AUTHENTICATION_FAILURE", "Transport adapter returned an identity-mismatched session", "peer");
     }
-    return { ...session, peerIdentity: { ...session.peerIdentity }, negotiated: { ...session.negotiated, scope: { ...session.negotiated.scope }, capabilities: session.negotiated.capabilities.map((item) => ({ ...item })) } };
+    assertFederationNegotiationScope(session.negotiated, scope);
+    return cloneSession(session);
   }
 
   async send(
@@ -102,7 +127,7 @@ export class FederationTransportBoundary {
       throw new FederationProtocolError("CAPABILITY_INCOMPATIBLE", "Envelope signature algorithm is outside the negotiated transport scope", "message");
     }
     if (!session.negotiated.capabilities.every((capability) => envelope.capabilities.some((offered) => offered.id === capability.id && offered.version === capability.version))) {
-      throw new FederationProtocolError("CAPABILITY_INCOMPATIBLE", "Envelope does not carry the negotiated mandatory capability set", "message");
+      throw new FederationProtocolError("CAPABILITY_INCOMPATIBLE", "Envelope does not carry the negotiated capability set", "message");
     }
     assertFederationMessageWithinNegotiatedLimits(session.negotiated, messageSize, attachmentSize);
 
@@ -128,25 +153,27 @@ export class InMemoryFederationTransportAdapter implements FederationTransportAd
     assertIso("observedAt", observedAt);
   }
 
-  async open(peer: FederationPeerIdentity, scope: FederationNegotiationScope, negotiated: NegotiatedFederationCapabilities): Promise<FederationTransportSession> {
-    assertFederationNegotiationScope(negotiated, scope);
+  async open(context: FederationTransportOpenContext): Promise<FederationTransportSession> {
+    assertNonEmpty("localDomain", context.localDomain);
+    assertFederationNegotiationScope(context.negotiated, context.scope);
     const session: FederationTransportSession = {
-      sessionId: scope.sessionId,
-      localDomain: negotiated.scope.peerId === peer.domain ? "local" : scope.peerId,
-      peerIdentity: { ...peer },
+      sessionId: context.scope.sessionId,
+      localDomain: context.localDomain,
+      peerIdentity: { ...context.peer },
       establishedAt: this.observedAt,
       authenticated: true,
-      negotiated: { ...negotiated, scope: { ...negotiated.scope }, capabilities: negotiated.capabilities.map((item) => ({ ...item })) },
+      negotiated: cloneNegotiated(context.negotiated),
     };
     this.sessions.set(session.sessionId, session);
-    return { ...session, peerIdentity: { ...session.peerIdentity }, negotiated: { ...session.negotiated, scope: { ...session.negotiated.scope }, capabilities: session.negotiated.capabilities.map((item) => ({ ...item })) } };
+    return cloneSession(session);
   }
 
   async send(context: FederationTransportSendContext): Promise<FederationTransportResult> {
     const active = this.sessions.get(context.session.sessionId);
-    if (!active) return { outcome: "PEER_UNAVAILABLE", sessionId: context.session.sessionId, messageId: context.envelope.messageId, idempotencyKey: `${context.envelope.sender.domain}\u0000${context.envelope.replayNonce}`, observedAt: this.observedAt };
+    const idempotencyKey = `${context.envelope.sender.domain}\u0000${context.envelope.replayNonce}`;
+    if (!active) return { outcome: "PEER_UNAVAILABLE", sessionId: context.session.sessionId, messageId: context.envelope.messageId, idempotencyKey, observedAt: this.observedAt };
     this.received.push({ ...context.envelope, sender: { ...context.envelope.sender }, payload: { type: context.envelope.payload.type, data: { ...context.envelope.payload.data } }, capabilities: context.envelope.capabilities.map((item) => ({ ...item })), time: { ...context.envelope.time } });
-    return { outcome: "DELIVERED", sessionId: active.sessionId, messageId: context.envelope.messageId, idempotencyKey: `${context.envelope.sender.domain}\u0000${context.envelope.replayNonce}`, observedAt: this.observedAt };
+    return { outcome: "DELIVERED", sessionId: active.sessionId, messageId: context.envelope.messageId, idempotencyKey, observedAt: this.observedAt };
   }
 
   async close(session: FederationTransportSession): Promise<void> {

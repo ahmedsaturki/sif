@@ -56,4 +56,4 @@ A `0.6.0` package release requires a fresh source archive and npm package built 
 
 ## Reverification note
 
-Run 93 verified the implementation commit before the final documentation-only evidence commits. A fresh CI run on the final branch HEAD is therefore required before artifact publication or promotion.
+Run 93 verified the implementation commit before the final documentation/evidence-only commits. A fresh CI run on the final branch HEAD is therefore required before artifact publication or promotion.

@@ -76,6 +76,7 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 - Added explicit encrypted-transport metadata coverage to prove encryption state does not substitute for peer authentication/trust at the provider-neutral transport boundary.
 - Added explicit strict TypeScript fixtures for the fault-injection and inbox acceptance tests so the final committed test tree builds cleanly under `exactOptionalPropertyTypes`.
 - Updated GitHub Actions to current Node 24-compatible major versions for checkout, Node setup, and artifact upload; this maintenance change was validated by the exact-head CI run after the update.
+- Aligned the typed federation failure contract with the implementation: the public codes are `AUTHENTICATION_FAILURE` and `INTEGRITY_FAILURE`; local policy denial is represented as `AUTHORIZATION_DENIED` with the underlying local rule/reason retained as attribution.
 
 ## Current Verification Boundary
 

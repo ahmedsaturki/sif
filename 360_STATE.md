@@ -14,7 +14,7 @@
 - `main` remains at Genesis `f4408d81375786e7a9f0715cf70609d0e257a67c`.
 - `feat/sif-core-0.5.0` remains the preserved kernel baseline.
 - `feat/sif-core-0.6.0-live-postgres` is the live-persistence candidate line.
-- Current candidate commit: `3a4ed64e90a7cf89fd59bd60a6b4b90401ae6929`.
+- Current candidate commit: `33421ea6855dedd31e5c1357f3aa946cfe863738`.
 - PR #2 remains open and unmerged.
 
 ## Verified Kernel
@@ -41,7 +41,7 @@ Implemented and tested:
 
 ## Live PostgreSQL 0.6 Verification
 
-GitHub Actions run **143** verified commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51` against a real PostgreSQL 16 service. The compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and direct SQL crash-window characterization.
+GitHub Actions **run 166** verified the current candidate commit `33421ea6855dedd31e5c1357f3aa946cfe863738` against a real PostgreSQL 16 service. The compiled implementation was exercised through a dependency-free PostgreSQL wire-protocol harness and direct SQL crash-window characterization.
 
 Verified live scenarios:
 
@@ -53,16 +53,15 @@ Verified live scenarios:
 
 ## Evidence State
 
-- Implementation baseline run 143: PASS
-- Current candidate CI: pending after documentation reconciliation
-- Artifact identity manifest: PASS in run 143
-- Strict committed TypeScript build + tests: PASS in run 143
-- Unit tests: 27/27 PASS in run 143
-- PostgreSQL schema bootstrap: PASS in run 143
-- Live PostgreSQL integration: 4/4 PASS in run 143
-- Crash-window characterization: PASS in run 143
+- Final candidate CI: PASS — run 166
+- Artifact identity manifest: PASS
+- Strict committed TypeScript build + tests: PASS
+- Unit tests: 27/27 PASS
+- PostgreSQL schema bootstrap: PASS
+- Live PostgreSQL integration: 4/4 PASS
+- Crash-window characterization: PASS
 
-The implementation-level milestone is verified. The current candidate requires one fresh CI pass because documentation/evidence commits were added after run 143.
+The implementation-level 0.6 persistence milestone is verified on the current candidate.
 
 ## Release / Promotion State
 

@@ -46,6 +46,17 @@ function envelope() {
   };
 }
 
+async function expectFederationError(action: () => Promise<unknown> | unknown, code: FederationProtocolError["code"]): Promise<void> {
+  try {
+    await action();
+  } catch (error) {
+    assert.equal(error instanceof FederationProtocolError, true);
+    if (error instanceof FederationProtocolError) assert.equal(error.code, code);
+    return;
+  }
+  assert.fail(`expected FederationProtocolError(${code})`);
+}
+
 test("transport boundary binds session identity and local domain", async () => {
   const negotiated = negotiateFederationCapabilities(profile, profile, { peerId: peer.domain, sessionId: "session-001", protocolVersion: "0.1" });
   const adapter = new InMemoryFederationTransportAdapter("2026-09-16T06:00:02.000Z");
@@ -73,7 +84,7 @@ test("sender/session mismatch fails before provider send", async () => {
   const boundary = new FederationTransportBoundary(adapter);
   const session = await boundary.open("domain-b", peer, negotiated.scope, negotiated);
   const bad = { ...envelope(), sender: { ...peer, subject: "other" } };
-  await assert.rejects(() => boundary.send(session, bad, 100, 0), (error: unknown) => error instanceof FederationProtocolError && error.code === "AUTHENTICATION_FAILURE");
+  await expectFederationError(() => boundary.send(session, bad, 100, 0), "AUTHENTICATION_FAILURE");
   assert.equal(adapter.listReceived().length, 0);
 });
 
@@ -82,7 +93,7 @@ test("oversized message is rejected before provider send", async () => {
   const adapter = new InMemoryFederationTransportAdapter("2026-09-16T06:00:02.000Z");
   const boundary = new FederationTransportBoundary(adapter);
   const session = await boundary.open("domain-b", peer, negotiated.scope, negotiated);
-  await assert.rejects(() => boundary.send(session, envelope(), 1025, 0), (error: unknown) => error instanceof FederationProtocolError && error.code === "RESOURCE_EXHAUSTED");
+  await expectFederationError(() => boundary.send(session, envelope(), 1025, 0), "RESOURCE_EXHAUSTED");
 });
 
 test("closed provider session reports peer unavailable", async () => {

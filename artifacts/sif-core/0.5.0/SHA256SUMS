@@ -1,0 +1,9 @@
+# Integrity manifest for preserved SIF Core 0.5.0 artifacts.
+# The source ZIP is stored as base64 text in Git for connector-safe preservation.
+ec1282724dafee08513aa96eb0642b74fcdcbd2341c77e6a49e9e82e78127c6b  sif-core-0.5.0-source.zip.b64
+
+# Decoded source ZIP digest (verified against the original local artifact).
+3f728ac799be5714efdbbddb80fae98152a3767f339f29ee84750ec1c2687bd5  decoded:sif-core-0.5.0-source.zip
+
+# npm package artifact digest; the .tgz itself is retained in the local artifact set and indexed here.
+c1b6d297ebef82523d4e1abc0249497fa702f3bd68bd6fa25d839402cc122abc  sif-core-0.5.0.tgz

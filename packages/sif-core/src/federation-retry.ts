@@ -145,8 +145,8 @@ export class FederationRetryController {
       attempts: attempt,
       lastOutcome: outcome,
       decision,
-      ...(nextAttemptAt === undefined ? { nextAttemptAt: undefined } : { nextAttemptAt }),
       history: [...current.history, entry],
+      ...(nextAttemptAt === undefined ? {} : { nextAttemptAt }),
     };
     this.states.set(idempotencyKey, updated);
     return cloneState(updated);

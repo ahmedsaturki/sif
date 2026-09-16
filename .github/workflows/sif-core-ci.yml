@@ -33,7 +33,7 @@ jobs:
       CANDIDATE_COMMIT: ${{ github.sha }}
     steps:
       - name: Checkout exact candidate commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
       - name: Verify exact candidate checkout
@@ -42,7 +42,7 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$CANDIDATE_COMMIT"
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Verify artifact identity manifest
@@ -104,7 +104,7 @@ jobs:
           test "$(wc -c < sif-core-0.5.0.tgz)" -gt 0
           grep -Fx "commit=$CANDIDATE_COMMIT" MANIFEST.txt
       - name: Upload unpublished candidate artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sif-core-unpublished-candidate-${{ env.CANDIDATE_COMMIT }}
           path: ${{ runner.temp }}/sif-candidate

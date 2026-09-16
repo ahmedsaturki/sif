@@ -15,6 +15,7 @@ import {
   negotiateFederationCapabilities,
   type FederationEnvelope,
   type FederationNegotiationProfile,
+  type FederationTrustDecision,
   type TrustedFederationPeer,
   type FederationTrustAnchor,
 } from "../src/index.js";
@@ -122,7 +123,7 @@ test("F3-036: replaying the same remote cursor batch remains idempotent", () => 
 
 test("F3-043: remote provenance cannot create local authority without a local policy rule", () => {
   const admission = new FederationLocalAdmission("local-a", new PolicyEngine());
-  const trust = {
+  const trust: FederationTrustDecision = {
     identity: peerIdentity,
     trustAnchorId: "anchor-gap",
     authenticated: true,
@@ -189,7 +190,7 @@ test("F3-047: occurrence, observation and inbox receipt times remain distinct fa
   assert.notEqual(claim.record.receivedAt, msg.time.observedAt);
 });
 
-test("F3-048: replayed historical message preserves its original occurrence semantics", () => {
+test("F3-048: historical message preserves original occurrence semantics when processed later", () => {
   const inbox = new InMemoryFederatedInbox();
   const historical = envelope({ messageId: "msg-historical-001", eventId: "evt-historical-001", replayNonce: "nonce-historical-001" });
   const claim = inbox.accept(historical, "consumer-a", "2026-09-16T06:30:00.000Z");

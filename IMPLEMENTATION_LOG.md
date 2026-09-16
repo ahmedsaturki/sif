@@ -73,7 +73,7 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 - Added declared retention-window enforcement in the federated inbox; delivery at/after `expiresAt` is rejected with typed `REPLAY_DETECTED`.
 - Added explicit encrypted-transport metadata coverage to prove encryption state does not substitute for peer authentication/trust at the provider-neutral transport boundary.
 - Added explicit strict TypeScript fixtures for the fault-injection and inbox acceptance tests so the final committed test tree builds cleanly under `exactOptionalPropertyTypes`.
-- Updated GitHub Actions to current Node 24-compatible major versions for checkout, Node setup, and artifact upload; this maintenance change is verified by the latest exact-head CI run.
+- Updated GitHub Actions to current Node 24-compatible major versions for checkout, Node setup, and artifact upload; this maintenance change was validated by the exact-head CI run after the update.
 
 ## Current Verification Boundary
 

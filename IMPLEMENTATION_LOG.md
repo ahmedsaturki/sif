@@ -66,6 +66,8 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 - Added bounded deterministic reconciliation with duplicate, cursor, divergence, explicit conflict, and batch-limit handling.
 - Added bounded delivery retry semantics with explicit `RETRY`, `STOP`, and `RECONCILE` classification, including `UNKNOWN_OUTCOME` handling.
 - Added provider-neutral transport session/send/close boundary with explicit local-domain binding, peer identity binding, negotiated-scope enforcement, and result identity validation.
+- Added transport-level binding between the canonical negotiated peer scope (`domain/subject`) and the authenticated session peer identity; mismatched scopes now fail closed before provider open/send.
+- Added explicit transport regression coverage for canonical negotiated peer identity binding and updated the fault-injection harness fixtures to use the same canonical scope.
 - Added resource/abuse governance for concurrent sessions, inbox work, replay retention, reconciliation batch size, and per-peer/global session rate limits.
 - Added executable coverage for delayed/replayed observations, provenance attribution, cross-peer identity collision, historical replay semantics, remote-authority isolation, deterministic reconciliation, and retry/reconnect backpressure.
 - Added executable fault-injection coverage for forced authentication failure, signature tamper, duplicate delivery, peer outage/recovery, and post-send connection loss producing `UNKNOWN_OUTCOME` followed by reconciliation.

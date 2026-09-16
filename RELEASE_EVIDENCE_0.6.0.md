@@ -53,3 +53,7 @@ Not established by this milestone:
 ## Release rule
 
 A `0.6.0` package release requires a fresh source archive and npm package built from the final promotion commit, SHA-256 identities, byte-preserving artifact preservation, and independent verification. CI success alone does not publish or merge the candidate.
+
+## Reverification note
+
+Run 93 verified the implementation commit before the final documentation-only evidence commits. A fresh CI run on the final branch HEAD is therefore required before artifact publication or promotion.

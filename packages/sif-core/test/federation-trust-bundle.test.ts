@@ -63,12 +63,12 @@ test("bundle versions are immutable and duplicate registration fails closed", ()
   const registry = new FederationTrustBundleRegistry();
   const ref = registry.register(BASE);
   const snapshot = registry.get(ref);
-  assert.ok(snapshot.anchors[0]);
-  snapshot.anchors[0].subject = "mutated";
+  const snapshotAnchor = snapshot.anchors[0]!;
+  snapshotAnchor.subject = "mutated";
 
   const stored = registry.get(ref);
-  assert.ok(stored.anchors[0]);
-  assert.equal(stored.anchors[0].subject, "CN=SIF Root A");
+  const storedAnchor = stored.anchors[0]!;
+  assert.equal(storedAnchor.subject, "CN=SIF Root A");
   assert.throws(() => registry.register(BASE), federationError("INTEGRITY_FAILURE"));
 });
 
@@ -159,9 +159,9 @@ test("list is deterministic and exposes provenance plus lifecycle evidence", () 
 
   const listed = registry.list();
   assert.deepEqual(listed.map((bundle) => `${bundle.id}@${bundle.version}`), ["a@1", "z@2"]);
-  assert.ok(listed[0]);
-  assert.equal(listed[0].provenanceId, "p-a");
-  assert.equal(listed[0].activatedAt, "2026-09-16T01:00:00.000Z");
-  assert.ok(listed[1]);
-  assert.equal(listed[1].status, "retired");
+  const listedA = listed[0]!;
+  const listedZ = listed[1]!;
+  assert.equal(listedA.provenanceId, "p-a");
+  assert.equal(listedA.activatedAt, "2026-09-16T01:00:00.000Z");
+  assert.equal(listedZ.status, "retired");
 });

@@ -58,15 +58,25 @@ The implementation-level 0.6 persistence milestone is verified through the lates
 - Defined `PHASE_3_TEST_MATRIX.md` with 60 required acceptance scenarios spanning identity, trust, signatures, capability negotiation, authority, inbox/idempotency, retry/recovery, reconciliation, resource abuse, time semantics, provenance, concurrency, fault injection, and artifact provenance.
 - Created dedicated branch `feat/sif-core-0.7.0-secure-federation` from the exact verified Phase 2 candidate.
 - Opened draft PR #3 against `feat/sif-core-0.6.0-live-postgres` to keep Phase 3 isolated from `main` and from the unpublished Phase 2 release boundary.
-- Implemented the first narrow runtime slice: canonical federation envelope domain types, typed failure taxonomy, deterministic payload/envelope canonicalization, payload SHA-256 integrity digest, provider-neutral signing/verifier interfaces, fail-closed protocol/signature-algorithm validation, MESSAGE IDENTITY vs EVENT IDENTITY separation, and deterministic capability ordering.
-- Added 6 contract/regression tests for the first envelope slice.
-- The first CI attempt exposed an invalid dependency boundary assumption: concrete Node key-object/Buffer crypto APIs were not available in the repository's declared TypeScript environment. The implementation was corrected to keep concrete crypto providers outside the dependency-free kernel and expose only deterministic signing/verifier adapters.
-- Subsequent CI is required to establish the corrected implementation candidate as verified.
+- Implemented canonical federation envelope domain types, typed failure taxonomy, deterministic payload/envelope canonicalization, payload SHA-256 integrity digest, provider-neutral signing/verifier interfaces, fail-closed protocol/signature-algorithm validation, MESSAGE IDENTITY vs EVENT IDENTITY separation, and deterministic capability ordering.
+- Added trust-anchor/trusted-peer validation with effective-time, revocation, transport binding, and versioned trust-bundle activation/retirement.
+- Added durable federated inbox state progression `DELIVERED → PROCESSED → COMMITTED → VERIFIED`, replay/idempotency protection, PostgreSQL transaction boundary, and crash-window characterization.
+- Added session-scoped capability negotiation with semantic matching and negotiated message/attachment limits.
+- Added sovereign local admission through the existing `PolicyEngine`; remote trust does not become local authority.
+- Added bounded deterministic reconciliation with duplicate, delayed, divergence, explicit conflict, cursor, and batch-limit handling.
+- Added bounded delivery retry semantics with explicit `RETRY`, `STOP`, and `RECONCILE` classification, including `UNKNOWN_OUTCOME` handling.
+- Added provider-neutral transport session/send/close boundary with explicit local-domain binding, peer identity binding, negotiated-scope enforcement, and result identity validation.
+- Added resource/abuse governance for concurrent sessions, inbox work, replay retention, reconciliation batch size, and per-peer/global session rate limits.
+- Added executable fault-injection coverage for forced authentication failure, signature tamper, duplicate delivery, peer outage/recovery, and post-send connection loss producing `UNKNOWN_OUTCOME` followed by reconciliation.
+- Fixed CI workflow duplication by adding branch-scoped concurrency and limiting push-triggered verification to `main`; feature branches are verified through their pull-request workflow.
+- Reconciled the Phase 3 implementation contract with the implemented transport/resource/fault-injection boundaries.
+- Reconciled this implementation log with the current Phase 3 implementation state.
+- The current candidate is still unpublished and remains subject to exact-HEAD CI verification; no passing status is inferred from cancelled, queued, or earlier runs.
 - No package version bump, registry publication, or merge is claimed.
 
-### Release Boundary
+## Current Verification Boundary
 
-A future `0.6.0` artifact release requires fresh artifacts built from the promotion commit, SHA-256 identities, byte-preserving preservation, and independent verification. CI success does not imply merge or binary publication.
+The current branch must only be promoted when every applicable Required row in `PHASE_3_TEST_MATRIX.md` has executable evidence tied to the exact candidate commit, and the artifact/provenance checks validate the same checkout. Documentation describing coverage does not itself constitute a PASS.
 
 Phase 3 follows the same evidence-gated sequence:
 

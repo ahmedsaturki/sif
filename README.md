@@ -7,7 +7,7 @@ SIF is a sovereignty-first intelligence fabric whose implementation begins with 
 - Genesis: `main` at `f4408d81375786e7a9f0715cf70609d0e257a67c`
 - Verified kernel branch: `feat/sif-core-0.5.0`
 - Live PostgreSQL verification branch: `feat/sif-core-0.6.0-live-postgres`
-- Current package version remains `0.5.0`; 0.6 is an integration-verification milestone, not a binary package release.
+- Current package version remains `0.5.0`; 0.6 is an integration-verification milestone, not yet a binary package release.
 
 ## SIF Core 0.5.0
 
@@ -15,17 +15,17 @@ The verified kernel includes append-only event streams, deterministic replay, op
 
 ## Live PostgreSQL verification — 0.6 milestone
 
-GitHub Actions run **136** verified the **final branch HEAD `31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba`** against a real PostgreSQL 16 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
+GitHub Actions run **143** verified commit `b01ba3f56aa7cd20436ddec8e0628944e99c6b51` against a real PostgreSQL 16 service and passed the complete persistence verification workflow. The live integration suite passed **4/4 scenarios**: concurrent same-stream serialization, atomic transaction rollback, durable projection checkpoint persistence, and exclusive/reclaimable owner-fenced outbox leases.
 
-The same run also passed direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
+The same run passed direct crash-window characterization: before-commit backend termination left no partial event/stream-head/outbox state and allowed retry; after-commit termination preserved the committed event and stream head.
 
-The final-head CI requirement is now satisfied. The implementation remains unpromoted because package artifact publication still requires a fresh 0.6.0 artifact set, SHA-256 identities, byte-preserving preservation, and independent verification.
+The final-head CI requirement is satisfied. The implementation remains unpromoted because package artifact publication still requires a fresh 0.6.0 artifact set, SHA-256 identities, byte-preserving preservation, and independent verification.
 
 ## Verification
 
 ```text
-Final branch HEAD: 31c33c6a47e627b6b5c8e5dbd9649efa32bc0cba
-GitHub Actions run 136: PASS
+Final branch HEAD: b01ba3f56aa7cd20436ddec8e0628944e99c6b51
+GitHub Actions run 143: PASS
 Strict committed TypeScript build + tests: PASS
 Unit tests: 27/27 PASS
 GitHub Actions artifact identity: PASS
@@ -36,7 +36,7 @@ GitHub Actions crash-window characterization: PASS
 
 ## Continuity and preserved knowledge
 
-- `PROJECT_HISTORY.md` — 0.0.0 → current implementation lineage
+- `PROJECT_HISTORY.md` — implementation lineage
 - `360_STATE.md` — repository/system state, laws, unknowns and gates
 - `IMPLEMENTATION_LOG.md` — implementation stages and critical fixes
 - `RESEARCH_SYNTHESIS.md` — reusable engineering patterns and research synthesis
@@ -55,11 +55,11 @@ GitHub Actions crash-window characterization: PASS
 
 ## Binary artifact preservation
 
-The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the persistent Library. Their SHA-256 identities are recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`. GitHub publication of binary release assets is intentionally a later release step; the repository never pretends an incomplete binary upload is a verified artifact.
+The byte-for-byte SIF Core 0.5.0 source ZIP and npm TGZ are preserved in the persistent Library. Their SHA-256 identities are recorded in `artifacts/sif-core/0.5.0/SHA256SUMS`. A 0.6.0 binary release has not been fabricated or claimed: the current repository connector cannot safely carry binary GitHub release bytes, and run 143 produced no Actions artifacts.
 
 ## Verification boundary
 
-The 0.6 live-Persistence milestone does not claim arbitrary crash-point coverage, full recovery/reconciliation after external database/network faults, network-partition recovery, TLS/mTLS/SPIFFE federation transport, OPA/Cedar adapters, KMS/HSM integration, distributed consensus, production OpenTelemetry exporters, exactly-once external side effects, or production-scale PostgreSQL HA/performance characterization.
+The 0.6 live-Persistence milestone does not claim arbitrary crash-point coverage, full recovery/reconciliation after external database/network faults, network-partition recovery, TLS/mTLS/SPIFFE federation, OPA/Cedar adapters, KMS/HSM integration, distributed consensus, production OpenTelemetry exporters, exactly-once external side effects, or production-scale PostgreSQL HA/performance characterization.
 
 ## Release discipline
 

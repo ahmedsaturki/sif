@@ -64,7 +64,7 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 - Added session-scoped capability negotiation with semantic matching and negotiated message/attachment limits.
 - Added sovereign local admission through the existing `PolicyEngine`; remote trust does not become local authority.
 - Added bounded deterministic reconciliation with duplicate, cursor, divergence, explicit conflict, and batch-limit handling.
-- Added bounded delivery retry semantics with explicit `RETRY`, `STOP`, and `RECONCILE` classification, including `UNKNOWN_OUTCOME` handling.
+- Added bounded delivery retry semantics with explicit `RETRY`, `STOP`, and `RECONCILE` outcomes, including `UNKNOWN_OUTCOME` handling.
 - Added provider-neutral transport session/send/close boundary with explicit local-domain binding, peer identity binding, negotiated-scope enforcement, and result identity validation.
 - Added transport-level binding between the canonical negotiated peer scope (`domain/subject`) and the authenticated session peer identity; mismatched scopes now fail closed before provider open/send.
 - Added explicit transport regression coverage for canonical negotiated peer identity binding and updated the fault-injection harness fixtures to use the same canonical scope.
@@ -77,6 +77,9 @@ The implementation-level 0.6 persistence milestone is verified through the succe
 - Added explicit strict TypeScript fixtures for the fault-injection and inbox acceptance tests so the final committed test tree builds cleanly under `exactOptionalPropertyTypes`.
 - Updated GitHub Actions to current Node 24-compatible major versions for checkout, Node setup, and artifact upload; this maintenance change was validated by the exact-head CI run after the update.
 - Aligned the typed federation failure contract with the implementation: the public codes are `AUTHENTICATION_FAILURE` and `INTEGRITY_FAILURE`; local policy denial is represented as `AUTHORIZATION_DENIED` with the underlying local rule/reason retained as attribution.
+- Fixed reconciliation cursor advancement so an explicit conflict blocks checkpoint advancement beyond the conflicted cursor; later accepted observations remain durable but are replay-safe until the conflict is reconciled.
+- Made reconciliation batch validation atomic with respect to in-memory state: all observations are validated before any observation is committed, preventing malformed later entries from leaving a partially-applied batch.
+- Added regression coverage for conflict-blocked cursor advancement, duplicate/accepted cursor progression, and no-partial-mutation behavior on malformed batches.
 
 ## Current Verification Boundary
 

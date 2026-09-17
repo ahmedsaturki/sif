@@ -5,13 +5,11 @@ SIF is a sovereignty-first intelligence fabric whose implementation grows throug
 ## Current promoted line
 
 - Phase 2 Live PostgreSQL, Phase 3 Secure Federation, Phase 4 Policy & Governance, Phase 5 Evaluation & Observability, Phase 6 Knowledge / Semantic, Phase 7 Systemic / Ecological, Phase 8 Reflexive / Continuity, and Phase 9 Sovereign Products are preserved on dedicated branches.
-- The cumulative Phase 7–9 tree is promoted into the preserved Phase 6 line `feat/sif-core-1.0.0-knowledge-semantic`.
-- Canonical preservation HEAD: `5a57827bb52a5e82a59dfa329ab77bcd659eea85`.
+- The cumulative Phase 7–9 tree is promoted into the preserved Phase 6 line `feat/sif-core-1.0.0-knowledge-semantic`, which is the canonical cumulative preservation branch.
 - Phase 9 exact implementation HEAD: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`.
 - Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`.
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
 - Phase 7/9 cumulative promotion into the Phase 6 line: `77a605a936115815c2e833f6c4667f0e353aefbd`.
-- Current closure documentation reconciliation: `5a57827bb52a5e82a59dfa329ab77bcd659eea85`.
 - The package version remains `0.5.0`; preservation and promotion do not imply package publication.
 
 ## Phase 9 Sovereign Products
@@ -26,9 +24,11 @@ F9-001..F9-060 are executable in `packages/sif-core/test/sovereign-products.test
 
 ## Verification boundary
 
-Each cumulative promotion layer was independently exact-head verified before promotion. The final canonical preservation state is identified by the exact HEAD above; the authoritative live proof is the SIF Core CI run whose `head_sha` exactly equals that HEAD. Current-state documents intentionally avoid embedding dynamic run and artifact identifiers.
+Each cumulative promotion layer was independently exact-head verified before promotion. The canonical cumulative branch is the authoritative current source state, and its current HEAD must be covered by a successful exact-head SIF Core CI run before that state is treated as verified.
 
 The established full verification gate covers exact checkout and identity, strict TypeScript build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox and PostgreSQL crash-window characterization, unpublished archive construction and integrity verification, exact-head artifact upload, and cleanup.
+
+Current-state documents intentionally avoid embedding dynamic CI run IDs, artifact IDs, or the current branch SHA, because changing those values in a document would require another state commit and invalidate the reference.
 
 ## Release discipline
 

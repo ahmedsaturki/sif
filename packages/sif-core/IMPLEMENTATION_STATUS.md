@@ -1,47 +1,34 @@
-# SIF Core — 0.5.0 Kernel + 0.6 Live PostgreSQL + Phase 3 + Phase 4 + Phase 5 Candidates
+# SIF Core — 0.5.0 Kernel + Candidate Phases 2–7
 
 ## Package identity
 
 The package identity remains `sif-core@0.5.0`. Later implementation milestones remain isolated candidate lines until a separate promotion/release decision.
 
-## Verified kernel and persistence
+## Verified foundation
 
-The core event-sourcing, integrity, CAS, authority, provenance, replay, persistence, outbox/inbox, worker, projection, and PostgreSQL transactional primitives remain preserved and are regression-tested by later candidate CI.
+The core event-sourcing, integrity, CAS, authority, provenance, replay, persistence, outbox/inbox, worker, projection, federation, policy-governance, evaluation/observability, and knowledge/semantic primitives remain preserved and are regression-tested by later candidate CI.
 
-## Phase 3 Secure Federation candidate
+## Phase 6 Knowledge / Semantic candidate
 
-The dedicated Phase 3 candidate covers canonical signed federation envelopes, peer identity and trust, semantic capability negotiation, sovereign local admission, durable/idempotent federation inboxes, bounded reconciliation and retry, provider-neutral transport, resource controls, and explicit fault injection.
+The dedicated `feat/sif-core-1.0.0-knowledge-semantic` candidate adds immutable/versioned ontology lifecycle, deterministic semantic compatibility with fail-closed ambiguity handling, evidence-qualified temporal knowledge, contradiction detection, immutable provenance, semantic replay, legacy handoff with `authorityWidened: false`, and bounded resources.
 
-## Phase 4 Policy & Governance candidate
+F6-001..F6-060 are executable in `packages/sif-core/test/knowledge-semantic-acceptance.test.ts`.
 
-The dedicated `feat/sif-core-0.8.0-policy-governance` candidate adds:
+## Phase 7 Systemic / Ecological candidate
 
-- immutable policy bundles and SHA-256 content identity;
-- explicit registered/active/retired lifecycle;
-- deterministic timestamp-aware historical resolution with fail-closed overlap handling;
-- local deny-overrides and default-deny semantics;
-- provider-neutral OPA/Cedar-shaped adapter boundary;
-- provider result binding to the exact policy identity and digest;
-- deterministic decision evidence and in-memory caller-immutable ledger;
-- bounded policy, rule, context, version, and concurrent-evaluation resources;
-- federated policy metadata subordinate to local authorization.
+The dedicated `feat/sif-core-1.1.0-systemic-ecological-plane` candidate adds:
 
-F4-001..F4-040 are executable in `packages/sif-core/test/policy-governance.test.ts`.
+- deterministic world-model identity spanning players, agents, strategies, markets, and institutions;
+- explicit reference validation and executable resource ceilings;
+- stable event ordering by `(step, id)` independent of input order;
+- strategy actions restricted to `SET`, `ADD`, and `MULTIPLY`;
+- institutional deny rules that block matching events before strategy actions;
+- bounded scenario branches and experiment digests bound to scenario identity;
+- deterministic replay descriptors and repeat-run determinism verification;
+- semantic-state digest validation and cross-phase evidence attribution;
+- no external network, shell, database mutation, or autonomous real-world action interface.
 
-## Phase 5 Evaluation & Observability candidate
-
-The dedicated `feat/sif-core-0.9.0-evaluation-observability` candidate adds:
-
-- bounded deterministic trace/evidence correlation;
-- dependency-free structured TRACE/METRIC/LOG observation adapters with sink isolation;
-- deterministic evaluation records carrying candidate and explicit environment provenance;
-- candidate/artifact/environment-bound replay descriptors with mismatch rejection;
-- bounded fault execution with explicit observed-fault proof and separate `NOT_OBSERVED`, `EVALUATION_FAILED`, and `UNAVAILABLE` outcomes;
-- bounded regression execution with true parallelism capped by `maxConcurrentEvaluations`;
-- measured-vs-expected regression semantics and explicit failure evidence;
-- fail-closed promotion evidence checks for candidate identity and required fault proof.
-
-F5-001..F5-060 are executable in `packages/sif-core/test/evaluation-observability-acceptance.test.ts`, with an additional targeted regression test for mismatch semantics.
+F7-001..F7-060 are executable in `packages/sif-core/test/systemic-ecological-acceptance.test.ts`.
 
 ## Verification rule
 
@@ -49,6 +36,6 @@ The authoritative candidate identity is the branch HEAD. The authoritative verif
 
 ## Release boundary
 
-No package version bump, registry publication, merge to `main`, production policy-provider deployment, production OpenTelemetry deployment, or production federation claim is implied by candidate verification.
+No package version bump, registry publication, merge to `main`, production simulation deployment, real-world forecasting claim, autonomous action, or authority promotion is implied by candidate verification.
 
-See the phase specifications, implementation contracts, test matrices, and evidence ledgers for exact boundaries.
+See the phase specifications, implementation contracts, test matrices, evidence ledgers, and CI records for exact boundaries.

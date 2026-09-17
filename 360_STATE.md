@@ -3,66 +3,74 @@
 ## Identity
 - Repository: `ahmedsaturki/sif`
 - Product: Sovereign Intelligence Fabric
-- Current package baseline: `SIF Core 0.5.0`
-- Current implementation candidate: Phase 6 — Knowledge / Semantic Plane
+- Package baseline: `SIF Core 0.5.0`
+- Current promoted phase: Phase 9 — Sovereign Products
+- Promoted preservation line: `feat/sif-core-1.2.0-reflexive-continuity`
+- Phase 9 implementation branch: `feat/sif-core-1.3.0-sovereign-products`
+- Verified Phase 9 exact-head: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`
+- Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`
 - Implementation language: TypeScript
 - Core dependency policy: dependency-free kernel
 - Primary persistence target: PostgreSQL
 
 ## Repository State
-- `main` remains at the preserved Genesis line and is not merged with later candidate phases.
-- Phases 2–5 remain preserved on their dedicated candidate lines.
-- `feat/sif-core-1.0.0-knowledge-semantic` is the current Phase 6 candidate line.
-- PR #6 is open, draft, and unmerged.
-- Candidate identity is always the branch HEAD; exact-head CI and its uploaded artifact are the authoritative verification records.
+- `main` remains the preserved Genesis line by release design; later verified phases are preserved on dedicated lines.
+- Phases 2–8 remain preserved on their dedicated candidate lines.
+- Phase 9 has been promoted from its verified implementation branch into the preserved Phase 8 continuity line through PR #11.
+- PR #11 is merged and closed; there is no open Phase 9 implementation gate.
+- The Phase 9 implementation branch remains available as the exact verified implementation source.
+- Candidate identity was verified at exact HEAD before promotion; the promotion commit preserves the verified implementation tree.
 
 ## Preserved Foundation
-SIF Core preserves append-only events, optimistic concurrency, hash-chain integrity, deterministic replay, resumable projections, SHA-256/CAS integrity, evidence/provenance/knowledge/semantic/lineage registries, scoped authority, delegation attenuation, default-deny policy, durable outbox/inbox, PostgreSQL transactional contracts, Ed25519 attestations, capability-gated execution, reconstruction verification, secure federation, policy governance, evaluation/observability, and the Phase 6 semantic plane described below.
+SIF Core preserves append-only events, optimistic concurrency, hash-chain integrity, deterministic replay, resumable projections, SHA-256/CAS integrity, evidence/provenance/knowledge/semantic/lineage registries, scoped authority, delegation attenuation, default-deny policy, durable outbox/inbox, PostgreSQL transactional contracts, Ed25519 attestations, capability-gated execution, reconstruction verification, secure federation, policy governance, evaluation/observability, the Phase 6 semantic plane, the Phase 7 systemic/ecological plane, the Phase 8 reflexive/continuity plane, and the Phase 9 sovereign product adapter boundary.
 
-## Phase 3 Secure Federation
-Preserved verified candidate capabilities include canonical federation envelopes, integrity, trust bundles, capability negotiation, sovereign local admission, durable federated inbox, bounded reconciliation/retry/recovery, transport identity binding, resource governance, fault injection, and crash-window verification.
+## Phase 8 — Reflexive / Continuity Plane
+The preserved Phase 8 implementation includes self-model and capability-drift verification, deterministic snapshots, lineage validation and cycle protection, evidence-gated controlled improvement proposals, authority non-widening review and succession constraints, preservation manifests, reconstruction verification, bounded proposal/certificate stores, and deterministic continuity replay.
 
-## Phase 4 Policy & Governance
-Preserved verified candidate capabilities include immutable policy bundles and versions, explicit lifecycle, historical resolution, overlap fail-closed behavior, deny-overrides-allow, provider-neutral OPA/Cedar-shaped integration boundaries, provider-result identity binding, deterministic evidence, non-widening federated policy metadata, bounded resources, and caller-immutable evidence ledgers.
-
-## Phase 5 Evaluation & Observability
-Preserved verified candidate capabilities include bounded deterministic trace/evidence correlation, structured TRACE/METRIC/LOG observation, sink isolation, deterministic evaluation records with candidate/environment provenance, candidate/artifact/environment-bound replay, explicit fault proof and distinct fault classifications, bounded parallel regression execution, measured-vs-expected semantics, and fail-closed promotion evidence.
-
-## Phase 6 Knowledge / Semantic Plane
+## Phase 9 — Sovereign Products
 Implemented capabilities include:
-- immutable/versioned ontology records with explicit DRAFT → ACTIVE → RETIRED lifecycle;
-- deterministic ontology/content identity, bounded concept/mapping counts, and caller-immutable reads;
-- deterministic semantic compatibility with explicit mappings and fail-closed handling of missing, ambiguous, low-confidence, approximate, and conditional mappings;
-- evidence-qualified epistemic knowledge with temporal validity and explicit LOCAL / REMOTE_EVIDENCE / LEGACY attribution;
-- contradiction detection at a requested point in time;
-- supersession/retraction represented as new records without rewriting historical assertions;
-- immutable provenance graph with parent validation, cycle rejection, bounded ancestry traversal, and graph digest;
-- append-only semantic operation log with deterministic replay and exact ontology/version filtering;
-- explicit legacy knowledge handoff preserving legacy identity/provenance and returning `authorityWidened: false`;
-- bounded ontology, knowledge, provenance, replay, and payload resources;
-- executable acceptance coverage F6-001..F6-060.
+- explicit, version-pinned product adapters for `LARA_OS_REIE`, `QADRIX`, and `SOVEREIGN_LIBRARY`;
+- immutable-to-callers product descriptors declaring identity, protocol, adapter version, capabilities, operations, planes, modes, and authority scopes;
+- deterministic request normalization, validation, payload bounds, and request digests;
+- fail-closed product/version/capability/authority/operation enforcement;
+- explicit injected operation handlers with no hidden external I/O;
+- caller-immutable request/descriptor/response boundaries;
+- bounded adapter registry with unique product identity and deterministic descriptor listing;
+- append-only, bounded, hash-linked product evidence ledger with sequence and linkage verification;
+- deterministic replay verification binding request and recorded response digests;
+- executable F9-001..F9-060 acceptance coverage.
+
+The Phase 9 boundary does not claim direct Lara OS/REIE, QADRIX, Sovereign Library, Supabase, PostgreSQL, GitHub, browser, queue, credential, or external API integration. Product-facing work enters only through explicit handlers.
 
 ## Verification State
-The current Phase 6 candidate has passed the full exact-head SIF Core CI workflow on the current branch HEAD. The workflow verified checkout identity, strict build/tests, live PostgreSQL integration, both crash-window characterizations, candidate archive construction/verification, and candidate artifact upload.
+The exact Phase 9 implementation HEAD `e1a0b5d47caabd61016cad92b0bc31c83ef01693` passed SIF Core CI Run #530 with 470/470 package tests, 7/7 live PostgreSQL integration tests, successful federated inbox crash-window characterization, successful PostgreSQL before-commit rollback and after-commit preservation characterization, unpublished source/package archive construction and integrity verification, exact-head artifact upload, and cleanup.
 
-Dynamic CI run numbers, IDs, artifact IDs, and artifact digests are intentionally not committed into this mutable state file because doing so creates a self-referential provenance loop.
+The exact-head unpublished candidate artifact recorded digest `sha256:d10d1b5885b99acef71343214daa2194e9327b073da41aad0a72add65f2ec56a`.
+
+PR #11 then promoted the verified Phase 9 tree into `feat/sif-core-1.2.0-reflexive-continuity` with merge commit `b9345786727cbd2692447d1ce53d472d7670b3df`.
+
+The promoted line has no implementation or documentation changes after the promotion reconciliation other than the final state record itself; a fresh exact-head CI run is required for this final promoted HEAD before treating its new commit identity as the last verification record.
 
 ## Release / Promotion State
 - `sif-core` package remains `0.5.0`.
-- No version bump, registry publication, release tag, or merge to `main` is implied.
-- No production semantic graph/knowledge-store deployment is claimed.
-- No automatic truth determination or authority promotion is claimed.
-- Phase 6 remains an unpublished draft candidate pending explicit promotion/release handling.
+- Phase 9 implementation and verification are complete.
+- Phase 9 has been explicitly promoted into the preserved Phase 8 continuity line.
+- PR #11 is merged; there is no remaining Phase 9 review/merge gate.
+- No merge to `main` has been made.
+- No registry publication has been made.
+- No release tag has been created.
+- No production product integration or deployment is claimed.
+- No production autonomous external action is claimed.
+- The verified implementation branch remains preserved for exact source provenance.
 
 ## Explicit Unknown / Not Claimed
-- production distributed knowledge graph or external ontology registry;
-- semantic consensus across autonomous domains;
-- automatic truth determination from confidence or compatibility;
-- production-scale knowledge graph HA/performance;
+- production distributed product-adapter deployment;
+- direct production integration with Lara OS/REIE, QADRIX, or Sovereign Library;
 - KMS/HSM integration;
 - distributed consensus;
 - exactly-once external side effects;
-- automatic authority promotion from knowledge, provenance, telemetry, or semantic compatibility.
+- autonomous external actions;
+- automatic authority promotion from product evidence, knowledge, simulation, telemetry, provenance, or semantic compatibility.
 
 ## Governing Laws
 - configured != live != usable != production-safe
@@ -70,10 +78,15 @@ Dynamic CI run numbers, IDs, artifact IDs, and artifact digests are intentionall
 - event history is authoritative
 - snapshots/projections/semantic indexes are derived
 - meaning is versioned; history is not silently rewritten
+- simulation is not reality
+- simulation output is not observed truth
 - ambiguity fails closed
 - knowledge is not authority
 - remote evidence is not local authority
 - legacy handoff never widens authority
+- simulation state never widens authority
+- product adapters never widen authority
+- injected handlers are explicit capabilities, not hidden integrations
 - no promotion without reproducible evidence
 - concurrency/resource limits must be executable, not documentary only
 - artifact provenance must identify the exact candidate content

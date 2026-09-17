@@ -23,5 +23,19 @@ This ledger records the evidence boundary for the Knowledge / Semantic Plane can
 ## Release Boundary
 No package version bump, registry publication, merge to `main`, production semantic infrastructure claim, external ontology service dependency, or automatic promotion is implied.
 
+## Verified Evidence State
+All required Phase 6 verification gates passed on the same candidate HEAD in the authoritative exact-head SIF Core CI workflow:
+
+- Exact candidate checkout: PASS.
+- Strict TypeScript build and executable F6-001..F6-060 acceptance suite: PASS.
+- Existing PostgreSQL integration regression suite: PASS.
+- Federated inbox crash-window characterization: PASS.
+- PostgreSQL crash-window characterization: PASS.
+- Candidate archive build: PASS.
+- Candidate archive verification: PASS.
+- Unpublished candidate artifact upload: PASS.
+
+The authoritative candidate identity remains the branch HEAD. The successful workflow's artifact digest is bound to that exact checkout. Dynamic run numbers, run IDs, artifact IDs, and artifact digests are intentionally not copied into this mutable ledger.
+
 ## Current Status
-Implementation candidate only until all required verification gates pass on the same branch HEAD.
+Phase 6 verification is complete for the current candidate. Release, merge, publication, production deployment claims, and automatic promotion remain separate explicit boundaries.

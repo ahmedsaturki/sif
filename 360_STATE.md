@@ -19,6 +19,7 @@
 - `feat/sif-core-0.9.0-evaluation-observability` remains the preserved Phase 5 candidate line.
 - `feat/sif-core-1.0.0-knowledge-semantic-plane` is the current Phase 6 candidate line.
 - PR #5 remains open, draft, and unmerged as the preserved Phase 5 candidate record.
+- PR #8 remains open, draft, and unmerged as the current Phase 6 candidate record.
 - The current candidate identity is always the branch HEAD; exact-head CI and its uploaded artifact are the authoritative verification/provenance records.
 
 ## Preserved Foundation
@@ -28,11 +29,11 @@ The SIF Core foundation includes append-only events, optimistic concurrency, per
 Phase 5 candidate `feat/sif-core-0.9.0-evaluation-observability` has an exact-head successful CI record covering checkout identity, strict build/tests, live PostgreSQL integration, federation/PostgreSQL crash windows, archive verification, and unpublished artifact upload. Dynamic CI identifiers remain outside mutable state documents.
 
 ## Phase 6 Knowledge / Semantic Plane
-Implemented candidate capabilities include:
+Implemented and exact-head verified capabilities include:
 - deterministic, versioned ontology definitions with lifecycle and temporal effective windows;
 - fail-closed activation when active ontology versions overlap;
 - timestamp-aware ontology resolution with ambiguity/not-found errors;
-- provider-neutral semantic compatibility classification;
+- provider-neutral semantic compatibility classification with structural-subset checking within the declared compatibility boundary;
 - explicit epistemic status, bounded confidence, attributable sources, normalized observation time, and derivation lineage;
 - bounded provenance graph with explicit node/edge identity and cycle prevention;
 - semantic replay descriptors bound to ontology, epistemic, provenance, subject, and proposition identity;
@@ -43,14 +44,22 @@ Implemented candidate capabilities include:
 ## Phase 6 Evidence State
 - Implementation branch created directly from the verified Phase 5 candidate HEAD.
 - Acceptance matrix committed.
-- Full exact-head CI verification is pending for the Phase 6 branch candidate.
-- No Phase 6 release, merge, publication, or production semantic-infrastructure claim is made yet.
+- Exact-head SIF Core CI verification: PASS on the current Phase 6 candidate HEAD.
+- Strict committed TypeScript build/tests: PASS.
+- Live PostgreSQL integration: PASS.
+- Federated inbox crash-window characterization: PASS.
+- PostgreSQL crash-window characterization: PASS.
+- Candidate archive build: PASS.
+- Candidate archive verification: PASS.
+- Unpublished candidate artifact upload: PASS.
+- Dynamic CI run numbers, run IDs, artifact IDs, and artifact digests are intentionally omitted from this mutable state document to avoid self-referential provenance.
 
 ## Release / Promotion State
 - `sif-core` package remains `0.5.0`.
 - No version bump has been performed.
 - No registry publication or release tag has been performed.
 - No merge to `main` has been performed.
+- No production semantic infrastructure deployment claim has been made.
 - No automatic promotion has been performed.
 
 ## Explicit Unknown / Not Claimed
@@ -60,6 +69,7 @@ Implemented candidate capabilities include:
 - production knowledge graph infrastructure
 - distributed semantic consensus
 - production-scale knowledge ingestion guarantees
+- semantic correctness beyond the declared compatibility/evaluation boundary
 
 ## Governing Laws
 - configured != live != usable != production-safe

@@ -6,25 +6,29 @@ SIF is a sovereignty-first intelligence fabric whose implementation begins with 
 
 - Verified kernel baseline is preserved.
 - Phase 2 Live PostgreSQL verification remains preserved by later candidate CI.
-- Phase 3 Secure Federation is an unpublished implementation candidate on its dedicated feature branch.
-- Phase 4 Policy & Governance is an unpublished implementation candidate on `feat/sif-core-0.8.0-policy-governance`.
+- Phase 3 Secure Federation remains a preserved unpublished implementation candidate on its dedicated feature branch.
+- Phase 4 Policy & Governance remains a preserved unpublished implementation candidate on its dedicated feature branch.
+- Phase 5 Evaluation & Observability remains a preserved unpublished implementation candidate on `feat/sif-core-0.9.0-evaluation-observability`.
+- Phase 6 Knowledge / Semantic Plane is the current unpublished implementation candidate on `feat/sif-core-1.0.0-knowledge-semantic-plane`.
 - The package version remains `0.5.0`; later milestones do not imply package publication.
 
-## Phase 4 Policy & Governance
+## Phase 6 Knowledge / Semantic Plane
 
-The Phase 4 candidate adds a dependency-free governance boundary for immutable policy versions, explicit lifecycle, timestamp-aware historical resolution, local deny-overrides/default-deny, provider-neutral OPA/Cedar-shaped adapters, deterministic attributable decision evidence, bounded policy/evaluation resources, and federated-policy subordination to local authorization.
+The Phase 6 candidate adds a dependency-free semantic boundary for deterministic ontology identity and lifecycle, timestamp-aware ontology resolution with overlap rejection, provider-neutral semantic compatibility, explicit epistemic state, bounded acyclic provenance, semantic replay binding, deterministic semantic-context hashing, and legacy knowledge handoff that preserves source identity while surfacing unmapped records.
 
-The executable acceptance suite is F4-001..F4-040 in `packages/sif-core/test/policy-governance.test.ts`. Exact-head CI retains the existing persistence, crash-window, archive, and artifact verification gates.
+The executable acceptance suite is F6-001..F6-060 in `packages/sif-core/test/knowledge-semantic-acceptance.test.ts`. Exact-head CI retains the existing PostgreSQL, crash-window, archive, and artifact verification gates.
 
 ## Verification boundary
 
-A passing exact-head CI result is evidence for the exact source candidate only. It is not a production deployment, external policy-provider deployment, HA/performance claim, or registry publication claim.
+The current Phase 6 branch candidate has passed exact-head SIF Core CI on the same commit as the branch HEAD. The successful run verified checkout identity, strict build/tests, live PostgreSQL integration, both crash-window characterizations, candidate archive construction/verification, unpublished artifact upload, and cleanup. The uploaded artifact digest is bound to that exact candidate checkout.
+
+A passing exact-head CI result is evidence for the exact source candidate only. It is not a production deployment, external ontology-service deployment, HA/performance claim, semantic correctness proof beyond the tested boundary, or registry publication claim.
 
 ## Release discipline
 
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
 
-Promotion requires a separate explicit decision. No merge to `main`, version bump, or registry publication is implied by candidate verification.
+Promotion requires a separate explicit decision. No merge to `main`, version bump, registry publication, or automatic promotion is implied by candidate verification.
 
 ## License
 

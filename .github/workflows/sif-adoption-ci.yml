@@ -54,10 +54,10 @@ jobs:
           npm run build
           npm test
 
-      - name: Build adoption layer
+      - name: Build adoption source
         run: |
           ./packages/sif-core/node_modules/.bin/tsc -p integrations/sif-adoption/tsconfig.json
 
       - name: Test adoption layer
         run: |
-          node --test integrations/sif-adoption/dist/test/*.test.js
+          node --experimental-strip-types --test integrations/sif-adoption/test/*.test.ts

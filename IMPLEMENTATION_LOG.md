@@ -1,7 +1,7 @@
 # SIF Implementation Log
 
 ## Verified Foundation
-SIF Core progressed through the preserved kernel line, live PostgreSQL persistence, secure federation, policy governance, evaluation/observability, the knowledge/semantic plane, the systemic/ecological plane, and the reflexive/continuity plane. Every candidate phase is isolated on its own branch and must pass exact-head CI before promotion.
+SIF Core progressed through the preserved kernel line, live PostgreSQL persistence, secure federation, policy governance, evaluation/observability, the knowledge/semantic plane, the systemic/ecological plane, the reflexive/continuity plane, and the sovereign product adapter boundary. Every implementation phase is isolated on its own branch and must pass exact-head CI before promotion.
 
 ## Phase 6 — Knowledge / Semantic Plane
 
@@ -52,15 +52,16 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Implemented request/response replay verification with deterministic digest binding and `REPLAY_MISMATCH` failure on tampering.
 - Added executable F9-001..F9-060 acceptance coverage.
 - Fixed the adapter boundary so injected handlers for operations not exposed by a descriptor are ignored instead of becoming a constructor-time false failure; exposed operations still require a bound handler and remain `UNAVAILABLE` when not implemented.
-- Exact-head CI passed implementation HEAD `fdb2a2e542f1745612e0617668258550bba5b12f`, including strict build/tests, live PostgreSQL integration, both crash-window characterizations, archive construction/verification, artifact upload, and cleanup.
+- Exact-head CI passed implementation HEAD `e1a0b5d47caabd61016cad92b0bc31c83ef01693`, including strict build/tests, live PostgreSQL integration, both crash-window characterizations, archive construction/verification, artifact upload, and cleanup.
+- Promoted Phase 9 into `feat/sif-core-1.2.0-reflexive-continuity` through PR #11 with merge commit `b9345786727cbd2692447d1ce53d472d7670b3df`.
 
-## Current Verification Boundary
+## Final Verification Boundary
 
-The Phase 9 implementation was verified at `fdb2a2e542f1745612e0617668258550bba5b12f`. Subsequent documentation-only commits reconcile repository state records without changing the Phase 9 implementation. Because the repository's release discipline requires exact-head verification, any post-verification documentation commit must itself pass the same exact-head CI before the new branch HEAD becomes the authoritative verified candidate.
+The authoritative Phase 9 implementation evidence is the exact-head SIF Core CI Run #530 on `e1a0b5d47caabd61016cad92b0bc31c83ef01693`. It demonstrated 470/470 package tests passing, 7/7 live PostgreSQL integration tests passing, successful federated inbox crash-window characterization, successful PostgreSQL before-commit rollback and after-commit preservation characterization, successful unpublished archive build/verification, exact-head artifact upload, and cleanup.
 
-The verified Phase 9 implementation run demonstrated 470/470 package tests passing, 7/7 live PostgreSQL integration tests passing, successful federated inbox crash-window characterization, successful PostgreSQL before-commit rollback and after-commit preservation characterization, successful unpublished archive build/verification, and candidate artifact upload with exact-HEAD provenance.
+The uploaded exact-head artifact was `sif-core-unpublished-candidate-e1a0b5d47caabd61016cad92b0bc31c83ef01693` with digest `sha256:d10d1b5885b99acef71343214daa2194e9327b073da41aad0a72add65f2ec56a`.
 
-No package version bump, registry publication, release tag, merge to `main`, production product deployment, real-world forecasting claim, automatic authority promotion, or autonomous external action is implied.
+The promotion boundary is complete: PR #11 is merged into `feat/sif-core-1.2.0-reflexive-continuity`, while `main` remains intentionally preserved at the Genesis line. No package version bump, registry publication, release tag, production deployment, direct external product integration, automatic authority promotion, or autonomous external action is implied.
 
 ## Release Discipline
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

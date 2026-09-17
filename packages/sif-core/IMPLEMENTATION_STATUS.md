@@ -1,4 +1,4 @@
-# SIF Core — 0.5.0 Kernel + 0.6 Live PostgreSQL + Phase 3 + Phase 4 Candidates
+# SIF Core — 0.5.0 Kernel + 0.6 Live PostgreSQL + Phase 3 + Phase 4 + Phase 5 Candidates
 
 ## Package identity
 
@@ -28,12 +28,27 @@ The dedicated `feat/sif-core-0.8.0-policy-governance` candidate adds:
 
 F4-001..F4-040 are executable in `packages/sif-core/test/policy-governance.test.ts`.
 
+## Phase 5 Evaluation & Observability candidate
+
+The dedicated `feat/sif-core-0.9.0-evaluation-observability` candidate adds:
+
+- bounded deterministic trace/evidence correlation;
+- dependency-free structured TRACE/METRIC/LOG observation adapters with sink isolation;
+- deterministic evaluation records carrying candidate and explicit environment provenance;
+- candidate/artifact/environment-bound replay descriptors with mismatch rejection;
+- bounded fault execution with explicit observed-fault proof and separate `NOT_OBSERVED`, `EVALUATION_FAILED`, and `UNAVAILABLE` outcomes;
+- bounded regression execution with true parallelism capped by `maxConcurrentEvaluations`;
+- measured-vs-expected regression semantics and explicit failure evidence;
+- fail-closed promotion evidence checks for candidate identity and required fault proof.
+
+F5-001..F5-060 are executable in `packages/sif-core/test/evaluation-observability-acceptance.test.ts`, with an additional targeted regression test for mismatch semantics.
+
 ## Verification rule
 
 The authoritative candidate identity is the branch HEAD. The authoritative verification record is a successful SIF Core CI run whose `head_sha` exactly equals that candidate. Dynamic CI run/artifact identifiers are intentionally excluded from mutable state documents to prevent self-invalidating provenance.
 
 ## Release boundary
 
-No package version bump, registry publication, merge to `main`, production policy-provider deployment claim, or production federation claim is implied by candidate verification.
+No package version bump, registry publication, merge to `main`, production policy-provider deployment, production OpenTelemetry deployment, or production federation claim is implied by candidate verification.
 
 See the phase specifications, implementation contracts, test matrices, and evidence ledgers for exact boundaries.

@@ -24,7 +24,9 @@ Versioned policy bundles, immutable policy digests, explicit lifecycle, timestam
 Status: implementation candidate on `feat/sif-core-0.8.0-policy-governance`; F4-001..F4-040 executable acceptance coverage and exact-head CI verification are present. Promotion remains a separate explicit boundary.
 
 ## Phase 5 — Evaluation and Observability
-OpenTelemetry, trace/evidence correlation, replayable evaluations, fault injection, regression suites and production-to-eval qualification.
+Bounded trace/evidence correlation, structured observation adapters, deterministic evaluations, candidate/artifact/environment-bound replay, explicit fault proof, bounded parallel regression execution, and fail-closed promotion evidence.
+
+Status: implementation candidate on `feat/sif-core-0.9.0-evaluation-observability`; F5-001..F5-060 executable acceptance coverage plus targeted measured-vs-expected regression coverage are present and the current candidate has passed exact-head CI, including PostgreSQL, crash-window, archive, and artifact gates. No publication, merge to main, or production OpenTelemetry claim.
 
 ## Phase 6 — Knowledge / Semantic Plane
 Versioned ontology, semantic compatibility, epistemic state, semantic replay, provenance graph and legacy knowledge handoff.

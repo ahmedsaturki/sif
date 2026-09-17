@@ -1,13 +1,14 @@
-# SIF Repository 360° Baseline
+# SIF Repository 360° Baseline — Historical 0.5.0 Handoff
 
 ## Purpose
 
-This file is the repository-level handoff record: what is in Git, what is verified locally, what CI is responsible for proving, and what remains explicitly unverified.
+This file is a preserved historical handoff for the 0.5.0 baseline. It records what was in Git at that milestone, what was verified locally, what CI was responsible for proving, and what remained explicitly unverified. It is not the current SIF state record; `360_STATE.md` and the canonical cumulative branch are authoritative for current state.
 
 ## Canonical branches
 
-- `main` — original baseline line; deliberately kept separate from the 0.5.0 preservation work until its verification gates are satisfied.
-- `feat/sif-core-0.5.0` — current preservation/release candidate line.
+- `main` — original Genesis baseline line at the time of this historical handoff.
+- `feat/sif-core-0.5.0` — 0.5.0 preservation/release candidate line at the time of this historical handoff.
+- Current cumulative preservation moved later to `feat/sif-core-1.0.0-knowledge-semantic`.
 
 ## Canonical release candidate
 
@@ -15,14 +16,14 @@ SIF Core `0.5.0` is preserved with its dependency-free TypeScript implementation
 
 ## Repository completeness target
 
-The feature branch contains the tested source modules and tests in `packages/sif-core`, plus the preserved source archive under `artifacts/sif-core/0.5.0/`.
+At this historical milestone, the feature branch contained the tested source modules and tests in `packages/sif-core`, plus the preserved source archive under `artifacts/sif-core/0.5.0/`. Later phases were promoted onto the dedicated cumulative preservation line.
 
 ## Evidence layers
 
 1. Local build/test evidence: TypeScript strict build and 27/27 tests passed in the development environment.
 2. Repository evidence: source, tests, schema, README, implementation status, historical lineage and checksums are committed to the feature branch.
-3. CI evidence: GitHub Actions must independently verify archive integrity, decode the archive, extract the exact preserved tree, and execute `npm test`.
-4. Live infrastructure evidence: real PostgreSQL multi-client execution and production integrations remain separate gates.
+3. Historical CI evidence obligation: GitHub Actions had to independently verify archive integrity, decode the archive, extract the exact preserved tree, and execute `npm test`.
+4. Historical live-infrastructure boundary: real PostgreSQL multi-client execution and production integrations remained separate gates.
 
 ## Preservation artifacts
 

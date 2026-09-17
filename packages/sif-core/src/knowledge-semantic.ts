@@ -2,7 +2,7 @@ import { digest, stableStringify } from "./core.js";
 
 export type OntologyLifecycle = "REGISTERED" | "ACTIVE" | "RETIRED";
 export type SemanticCompatibility = "EXACT" | "BACKWARD_COMPATIBLE" | "INCOMPATIBLE" | "UNKNOWN";
-export type EpistemicStatus = "KNOWN" | "SUPPORTED" | "UNCERTAIN" | "DISPUTED" | "REJECTED";
+export type SemanticEpistemicStatus = "KNOWN" | "SUPPORTED" | "UNCERTAIN" | "DISPUTED" | "REJECTED";
 export type ProvenanceNodeKind = "SOURCE" | "CLAIM" | "DERIVATION" | "EVENT";
 export type ProvenanceEdgeKind = "SUPPORTS" | "DERIVED_FROM" | "CONTRADICTS" | "ASSERTS";
 
@@ -18,7 +18,7 @@ export interface KnowledgeSemanticLimits {
   maxHandoffRecords: number;
 }
 
-export interface SemanticConcept {
+export interface OntologyConcept {
   id: string;
   kind: string;
   labels: string[];
@@ -38,7 +38,7 @@ export interface OntologyVersion {
   lifecycle: OntologyLifecycle;
   effectiveFrom: string;
   effectiveTo?: string;
-  concepts: SemanticConcept[];
+  concepts: OntologyConcept[];
   relations: SemanticRelation[];
   digest: string;
 }
@@ -49,7 +49,7 @@ export interface OntologyRegistration {
   effectiveFrom: string;
   effectiveTo?: string;
   lifecycle?: OntologyLifecycle;
-  concepts: SemanticConcept[];
+  concepts: OntologyConcept[];
   relations: SemanticRelation[];
 }
 
@@ -70,7 +70,7 @@ export interface EpistemicState {
   stateId: string;
   subject: string;
   proposition: string;
-  status: EpistemicStatus;
+  status: SemanticEpistemicStatus;
   confidence: number;
   sources: EpistemicSource[];
   observedAt: string;
@@ -225,8 +225,13 @@ export function compareOntologySemantics(source: OntologyVersion, target: Ontolo
   if (source.ontologyId !== target.ontologyId) return { compatibility: "INCOMPATIBLE", sourceOntologyDigest: source.digest, targetOntologyDigest: target.digest, reason: "Different ontology identifiers" };
   if (source.digest === target.digest) return { compatibility: "EXACT", sourceOntologyDigest: source.digest, targetOntologyDigest: target.digest, reason: "Identical ontology identity" };
   if (sMajor !== tMajor) return { compatibility: "INCOMPATIBLE", sourceOntologyDigest: source.digest, targetOntologyDigest: target.digest, reason: "Major version mismatch" };
-  if (tMinor >= sMinor) return { compatibility: "BACKWARD_COMPATIBLE", sourceOntologyDigest: source.digest, targetOntologyDigest: target.digest, reason: "Same major with target minor version not older" };
-  return { compatibility: "UNKNOWN", sourceOntologyDigest: source.digest, targetOntologyDigest: target.digest, reason: "Target semantic version is older and requires explicit review" };
+  const sourceConceptIds = new Set(source.concepts.map((x) => x.id));
+  const targetConceptIds = new Set(target.concepts.map((x) => x.id));
+  const sourceRelationIds = new Set(source.relations.map((x) => x.id));
+  const targetRelationIds = new Set(target.relations.map((x) => x.id));
+  const structuralSubset = [...sourceConceptIds].every((id) => targetConceptIds.has(id)) && [...sourceRelationIds].every((id) => targetRelationIds.has(id));
+  if (tMinor >= sMinor && structuralSubset) return { compatibility: "BACKWARD_COMPATIBLE", sourceOntologyDigest: source.digest, targetOntologyDigest: target.digest, reason: "Same major, forward minor version, and source semantics preserved" };
+  return { compatibility: "UNKNOWN", sourceOntologyDigest: source.digest, targetOntologyDigest: target.digest, reason: "Semantic structure or version direction requires explicit review" };
 }
 
 export function createEpistemicState(args: Omit<EpistemicState, "stateId" | "digest">, limits: KnowledgeSemanticLimits): EpistemicState {
@@ -270,8 +275,9 @@ export class LegacyKnowledgeHandoff {
     const unmapped = records.filter((x) => !mappings.some((m) => m.legacyId === x.legacyId)).map((x) => x.legacyId);
     for (const mapping of mappings) { if (!recordIds.has(mapping.legacyId)) throw new KnowledgeSemanticError("HANDOFF_INCOMPLETE", "Mapping references unknown legacy record"); text("conceptId", mapping.conceptId); }
     const evidence = records.map((x) => ({ legacyId: x.legacyId, sourceSystem: x.sourceSystem, sourceDigest: x.sourceDigest })).sort((a, b) => a.legacyId.localeCompare(b.legacyId));
-    const handoffId = digest({ evidence, mappings: clone(mappings), unmapped: [...unmapped].sort() });
-    return { handoffId, accepted: unmapped.length === 0, preservedSourceDigest: digest(evidence), mappings: clone(mappings), unmapped: [...unmapped].sort(), evidenceDigest: digest({ evidence, mappings: clone(mappings) }) };
+    const mappingsCopy = clone(mappings);
+    const unmappedSorted = [...unmapped].sort();
+    return { handoffId: digest({ evidence, mappings: mappingsCopy, unmapped: unmappedSorted }), accepted: unmappedSorted.length === 0, preservedSourceDigest: digest(evidence), mappings: mappingsCopy, unmapped: unmappedSorted, evidenceDigest: digest({ evidence, mappings: mappingsCopy }) };
   }
 }
 

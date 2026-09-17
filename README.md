@@ -36,7 +36,7 @@ Repository-level merge protection is specified in `REPOSITORY_GOVERNANCE.md`. Th
 
 The tree now includes `CODEOWNERS`, a pull-request template, PR-targeted CI, explicit workflow read-only permissions, a 15-minute verification timeout, and deterministic Node/npm/TypeScript build metadata.
 
-The connected GitHub administration surface currently exposes no active Rulesets or protected branches. The repository files therefore document and reinforce the governance contract but do not claim that the GitHub setting itself is active.
+The connected GitHub administration surface currently reports no active Rulesets; branch-protection status is not readable through the connected integration and is therefore not asserted here. The repository files therefore document and reinforce the governance contract but do not claim that the GitHub setting itself is active.
 
 ## Release discipline
 

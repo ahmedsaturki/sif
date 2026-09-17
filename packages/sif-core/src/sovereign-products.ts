@@ -5,363 +5,99 @@ export type ProductPlane = "FEDERATION" | "POLICY" | "OBSERVABILITY" | "KNOWLEDG
 export type ProductOperationMode = "READ" | "CONTROLLED";
 export type ProductEvaluationStatus = "PASS" | "FAIL" | "INDETERMINATE" | "UNAVAILABLE";
 
-export interface SifProductCapability {
-  capabilityId: string;
-  plane: ProductPlane;
-  version: string;
-  mode: ProductOperationMode;
-  authorityScopes: string[];
-}
-
-export interface SifProductDescriptor {
-  productId: SovereignProductId;
-  adapterVersion: string;
-  protocolVersion: string;
-  capabilities: SifProductCapability[];
-  allowedAuthorityScopes: string[];
-  allowedOperations: string[];
-}
-
-export interface SifProductAdapterLimits {
-  maxAdapters: number;
-  maxCapabilitiesPerAdapter: number;
-  maxOperationsPerAdapter: number;
-  maxRequestBytes: number;
-  maxResponseBytes: number;
-  maxEvidenceRefs: number;
-  maxLedgerRecords: number;
-}
-
-export interface SifProductRequest {
-  requestId: string;
-  productId: SovereignProductId;
-  adapterVersion: string;
-  operation: string;
-  requestedCapabilities: string[];
-  authorityScopes: string[];
-  evidenceIds: string[];
-  payload: unknown;
-  createdAt: string;
-}
-
-export interface SifProductExecutionContext {
-  request: SifProductRequest;
-  descriptor: SifProductDescriptor;
-  requestDigest: string;
-}
-
-export interface SifProductResponse {
-  requestId: string;
-  productId: SovereignProductId;
-  adapterVersion: string;
-  operation: string;
-  status: ProductEvaluationStatus;
-  requestDigest: string;
-  capabilityIds: string[];
-  authorityScopes: string[];
-  evidenceIds: string[];
-  output?: unknown;
-  reason?: string;
-  responseDigest: string;
-}
-
-export interface SifProductAdapter {
-  readonly descriptor: SifProductDescriptor;
-  execute(request: SifProductRequest): Promise<SifProductResponse>;
-}
-
+export interface SifProductCapability { capabilityId: string; plane: ProductPlane; version: string; mode: ProductOperationMode; authorityScopes: string[]; }
+export interface SifProductDescriptor { productId: SovereignProductId; adapterVersion: string; protocolVersion: string; capabilities: SifProductCapability[]; allowedAuthorityScopes: string[]; allowedOperations: string[]; }
+export interface SifProductAdapterLimits { maxAdapters: number; maxCapabilitiesPerAdapter: number; maxOperationsPerAdapter: number; maxRequestBytes: number; maxResponseBytes: number; maxEvidenceRefs: number; maxLedgerRecords: number; }
+export interface SifProductRequest { requestId: string; productId: SovereignProductId; adapterVersion: string; operation: string; requestedCapabilities: string[]; authorityScopes: string[]; evidenceIds: string[]; payload: unknown; createdAt: string; }
+export interface SifProductExecutionContext { request: SifProductRequest; descriptor: SifProductDescriptor; requestDigest: string; }
+export interface SifProductResponse { requestId: string; productId: SovereignProductId; adapterVersion: string; operation: string; status: ProductEvaluationStatus; requestDigest: string; capabilityIds: string[]; authorityScopes: string[]; evidenceIds: string[]; output?: unknown; reason?: string; responseDigest: string; }
+export interface SifProductAdapter { readonly descriptor: SifProductDescriptor; execute(request: SifProductRequest): Promise<SifProductResponse>; }
 export type ProductOperationHandler = (context: SifProductExecutionContext) => Promise<unknown> | unknown;
-
-export interface ProductEvidenceRecord {
-  sequence: number;
-  productId: SovereignProductId;
-  requestDigest: string;
-  responseDigest: string;
-  recordedAt: string;
-  previousDigest: string | null;
-  recordDigest: string;
-}
+export interface ProductEvidenceRecord { sequence: number; productId: SovereignProductId; requestDigest: string; responseDigest: string; recordedAt: string; previousDigest: string | null; recordDigest: string; }
 
 export class SovereignProductError extends Error {
-  constructor(readonly code:
-    | "INVALID_REQUEST"
-    | "INVALID_DESCRIPTOR"
-    | "RESOURCE_EXHAUSTED"
-    | "CAPABILITY_DENIED"
-    | "AUTHORITY_WIDENING"
-    | "VERSION_MISMATCH"
-    | "OPERATION_DENIED"
-    | "PRODUCT_NOT_FOUND"
-    | "EXECUTION_FAILED"
-    | "REPLAY_MISMATCH"
-    | "EVIDENCE_MISMATCH"
-  , message: string) {
-    super(message);
-    this.name = "SovereignProductError";
-  }
+  constructor(readonly code: "INVALID_REQUEST" | "INVALID_DESCRIPTOR" | "RESOURCE_EXHAUSTED" | "CAPABILITY_DENIED" | "AUTHORITY_WIDENING" | "VERSION_MISMATCH" | "OPERATION_DENIED" | "PRODUCT_NOT_FOUND" | "EXECUTION_FAILED" | "REPLAY_MISMATCH" | "EVIDENCE_MISMATCH", message: string) { super(message); this.name = "SovereignProductError"; }
 }
-
-function text(name: string, value: string): void {
-  if (value.length === 0) throw new SovereignProductError("INVALID_REQUEST", `${name} must not be empty`);
-}
-function positive(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value <= 0) throw new SovereignProductError("RESOURCE_EXHAUSTED", `${name} must be positive`);
-}
-function iso(name: string, value: string): void {
-  if (!Number.isFinite(Date.parse(value))) throw new SovereignProductError("INVALID_REQUEST", `${name} must be a valid timestamp`);
-}
-function unique(values: string[], label: string): void {
-  if (new Set(values).size !== values.length) throw new SovereignProductError("INVALID_REQUEST", `${label} identifiers must be unique`);
-}
-function subset(required: string[], available: string[]): boolean {
-  const set = new Set(available);
-  return required.every((value) => set.has(value));
-}
-function bytes(value: unknown): number {
-  return new TextEncoder().encode(stableStringify(value)).byteLength;
-}
-function clone<T>(value: T): T {
-  return structuredClone(value);
-}
-function validateLimits(limits: SifProductAdapterLimits): void {
-  for (const [key, value] of Object.entries(limits)) positive(key, value as number);
-}
+function text(name: string, value: string): void { if (value.length === 0) throw new SovereignProductError("INVALID_REQUEST", `${name} must not be empty`); }
+function positive(name: string, value: number): void { if (!Number.isSafeInteger(value) || value <= 0) throw new SovereignProductError("RESOURCE_EXHAUSTED", `${name} must be positive`); }
+function iso(name: string, value: string): void { if (!Number.isFinite(Date.parse(value))) throw new SovereignProductError("INVALID_REQUEST", `${name} must be a valid timestamp`); }
+function unique(values: string[], label: string): void { if (new Set(values).size !== values.length) throw new SovereignProductError("INVALID_REQUEST", `${label} identifiers must be unique`); }
+function subset(required: string[], available: string[]): boolean { const set = new Set(available); return required.every((value) => set.has(value)); }
+function bytes(value: unknown): number { return new TextEncoder().encode(stableStringify(value)).byteLength; }
+function clone<T>(value: T): T { return structuredClone(value); }
+function validateLimits(limits: SifProductAdapterLimits): void { for (const [key, value] of Object.entries(limits)) positive(key, value as number); }
 function validateDescriptor(descriptor: SifProductDescriptor, limits: SifProductAdapterLimits): void {
-  text("productId", descriptor.productId);
-  text("adapterVersion", descriptor.adapterVersion);
-  text("protocolVersion", descriptor.protocolVersion);
+  text("productId", descriptor.productId); text("adapterVersion", descriptor.adapterVersion); text("protocolVersion", descriptor.protocolVersion);
   if (descriptor.capabilities.length > limits.maxCapabilitiesPerAdapter) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Capability limit exceeded");
   if (descriptor.allowedOperations.length > limits.maxOperationsPerAdapter) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Operation limit exceeded");
-  unique(descriptor.capabilities.map((x) => x.capabilityId), "capability");
-  unique(descriptor.allowedAuthorityScopes, "authority");
-  unique(descriptor.allowedOperations, "operation");
+  unique(descriptor.capabilities.map((x) => x.capabilityId), "capability"); unique(descriptor.allowedAuthorityScopes, "authority"); unique(descriptor.allowedOperations, "operation");
   for (const capability of descriptor.capabilities) {
-    text("capabilityId", capability.capabilityId);
-    text("capability.version", capability.version);
-    unique(capability.authorityScopes, `capability:${capability.capabilityId}:authority`);
+    text("capabilityId", capability.capabilityId); text("capability.version", capability.version); unique(capability.authorityScopes, `capability:${capability.capabilityId}:authority`);
     if (!subset(capability.authorityScopes, descriptor.allowedAuthorityScopes)) throw new SovereignProductError("INVALID_DESCRIPTOR", `Capability ${capability.capabilityId} exceeds adapter authority`);
   }
 }
-
 function normalizeRequest(request: SifProductRequest, limits: SifProductAdapterLimits): SifProductRequest {
-  validateLimits(limits);
-  text("requestId", request.requestId);
-  text("productId", request.productId);
-  text("adapterVersion", request.adapterVersion);
-  text("operation", request.operation);
-  iso("createdAt", request.createdAt);
+  validateLimits(limits); text("requestId", request.requestId); text("productId", request.productId); text("adapterVersion", request.adapterVersion); text("operation", request.operation); iso("createdAt", request.createdAt);
   if (request.requestedCapabilities.length > limits.maxCapabilitiesPerAdapter) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Requested capability limit exceeded");
   if (request.evidenceIds.length > limits.maxEvidenceRefs) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Evidence reference limit exceeded");
-  unique(request.requestedCapabilities, "requested capability");
-  unique(request.authorityScopes, "authority");
-  unique(request.evidenceIds, "evidence");
+  unique(request.requestedCapabilities, "requested capability"); unique(request.authorityScopes, "authority"); unique(request.evidenceIds, "evidence");
   if (bytes(request.payload) > limits.maxRequestBytes) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Product request payload exceeds byte limit");
-  return {
-    ...request,
-    requestedCapabilities: [...request.requestedCapabilities].sort(),
-    authorityScopes: [...request.authorityScopes].sort(),
-    evidenceIds: [...request.evidenceIds].sort(),
-    payload: clone(request.payload),
-    createdAt: new Date(request.createdAt).toISOString(),
-  };
+  return { ...request, requestedCapabilities: [...request.requestedCapabilities].sort(), authorityScopes: [...request.authorityScopes].sort(), evidenceIds: [...request.evidenceIds].sort(), payload: clone(request.payload), createdAt: new Date(request.createdAt).toISOString() };
 }
-
-export function computeProductRequestDigest(request: SifProductRequest, limits: SifProductAdapterLimits): string {
-  return digest(normalizeRequest(request, limits));
-}
-
-function computeResponseDigest(response: Omit<SifProductResponse, "responseDigest">): string {
-  return digest(response);
-}
-
+export function computeProductRequestDigest(request: SifProductRequest, limits: SifProductAdapterLimits): string { return digest(normalizeRequest(request, limits)); }
+function computeResponseDigest(response: Omit<SifProductResponse, "responseDigest">): string { return digest(response); }
 function buildFailureResponse(request: SifProductRequest, descriptor: SifProductDescriptor, status: ProductEvaluationStatus, reason: string, requestDigest = ""): SifProductResponse {
-  const base = {
-    requestId: request.requestId,
-    productId: descriptor.productId,
-    adapterVersion: descriptor.adapterVersion,
-    operation: request.operation,
-    status,
-    requestDigest,
-    capabilityIds: [...request.requestedCapabilities].sort(),
-    authorityScopes: [...request.authorityScopes].sort(),
-    evidenceIds: [...request.evidenceIds].sort(),
-    reason,
-  };
+  const base = { requestId: request.requestId, productId: descriptor.productId, adapterVersion: descriptor.adapterVersion, operation: request.operation, status, requestDigest, capabilityIds: [...request.requestedCapabilities].sort(), authorityScopes: [...request.authorityScopes].sort(), evidenceIds: [...request.evidenceIds].sort(), reason };
   return { ...base, responseDigest: computeResponseDigest(base) };
 }
 
 class DefinedSifProductAdapter implements SifProductAdapter {
-  private readonly descriptorValue: SifProductDescriptor;
-  private readonly limits: SifProductAdapterLimits;
-  private readonly handlers: ReadonlyMap<string, ProductOperationHandler>;
+  private readonly descriptorValue: SifProductDescriptor; private readonly limits: SifProductAdapterLimits; private readonly handlers: ReadonlyMap<string, ProductOperationHandler>;
   constructor(descriptor: SifProductDescriptor, handlers: ReadonlyMap<string, ProductOperationHandler>, limits: SifProductAdapterLimits) {
-    validateDescriptor(descriptor, limits);
-    for (const operation of handlers.keys()) if (!descriptor.allowedOperations.includes(operation)) throw new SovereignProductError("INVALID_DESCRIPTOR", `Handler ${operation} is not declared by descriptor`);
-    this.descriptorValue = clone(descriptor);
-    this.handlers = new Map(handlers);
-    this.limits = { ...limits };
+    validateDescriptor(descriptor, limits); for (const operation of handlers.keys()) if (!descriptor.allowedOperations.includes(operation)) throw new SovereignProductError("INVALID_DESCRIPTOR", `Handler ${operation} is not declared by descriptor`);
+    this.descriptorValue = clone(descriptor); this.handlers = new Map(handlers); this.limits = { ...limits };
   }
-  get descriptor(): SifProductDescriptor {
-    return clone(this.descriptorValue);
-  }
+  get descriptor(): SifProductDescriptor { return clone(this.descriptorValue); }
   async execute(request: SifProductRequest): Promise<SifProductResponse> {
     let normalized: SifProductRequest;
-    try {
-      normalized = normalizeRequest(request, this.limits);
-    } catch (error) {
-      const status = error instanceof SovereignProductError && error.code === "RESOURCE_EXHAUSTED" ? "UNAVAILABLE" : "FAIL";
-      return buildFailureResponse(request, this.descriptorValue, status, String(error));
-    }
-    const requestDigest = digest(normalized);
-    const descriptor = this.descriptorValue;
+    try { normalized = normalizeRequest(request, this.limits); } catch (error) { const status = error instanceof SovereignProductError && error.code === "RESOURCE_EXHAUSTED" ? "UNAVAILABLE" : "FAIL"; return buildFailureResponse(request, this.descriptorValue, status, String(error)); }
+    const requestDigest = digest(normalized); const descriptor = this.descriptorValue;
     if (normalized.productId !== descriptor.productId) return buildFailureResponse(normalized, descriptor, "UNAVAILABLE", "Product adapter identity mismatch", requestDigest);
     if (normalized.adapterVersion !== descriptor.adapterVersion) return buildFailureResponse(normalized, descriptor, "UNAVAILABLE", "Adapter version mismatch", requestDigest);
     if (!descriptor.allowedOperations.includes(normalized.operation)) return buildFailureResponse(normalized, descriptor, "FAIL", "Operation is not exposed by this adapter", requestDigest);
     const capabilityMap = new Map(descriptor.capabilities.map((capability) => [capability.capabilityId, capability]));
     if (!subset(normalized.requestedCapabilities, [...capabilityMap.keys()])) return buildFailureResponse(normalized, descriptor, "FAIL", "Requested capability is not exposed by this adapter", requestDigest);
-    for (const capabilityId of normalized.requestedCapabilities) {
-      const capability = capabilityMap.get(capabilityId);
-      if (capability === undefined || !subset(capability.authorityScopes, normalized.authorityScopes)) return buildFailureResponse(normalized, descriptor, "FAIL", `Authority required by capability ${capabilityId} is not present`, requestDigest);
-    }
+    for (const capabilityId of normalized.requestedCapabilities) { const capability = capabilityMap.get(capabilityId); if (capability === undefined || !subset(capability.authorityScopes, normalized.authorityScopes)) return buildFailureResponse(normalized, descriptor, "FAIL", `Authority required by capability ${capabilityId} is not present`, requestDigest); }
     if (!subset(normalized.authorityScopes, descriptor.allowedAuthorityScopes)) return buildFailureResponse(normalized, descriptor, "FAIL", "Requested authority exceeds adapter authority", requestDigest);
-    const handler = this.handlers.get(normalized.operation);
-    if (!handler) return buildFailureResponse(normalized, descriptor, "UNAVAILABLE", "No implementation handler is bound for operation", requestDigest);
-    let output: unknown;
-    try {
-      output = await handler({ request: clone(normalized), descriptor: clone(descriptor), requestDigest });
-    } catch (error) {
-      return buildFailureResponse(normalized, descriptor, "INDETERMINATE", `Operation handler failed: ${String(error)}`, requestDigest);
-    }
+    const handler = this.handlers.get(normalized.operation); if (!handler) return buildFailureResponse(normalized, descriptor, "UNAVAILABLE", "No implementation handler is bound for operation", requestDigest);
+    let output: unknown; try { output = await handler({ request: clone(normalized), descriptor: clone(descriptor), requestDigest }); } catch (error) { return buildFailureResponse(normalized, descriptor, "INDETERMINATE", `Operation handler failed: ${String(error)}`, requestDigest); }
     if (bytes(output) > this.limits.maxResponseBytes) return buildFailureResponse(normalized, descriptor, "FAIL", "Product response exceeds byte limit", requestDigest);
-    const base = {
-      requestId: normalized.requestId,
-      productId: descriptor.productId,
-      adapterVersion: descriptor.adapterVersion,
-      operation: normalized.operation,
-      status: "PASS" as const,
-      requestDigest,
-      capabilityIds: [...normalized.requestedCapabilities],
-      authorityScopes: [...normalized.authorityScopes],
-      evidenceIds: [...normalized.evidenceIds],
-      output: clone(output),
-    };
+    const base = { requestId: normalized.requestId, productId: descriptor.productId, adapterVersion: descriptor.adapterVersion, operation: normalized.operation, status: "PASS" as const, requestDigest, capabilityIds: [...normalized.requestedCapabilities], authorityScopes: [...normalized.authorityScopes], evidenceIds: [...normalized.evidenceIds], output: clone(output) };
     return { ...base, responseDigest: computeResponseDigest(base) };
   }
 }
-
-function makeDescriptor(productId: SovereignProductId, capabilities: SifProductCapability[], allowedAuthorityScopes: string[], allowedOperations: string[]): SifProductDescriptor {
-  return { productId, adapterVersion: "1.0.0", protocolVersion: "1.0", capabilities, allowedAuthorityScopes, allowedOperations };
-}
-
-function makeAdapter(productId: SovereignProductId, capabilities: SifProductCapability[], allowedOperations: string[], handlerMap: Record<string, ProductOperationHandler>, limits: SifProductAdapterLimits): SifProductAdapter {
-  const authorityScopes = [...new Set(capabilities.flatMap((x) => x.authorityScopes))].sort();
-  return new DefinedSifProductAdapter(makeDescriptor(productId, capabilities, authorityScopes, allowedOperations), new Map(Object.entries(handlerMap)), limits);
-}
-
-const DEFAULT_LIMITS: SifProductAdapterLimits = {
-  maxAdapters: 16,
-  maxCapabilitiesPerAdapter: 32,
-  maxOperationsPerAdapter: 32,
-  maxRequestBytes: 64 * 1024,
-  maxResponseBytes: 128 * 1024,
-  maxEvidenceRefs: 32,
-  maxLedgerRecords: 1024,
-};
-
-export function defaultSifProductAdapterLimits(): SifProductAdapterLimits {
-  return { ...DEFAULT_LIMITS };
-}
-
-const LARA_CAPABILITIES: SifProductCapability[] = [
-  { capabilityId: "sif.policy.check", plane: "POLICY", version: "1", mode: "READ", authorityScopes: ["product:lara:read"] },
-  { capabilityId: "sif.knowledge.query", plane: "KNOWLEDGE", version: "1", mode: "READ", authorityScopes: ["product:lara:read"] },
-  { capabilityId: "sif.evaluation.run", plane: "OBSERVABILITY", version: "1", mode: "CONTROLLED", authorityScopes: ["product:lara:execute"] },
-  { capabilityId: "sif.systemic.query", plane: "SYSTEMIC", version: "1", mode: "READ", authorityScopes: ["product:lara:read"] },
-  { capabilityId: "sif.continuity.read", plane: "CONTINUITY", version: "1", mode: "READ", authorityScopes: ["product:lara:read"] },
-];
-const QADRIX_CAPABILITIES: SifProductCapability[] = [
-  { capabilityId: "sif.policy.check", plane: "POLICY", version: "1", mode: "READ", authorityScopes: ["product:qadrix:read"] },
-  { capabilityId: "sif.knowledge.query", plane: "KNOWLEDGE", version: "1", mode: "READ", authorityScopes: ["product:qadrix:read"] },
-  { capabilityId: "sif.evaluation.run", plane: "OBSERVABILITY", version: "1", mode: "CONTROLLED", authorityScopes: ["product:qadrix:execute"] },
-  { capabilityId: "sif.continuity.read", plane: "CONTINUITY", version: "1", mode: "READ", authorityScopes: ["product:qadrix:read"] },
-];
-const LIBRARY_CAPABILITIES: SifProductCapability[] = [
-  { capabilityId: "sif.knowledge.query", plane: "KNOWLEDGE", version: "1", mode: "READ", authorityScopes: ["product:library:read"] },
-  { capabilityId: "sif.evaluation.run", plane: "OBSERVABILITY", version: "1", mode: "CONTROLLED", authorityScopes: ["product:library:execute"] },
-  { capabilityId: "sif.continuity.read", plane: "CONTINUITY", version: "1", mode: "READ", authorityScopes: ["product:library:read"] },
-  { capabilityId: "sif.federation.inspect", plane: "FEDERATION", version: "1", mode: "READ", authorityScopes: ["product:library:read"] },
-];
-
-export function createLaraOsReieAdapter(handlers: Record<string, ProductOperationHandler>, limits = DEFAULT_LIMITS): SifProductAdapter {
-  return makeAdapter("LARA_OS_REIE", LARA_CAPABILITIES, ["policy.check", "knowledge.query", "evaluation.run", "systemic.query", "continuity.read"], handlers, limits);
-}
-export function createQadrixAdapter(handlers: Record<string, ProductOperationHandler>, limits = DEFAULT_LIMITS): SifProductAdapter {
-  return makeAdapter("QADRIX", QADRIX_CAPABILITIES, ["policy.check", "knowledge.query", "evaluation.run", "continuity.read"], handlers, limits);
-}
-export function createSovereignLibraryAdapter(handlers: Record<string, ProductOperationHandler>, limits = DEFAULT_LIMITS): SifProductAdapter {
-  return makeAdapter("SOVEREIGN_LIBRARY", LIBRARY_CAPABILITIES, ["knowledge.query", "evaluation.run", "continuity.read", "federation.inspect"], handlers, limits);
-}
-
+function makeDescriptor(productId: SovereignProductId, capabilities: SifProductCapability[], allowedAuthorityScopes: string[], allowedOperations: string[]): SifProductDescriptor { return { productId, adapterVersion: "1.0.0", protocolVersion: "1.0", capabilities, allowedAuthorityScopes, allowedOperations }; }
+function makeAdapter(productId: SovereignProductId, capabilities: SifProductCapability[], allowedOperations: string[], handlerMap: Record<string, ProductOperationHandler>, limits: SifProductAdapterLimits): SifProductAdapter { const authorityScopes = [...new Set(capabilities.flatMap((x) => x.authorityScopes))].sort(); return new DefinedSifProductAdapter(makeDescriptor(productId, capabilities, authorityScopes, allowedOperations), new Map(Object.entries(handlerMap)), limits); }
+const DEFAULT_LIMITS: SifProductAdapterLimits = { maxAdapters: 16, maxCapabilitiesPerAdapter: 32, maxOperationsPerAdapter: 32, maxRequestBytes: 64 * 1024, maxResponseBytes: 128 * 1024, maxEvidenceRefs: 32, maxLedgerRecords: 1024 };
+export function defaultSifProductAdapterLimits(): SifProductAdapterLimits { return { ...DEFAULT_LIMITS }; }
+const LARA_CAPABILITIES: SifProductCapability[] = [ { capabilityId: "sif.policy.check", plane: "POLICY", version: "1", mode: "READ", authorityScopes: ["product:lara:read"] }, { capabilityId: "sif.knowledge.query", plane: "KNOWLEDGE", version: "1", mode: "READ", authorityScopes: ["product:lara:read"] }, { capabilityId: "sif.evaluation.run", plane: "OBSERVABILITY", version: "1", mode: "CONTROLLED", authorityScopes: ["product:lara:execute"] }, { capabilityId: "sif.systemic.query", plane: "SYSTEMIC", version: "1", mode: "READ", authorityScopes: ["product:lara:read"] }, { capabilityId: "sif.continuity.read", plane: "CONTINUITY", version: "1", mode: "READ", authorityScopes: ["product:lara:read"] } ];
+const QADRIX_CAPABILITIES: SifProductCapability[] = [ { capabilityId: "sif.policy.check", plane: "POLICY", version: "1", mode: "READ", authorityScopes: ["product:qadrix:read"] }, { capabilityId: "sif.knowledge.query", plane: "KNOWLEDGE", version: "1", mode: "READ", authorityScopes: ["product:qadrix:read"] }, { capabilityId: "sif.evaluation.run", plane: "OBSERVABILITY", version: "1", mode: "CONTROLLED", authorityScopes: ["product:qadrix:execute"] }, { capabilityId: "sif.continuity.read", plane: "CONTINUITY", version: "1", mode: "READ", authorityScopes: ["product:qadrix:read"] } ];
+const LIBRARY_CAPABILITIES: SifProductCapability[] = [ { capabilityId: "sif.knowledge.query", plane: "KNOWLEDGE", version: "1", mode: "READ", authorityScopes: ["product:library:read"] }, { capabilityId: "sif.evaluation.run", plane: "OBSERVABILITY", version: "1", mode: "CONTROLLED", authorityScopes: ["product:library:execute"] }, { capabilityId: "sif.continuity.read", plane: "CONTINUITY", version: "1", mode: "READ", authorityScopes: ["product:library:read"] }, { capabilityId: "sif.federation.inspect", plane: "FEDERATION", version: "1", mode: "READ", authorityScopes: ["product:library:read"] } ];
+export function createLaraOsReieAdapter(handlers: Record<string, ProductOperationHandler>, limits = DEFAULT_LIMITS): SifProductAdapter { return makeAdapter("LARA_OS_REIE", LARA_CAPABILITIES, ["policy.check", "knowledge.query", "evaluation.run", "systemic.query", "continuity.read"], handlers, limits); }
+export function createQadrixAdapter(handlers: Record<string, ProductOperationHandler>, limits = DEFAULT_LIMITS): SifProductAdapter { return makeAdapter("QADRIX", QADRIX_CAPABILITIES, ["policy.check", "knowledge.query", "evaluation.run", "continuity.read"], handlers, limits); }
+export function createSovereignLibraryAdapter(handlers: Record<string, ProductOperationHandler>, limits = DEFAULT_LIMITS): SifProductAdapter { return makeAdapter("SOVEREIGN_LIBRARY", LIBRARY_CAPABILITIES, ["knowledge.query", "evaluation.run", "continuity.read", "federation.inspect"], handlers, limits); }
 export class SifProductAdapterRegistry {
-  private readonly adapters = new Map<string, SifProductAdapter>();
-  constructor(private readonly limits: SifProductAdapterLimits = DEFAULT_LIMITS) { validateLimits(limits); }
-  register(adapter: SifProductAdapter): void {
-    validateDescriptor(adapter.descriptor, this.limits);
-    if (this.adapters.size >= this.limits.maxAdapters && !this.adapters.has(adapter.descriptor.productId)) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Product adapter limit exceeded");
-    if (this.adapters.has(adapter.descriptor.productId)) throw new SovereignProductError("INVALID_DESCRIPTOR", "Product adapter already registered");
-    this.adapters.set(adapter.descriptor.productId, adapter);
-  }
-  get(productId: SovereignProductId): SifProductAdapter {
-    const adapter = this.adapters.get(productId);
-    if (!adapter) throw new SovereignProductError("PRODUCT_NOT_FOUND", `No adapter registered for ${productId}`);
-    return adapter;
-  }
-  listDescriptors(): SifProductDescriptor[] {
-    return [...this.adapters.values()].map((adapter) => clone(adapter.descriptor)).sort((a, b) => a.productId.localeCompare(b.productId));
-  }
-  async dispatch(request: SifProductRequest): Promise<SifProductResponse> {
-    const adapter = this.adapters.get(request.productId);
-    if (!adapter) return buildFailureResponse(request, { productId: request.productId, adapterVersion: request.adapterVersion, protocolVersion: "unknown", capabilities: [], allowedAuthorityScopes: [], allowedOperations: [] }, "UNAVAILABLE", "No product adapter is registered");
-    return adapter.execute(request);
-  }
+  private readonly adapters = new Map<string, SifProductAdapter>(); constructor(private readonly limits: SifProductAdapterLimits = DEFAULT_LIMITS) { validateLimits(limits); }
+  register(adapter: SifProductAdapter): void { validateDescriptor(adapter.descriptor, this.limits); if (this.adapters.size >= this.limits.maxAdapters && !this.adapters.has(adapter.descriptor.productId)) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Product adapter limit exceeded"); if (this.adapters.has(adapter.descriptor.productId)) throw new SovereignProductError("INVALID_DESCRIPTOR", "Product adapter already registered"); this.adapters.set(adapter.descriptor.productId, adapter); }
+  get(productId: SovereignProductId): SifProductAdapter { const adapter = this.adapters.get(productId); if (!adapter) throw new SovereignProductError("PRODUCT_NOT_FOUND", `No adapter registered for ${productId}`); return adapter; }
+  listDescriptors(): SifProductDescriptor[] { return [...this.adapters.values()].map((adapter) => clone(adapter.descriptor)).sort((a, b) => a.productId.localeCompare(b.productId)); }
+  async dispatch(request: SifProductRequest): Promise<SifProductResponse> { const adapter = this.adapters.get(request.productId); if (!adapter) return buildFailureResponse(request, { productId: request.productId, adapterVersion: request.adapterVersion, protocolVersion: "unknown", capabilities: [], allowedAuthorityScopes: [], allowedOperations: [] }, "UNAVAILABLE", "No product adapter is registered"); return adapter.execute(request); }
 }
-
 export class InMemoryProductEvidenceLedger {
   private readonly records: ProductEvidenceRecord[] = [];
-  constructor(private readonly maxRecords = DEFAULT_LIMITS.maxLedgerRecords) {
-    positive("maxRecords", maxRecords);
-  }
-  append(response: SifProductResponse, recordedAt = new Date().toISOString()): ProductEvidenceRecord {
-    if (this.records.length >= this.maxRecords) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Product evidence ledger limit exceeded");
-    iso("recordedAt", recordedAt);
-    const base = {
-      sequence: this.records.length + 1,
-      productId: response.productId,
-      requestDigest: response.requestDigest,
-      responseDigest: response.responseDigest,
-      recordedAt: new Date(recordedAt).toISOString(),
-      previousDigest: this.records.length === 0 ? null : this.records[this.records.length - 1].recordDigest,
-    };
-    const record = { ...base, recordDigest: digest(base) };
-    this.records.push(record);
-    return clone(record);
-  }
+  constructor(private readonly maxRecords = DEFAULT_LIMITS.maxLedgerRecords) { positive("maxRecords", maxRecords); }
+  append(response: SifProductResponse, recordedAt = new Date().toISOString()): ProductEvidenceRecord { if (this.records.length >= this.maxRecords) throw new SovereignProductError("RESOURCE_EXHAUSTED", "Product evidence ledger limit exceeded"); iso("recordedAt", recordedAt); const base = { sequence: this.records.length + 1, productId: response.productId, requestDigest: response.requestDigest, responseDigest: response.responseDigest, recordedAt: new Date(recordedAt).toISOString(), previousDigest: this.records.length === 0 ? null : this.records[this.records.length - 1].recordDigest }; const record = { ...base, recordDigest: digest(base) }; this.records.push(record); return clone(record); }
   list(): ProductEvidenceRecord[] { return clone(this.records); }
-  verify(records: ProductEvidenceRecord[] = this.records): void {
-    let previous: string | null = null;
-    for (let index = 0; index < records.length; index += 1) {
-      const record = records[index];
-      if (record.sequence !== index + 1 || record.previousDigest !== previous) throw new SovereignProductError("EVIDENCE_MISMATCH", "Product evidence chain linkage failed");
-      const { recordDigest: _ignored, ...base } = record;
-      if (digest(base) !== record.recordDigest) throw new SovereignProductError("EVIDENCE_MISMATCH", "Product evidence record digest mismatch");
-      previous = record.recordDigest;
-    }
-  }
+  verify(records: ProductEvidenceRecord[] = this.records): void { let previous: string | null = null; for (let index = 0; index < records.length; index += 1) { const record = records[index]!; if (record.sequence !== index + 1 || record.previousDigest !== previous) throw new SovereignProductError("EVIDENCE_MISMATCH", "Product evidence chain linkage failed"); const { recordDigest: _ignored, ...base } = record; if (digest(base) !== record.recordDigest) throw new SovereignProductError("EVIDENCE_MISMATCH", "Product evidence record digest mismatch"); previous = record.recordDigest; } }
 }
-
-export function verifySifProductReplay(request: SifProductRequest, recorded: SifProductResponse, limits = DEFAULT_LIMITS): void {
-  const requestDigest = computeProductRequestDigest(request, limits);
-  if (requestDigest !== recorded.requestDigest) throw new SovereignProductError("REPLAY_MISMATCH", "Product replay request digest mismatch");
-  const { responseDigest: _ignored, ...base } = recorded;
-  if (computeResponseDigest(base) !== recorded.responseDigest) throw new SovereignProductError("REPLAY_MISMATCH", "Product replay response digest mismatch");
-}
+export function verifySifProductReplay(request: SifProductRequest, recorded: SifProductResponse, limits = DEFAULT_LIMITS): void { const requestDigest = computeProductRequestDigest(request, limits); if (requestDigest !== recorded.requestDigest) throw new SovereignProductError("REPLAY_MISMATCH", "Product replay request digest mismatch"); const { responseDigest: _ignored, ...base } = recorded; if (computeResponseDigest(base) !== recorded.responseDigest) throw new SovereignProductError("REPLAY_MISMATCH", "Product replay response digest mismatch"); }

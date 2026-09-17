@@ -24,5 +24,8 @@
     "test": "npm run build && node --test dist/test/*.test.js",
     "check": "npm test",
     "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
   }
 }

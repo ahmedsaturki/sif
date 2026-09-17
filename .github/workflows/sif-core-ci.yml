@@ -2,7 +2,7 @@ name: SIF Core CI
 
 on:
   push:
-    branches: [main, 'feat/**']
+    branches: [main, 'feat/**', 'chore/**']
 
 concurrency:
   group: sif-core-ci-${{ github.workflow }}-${{ github.ref_name }}
@@ -44,7 +44,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: 22
+          node-version: 22.23.2
+      - name: Install deterministic build toolchain
+        working-directory: packages/sif-core
+        shell: bash
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify deterministic TypeScript compiler
+        working-directory: packages/sif-core
+        shell: bash
+        run: npx --no-install tsc --version
       - name: Verify artifact identity manifest
         shell: bash
         run: |

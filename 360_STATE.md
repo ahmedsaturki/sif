@@ -49,6 +49,8 @@ The exact-head unpublished candidate artifact recorded digest `sha256:d10d1b5885
 
 PR #11 then promoted the verified Phase 9 tree into `feat/sif-core-1.2.0-reflexive-continuity` with merge commit `b9345786727cbd2692447d1ce53d472d7670b3df`.
 
+The promoted line has no implementation or documentation changes after the promotion reconciliation other than the final state record itself; a fresh exact-head CI run is required for this final promoted HEAD before treating its new commit identity as the last verification record.
+
 ## Release / Promotion State
 - `sif-core` package remains `0.5.0`.
 - Phase 9 implementation and verification are complete.

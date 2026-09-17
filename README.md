@@ -44,7 +44,7 @@ The connected GitHub administration surface currently exposes no active Rulesets
 
 The current Phase 0–9 roadmap is closed. No Phase 10 is defined. No merge to `main`, package publication, release tag, production deployment, or direct external product integration is implied.
 
-All PRs #1–#13 are closed. PRs #9–#13 completed the later promotion/hardening chain; PRs #1–#6 are retained only as closed historical candidate records.
+All PRs #1–#15 are closed. PRs #9–#13 completed the later promotion/hardening chain; PRs #14–#15 completed final documentation reconciliation. PRs #1–#6 are retained only as closed historical candidate records.
 
 ## Cleanup note
 

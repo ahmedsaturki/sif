@@ -44,7 +44,7 @@ The Phase 9 implementation anchor `fdb2a2e542f1745612e0617668258550bba5b12f` pas
 
 The corresponding unpublished candidate artifact was created from that exact implementation HEAD and the workflow recorded artifact digest `sha256:271f5af78b8d585476b8eef815402ed99889b1ebd281469b3aab642cec0e2351`.
 
-Two documentation-only reconciliation commits followed the verified implementation to correct and complete `360_STATE.md` and `IMPLEMENTATION_LOG.md`. The repository release discipline therefore requires a fresh exact-head workflow on the resulting branch HEAD before that latest HEAD is treated as the final authoritative verified candidate.
+Subsequent documentation-only reconciliation commits corrected and completed `360_STATE.md`, `IMPLEMENTATION_LOG.md`, `ROADMAP.md`, `README.md`, and the Phase 9 test matrix without changing the Phase 9 implementation. The repository release discipline therefore requires a fresh exact-head workflow on the resulting branch HEAD before that latest HEAD is treated as the authoritative verified candidate.
 
 Dynamic workflow run IDs and artifact IDs are not treated as mutable state; exact commit identity plus CI/artifact evidence remains authoritative.
 

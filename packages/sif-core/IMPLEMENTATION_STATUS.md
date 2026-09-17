@@ -2,7 +2,7 @@
 
 ## Package identity
 
-The package identity remains `sif-core@0.5.0`. The current canonical cumulative preservation line is `feat/sif-core-1.0.0-knowledge-semantic`, carrying the verified Phase 2–9 implementation and promotion history while `main` remains the preserved Genesis line by design.
+The package identity remains `sif-core@0.5.0`. The canonical cumulative preservation line is `feat/sif-core-1.0.0-knowledge-semantic`, carrying the verified Phase 2–9 implementation and promotion history while `main` remains the preserved Genesis line by design.
 
 ## Verified implementation scope
 
@@ -21,12 +21,12 @@ F6-001..F6-060, F7-001..F7-060, F8-001..F8-060, and F9-001..F9-060 are executabl
 
 ## Verification rule
 
-The authoritative candidate identity is the exact branch HEAD. The authoritative verification record is a successful SIF Core CI run whose `head_sha` exactly equals that candidate. The current canonical preservation state is `5a57827bb52a5e82a59dfa329ab77bcd659eea85`; its live verification is the exact-head SIF Core CI run associated with that SHA.
+The canonical preservation branch is the authoritative current source state. Its current HEAD is accepted as verified only when a SIF Core CI run checks out that exact `head_sha` and every verification gate succeeds. Current-state documentation intentionally avoids embedding dynamic run IDs, artifact IDs, or the current branch SHA.
 
 The established full verification gate covers exact checkout and identity, strict build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox crash-window characterization, PostgreSQL crash-window characterization, unpublished candidate archive construction and verification, artifact upload, and cleanup.
 
 ## Release boundary
 
-Phase 0–9 implementation, verification, and promotion work is complete for the currently defined roadmap. No package version bump, registry publication, merge to `main`, release tag, production deployment, direct external product integration, autonomous external action, or automatic authority promotion is implied by this verification state.
+Phase 0–9 implementation, verification, and promotion work is complete for the currently defined roadmap. No package version bump, registry publication, merge to `main`, release tag, production deployment, direct external product integration, autonomous external action, or automatic authority promotion is implied by the verification state.
 
 No Phase 10 is currently defined. Any future phase requires a new explicit specification and evidence-gated implementation cycle.

@@ -13,7 +13,6 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Implemented an append-only semantic operation log with deterministic operation identity and replay snapshots bound to ontology/version filters.
 - Implemented explicit legacy handoff preserving legacy identity, evidence/provenance, semantic version, and non-widening authority semantics.
 - Added executable F6-001..F6-060 acceptance coverage.
-- Re-anchored the candidate directly to the verified Phase 5 HEAD and re-ran exact-head CI successfully across build/tests, PostgreSQL, both crash windows, archive verification, and artifact upload.
 
 ## Phase 7 — Systemic / Ecological Plane
 
@@ -27,7 +26,6 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Implemented semantic-state digest validation and cross-phase evidence references without authority escalation.
 - Kept the simulation boundary free of external network, shell, database mutation, or autonomous real-world action interfaces.
 - Added executable F7-001..F7-060 acceptance coverage.
-- Selected the more complete systemic implementation line and closed the older duplicate Phase 7 PR. Re-anchored the canonical candidate directly to the verified Phase 6 HEAD.
 - Exact-head CI passed the Phase 7 candidate across strict build/tests, live PostgreSQL integration, both crash windows, archive verification, artifact upload, and cleanup.
 
 ## Phase 8 — Reflexive / Continuity Plane
@@ -38,7 +36,8 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Implemented controlled improvement proposals bound to a base identity/snapshot, explicit target state, required evaluations, preserved-or-narrowed authority, and generation increments.
 - Implemented review and succession constraints so approval requires matching evidence and cannot widen authority.
 - Implemented preservation manifests, reconstruction verification, bounded proposal/certificate storage, and deterministic continuity replay.
-- Executable F8-001..F8-060 acceptance coverage is preserved and regression-tested by the later Phase 9 candidate CI.
+- Added executable F8-001..F8-060 acceptance coverage.
+- Exact-head CI passed the Phase 8 implementation and the later cumulative Phase 8+9 line before promotion.
 
 ## Phase 9 — Sovereign Products
 
@@ -52,16 +51,25 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Implemented request/response replay verification with deterministic digest binding and `REPLAY_MISMATCH` failure on tampering.
 - Added executable F9-001..F9-060 acceptance coverage.
 - Fixed the adapter boundary so injected handlers for operations not exposed by a descriptor are ignored instead of becoming a constructor-time false failure; exposed operations still require a bound handler and remain `UNAVAILABLE` when not implemented.
-- Exact-head CI passed implementation HEAD `e1a0b5d47caabd61016cad92b0bc31c83ef01693`, including strict build/tests, live PostgreSQL integration, both crash-window characterizations, archive construction/verification, artifact upload, and cleanup.
-- Promoted Phase 9 into `feat/sif-core-1.2.0-reflexive-continuity` through PR #11 with merge commit `b9345786727cbd2692447d1ce53d472d7670b3df`.
+- Exact-head CI passed implementation HEAD `e1a0b5d47caabd61016cad92b0bc31c83ef01693` in Run #530.
+
+## Final Promotion Chain
+
+- Phase 9 was promoted into `feat/sif-core-1.2.0-reflexive-continuity` through PR #11 at merge commit `b9345786727cbd2692447d1ce53d472d7670b3df`.
+- The cumulative Phase 8+9 line was exact-head verified at `ec0a37072bca89313e15bd03a9902b145e3e801d` in Run `35255909084`, then promoted through PR #10 at merge commit `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
+- The cumulative Phase 7+8+9 line was exact-head verified at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` in Run `35256086808`, then promoted through PR #9 into `feat/sif-core-1.0.0-knowledge-semantic` at merge commit `77a605a936115815c2e833f6c4667f0e353aefbd`.
+- Each promotion preserved the exact verified implementation tree; no merge to `main` was performed.
+- Historical PRs #1–#6 are superseded candidate records; they are not required for the completed Phase 0–9 preservation chain.
 
 ## Final Verification Boundary
 
-The authoritative Phase 9 implementation evidence is the exact-head SIF Core CI Run #530 on `e1a0b5d47caabd61016cad92b0bc31c83ef01693`. It demonstrated 470/470 package tests passing, 7/7 live PostgreSQL integration tests passing, successful federated inbox crash-window characterization, successful PostgreSQL before-commit rollback and after-commit preservation characterization, successful unpublished archive build/verification, exact-head artifact upload, and cleanup.
+The cumulative promotion chain was re-verified at each promotion head. The final Phase 7+8+9 line passed 470/470 package tests, 7/7 live PostgreSQL integration tests, both crash-window characterizations, archive construction/verification, exact-head artifact provenance, and cleanup immediately before the final promotion into the Phase 6 preservation line.
 
-The uploaded exact-head artifact was `sif-core-unpublished-candidate-e1a0b5d47caabd61016cad92b0bc31c83ef01693` with digest `sha256:d10d1b5885b99acef71343214daa2194e9327b073da41aad0a72add65f2ec56a`.
+The latest pre-promotion cumulative artifact was `sif-core-unpublished-candidate-963a268e205fb0d2b0dcaf0e184a25ab91befd73` with digest `sha256:4270a743ca802944784f22a0beacec37b9589a8cc18c36b5dd6090ecdc2f7c63`.
 
-The promotion boundary is complete: PR #11 is merged into `feat/sif-core-1.2.0-reflexive-continuity`, while `main` remains intentionally preserved at the Genesis line. No package version bump, registry publication, release tag, production deployment, direct external product integration, automatic authority promotion, or autonomous external action is implied.
+The current package remains `sif-core@0.5.0`. No registry publication, release tag, production deployment, direct external product integration, automatic authority promotion, or autonomous external action is claimed. `main` remains the preserved Genesis line.
 
 ## Release Discipline
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
+
+Phase 0–9 is complete as the currently defined roadmap. No Phase 10 is currently defined.

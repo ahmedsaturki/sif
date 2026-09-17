@@ -1,41 +1,32 @@
-# SIF Core — 0.5.0 Kernel + Candidate Phases 2–7
+# SIF Core — 0.5.0 Kernel + Verified Phases 2–9
 
 ## Package identity
 
-The package identity remains `sif-core@0.5.0`. Later implementation milestones remain isolated candidate lines until a separate promotion/release decision.
+The package identity remains `sif-core@0.5.0`. The current canonical cumulative preservation line is `feat/sif-core-1.0.0-knowledge-semantic`, carrying the verified Phase 2–9 implementation and promotion history while `main` remains the preserved Genesis line by design.
 
-## Verified foundation
+## Verified implementation scope
 
-The core event-sourcing, integrity, CAS, authority, provenance, replay, persistence, outbox/inbox, worker, projection, federation, policy-governance, evaluation/observability, and knowledge/semantic primitives remain preserved and are regression-tested by later candidate CI.
+The preserved SIF Core tree contains the verified kernel foundation plus:
 
-## Phase 6 Knowledge / Semantic candidate
+- Phase 2 — Live PostgreSQL persistence and crash-window characterization;
+- Phase 3 — Secure federation, durable inbox, retry/recovery, and resource controls;
+- Phase 4 — Policy and governance with versioned policy bundles, fail-closed admission, attributable evidence, and bounded evaluation;
+- Phase 5 — Evaluation and observability with trace/evidence correlation, replay, fault injection, regression semantics, and promotion evidence;
+- Phase 6 — Knowledge / Semantic plane with versioned ontology, semantic compatibility, epistemic knowledge, provenance graph, semantic replay, and legacy handoff;
+- Phase 7 — Systemic / Ecological plane with deterministic bounded world-models, scenario events, strategy actions, institutions, experiments, replay, and cross-phase evidence;
+- Phase 8 — Reflexive / Continuity plane with self-model, snapshots, lineage, controlled improvement, succession, preservation manifests, reconstruction verification, and continuity replay;
+- Phase 9 — Sovereign Products with explicit version-pinned product adapters, deterministic request/response handling, fail-closed capability/authority/version/operation enforcement, append-only product evidence, and replay verification.
 
-The dedicated `feat/sif-core-1.0.0-knowledge-semantic` candidate adds immutable/versioned ontology lifecycle, deterministic semantic compatibility with fail-closed ambiguity handling, evidence-qualified temporal knowledge, contradiction detection, immutable provenance, semantic replay, legacy handoff with `authorityWidened: false`, and bounded resources.
-
-F6-001..F6-060 are executable in `packages/sif-core/test/knowledge-semantic-acceptance.test.ts`.
-
-## Phase 7 Systemic / Ecological candidate
-
-The dedicated `feat/sif-core-1.1.0-systemic-ecological-plane` candidate adds:
-
-- deterministic world-model identity spanning players, agents, strategies, markets, and institutions;
-- explicit reference validation and executable resource ceilings;
-- stable event ordering by `(step, id)` independent of input order;
-- strategy actions restricted to `SET`, `ADD`, and `MULTIPLY`;
-- institutional deny rules that block matching events before strategy actions;
-- bounded scenario branches and experiment digests bound to scenario identity;
-- deterministic replay descriptors and repeat-run determinism verification;
-- semantic-state digest validation and cross-phase evidence attribution;
-- no external network, shell, database mutation, or autonomous real-world action interface.
-
-F7-001..F7-060 are executable in `packages/sif-core/test/systemic-ecological-acceptance.test.ts`.
+F6-001..F6-060, F7-001..F7-060, F8-001..F8-060, and F9-001..F9-060 are executable acceptance coverage in the corresponding test suites.
 
 ## Verification rule
 
-The authoritative candidate identity is the branch HEAD. The authoritative verification record is a successful SIF Core CI run whose `head_sha` exactly equals that candidate. Dynamic CI run/artifact identifiers are intentionally excluded from mutable state documents to prevent self-invalidating provenance.
+The authoritative candidate identity is the exact branch HEAD. The authoritative verification record is a successful SIF Core CI run whose `head_sha` exactly equals that candidate. The final canonical preservation state is `1e72337789c79731368317bec01bff263eeb9e0a`, verified by SIF Core CI Run `35256893363` / check run `105322634515` with every gate completing successfully.
+
+The final verification covered exact checkout and identity, strict build/tests, live PostgreSQL integration, federated inbox crash-window characterization, PostgreSQL crash-window characterization, unpublished candidate archive construction and verification, artifact upload, and cleanup.
 
 ## Release boundary
 
-No package version bump, registry publication, merge to `main`, production simulation deployment, real-world forecasting claim, autonomous action, or authority promotion is implied by candidate verification.
+Phase 0–9 implementation, verification, and promotion work is complete for the currently defined roadmap. No package version bump, registry publication, merge to `main`, release tag, production deployment, direct external product integration, autonomous external action, or automatic authority promotion is implied by this verification state.
 
-See the phase specifications, implementation contracts, test matrices, evidence ledgers, and CI records for exact boundaries.
+No Phase 10 is currently defined. Any future phase requires a new explicit specification and evidence-gated implementation cycle.

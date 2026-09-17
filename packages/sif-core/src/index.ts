@@ -45,6 +45,8 @@ export {
 export * from "./evaluation-observability.js";
 export * from "./knowledge-semantic.js";
 export * from "./systemic-ecological.js";
+export * from "./reflexive-continuity.js";
+export * from "./sovereign-products.js";
 export * from "./outbox.js";
 export * from "./postgres.js";
 export * from "./replay.js";

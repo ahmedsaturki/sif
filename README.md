@@ -1,25 +1,26 @@
 # SIF — Sovereign Intelligence Fabric
 
-SIF is a sovereignty-first intelligence fabric whose implementation begins with a small, verifiable TypeScript kernel and grows through evidence-gated integration layers.
+SIF is a sovereignty-first intelligence fabric whose implementation grows through evidence-gated, dependency-light kernel layers.
 
 ## Current candidate line
 
 - Verified kernel baseline is preserved.
-- Phase 2 Live PostgreSQL verification remains preserved by later candidate CI.
-- Phase 3 Secure Federation remains an unpublished implementation candidate on its dedicated feature branch.
-- Phase 4 Policy & Governance remains an unpublished implementation candidate on `feat/sif-core-0.8.0-policy-governance`.
-- Phase 5 Evaluation & Observability is the current unpublished implementation candidate on `feat/sif-core-0.9.0-evaluation-observability`.
-- The package version remains `0.5.0`; later milestones do not imply package publication.
+- Phase 2 Live PostgreSQL verification is preserved by later candidate CI.
+- Phase 3 Secure Federation, Phase 4 Policy & Governance, Phase 5 Evaluation & Observability, and Phase 6 Knowledge / Semantic remain preserved on dedicated candidate lines.
+- Phase 7 Systemic / Ecological is the current unpublished implementation candidate on `feat/sif-core-1.1.0-systemic-ecological-plane`.
+- The package version remains `0.5.0`; candidate phases do not imply publication.
 
-## Phase 5 Evaluation & Observability
+## Phase 7 Systemic / Ecological
 
-The Phase 5 candidate adds a dependency-free evaluation/observability boundary for bounded trace correlation, structured TRACE/METRIC/LOG observations, deterministic evaluation evidence, candidate/artifact/environment-bound replay, explicit fault execution proof, bounded parallel regression suites, and fail-closed promotion evidence.
+Phase 7 adds a dependency-free bounded world-model layer for systemic experiments: players, agents, strategies, markets, institutions, numeric state, scheduled events, scenario branches, deterministic replay, and cross-phase evidence references.
 
-The executable acceptance suite is F5-001..F5-060 in `packages/sif-core/test/evaluation-observability-acceptance.test.ts`, with an additional regression test proving measured-vs-expected mismatch semantics. Exact-head CI retains the existing persistence, crash-window, archive, and artifact verification gates.
+Its runtime boundary is deliberately simulation-only. Institutional blocking is fail-closed, event execution is deterministic, resources are explicitly bounded, experiment digests include scenario identity, and simulation outputs cannot widen authority or silently become observed/production truth.
+
+F7-001..F7-060 are executable in `packages/sif-core/test/systemic-ecological-acceptance.test.ts`.
 
 ## Verification boundary
 
-A passing exact-head CI result is evidence for the exact source candidate only. It is not a production deployment, external observability-provider deployment, OpenTelemetry SLA, HA/performance claim, or registry publication claim.
+A successful exact-head SIF Core CI run verifies the exact source checkout and its unpublished candidate artifact. It does not claim production deployment, external market forecasting, autonomous real-world action, distributed consensus, or package publication.
 
 ## Release discipline
 

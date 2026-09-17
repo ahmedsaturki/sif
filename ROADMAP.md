@@ -31,10 +31,12 @@ Status: verified implementation candidate preserved; production telemetry deploy
 ## Phase 6 — Knowledge / Semantic Plane
 Versioned immutable ontology, semantic compatibility, epistemic state, semantic replay, provenance graph and legacy knowledge handoff.
 
-Status: verified implementation candidate on `feat/sif-core-1.0.0-knowledge-semantic`; F6-001..F6-060 executable acceptance coverage has passed exact-head CI on the current branch HEAD. Promotion remains a separate explicit boundary.
+Status: verified implementation candidate preserved on `feat/sif-core-1.0.0-knowledge-semantic`; F6-001..F6-060 executable acceptance coverage and exact-head CI verification are present. Promotion remains a separate explicit boundary.
 
 ## Phase 7 — Systemic / Ecological Plane
-Agents, players, strategies, markets, institutions, system dynamics, event simulation and bounded world-model experiments.
+Deterministic bounded world-models for players, agents, strategies, markets, institutions, state variables, scheduled events, experiments, replay, and cross-phase evidence.
+
+Status: verified implementation candidate on `feat/sif-core-1.1.0-systemic-ecological-plane`; F7-001..F7-060 executable acceptance coverage has passed exact-head CI. Promotion remains a separate explicit boundary.
 
 ## Phase 8 — Reflexive / Continuity Plane
 Self-model, controlled self-improvement, reconstruction, succession, identity lineage and long-term preservation.

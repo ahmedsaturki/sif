@@ -61,7 +61,7 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Subsequent documentation reconciliations corrected current-state wording and historical evidence status without changing the verified Phase 0–9 implementation tree.
 - The canonical preservation branch `feat/sif-core-1.0.0-knowledge-semantic` is the authoritative current cumulative state.
 - Each promotion preserved the exact verified implementation tree; no merge to `main` was performed.
-- Historical PRs #1–#6 are closed superseded candidate records; PRs #9–#11 are closed completed promotion records.
+- All pull requests created so far are closed. PRs #1–#6 remain superseded historical candidate records; PRs #9–#13 completed the later promotion/hardening chain; later pull requests were documentation/governance reconciliation only.
 
 ## Final Verification Boundary
 
@@ -73,7 +73,7 @@ Dynamic CI run IDs, artifact IDs, and the current branch SHA are deliberately no
 
 The current package remains `sif-core@0.5.0`. No registry publication, release tag, production deployment, direct external product integration, automatic authority promotion, or autonomous external action is claimed. `main` remains the preserved Genesis line.
 
-The only known non-semantic refs are `tmp-test-no` and `tmp-test-no2`; the available connector does not expose branch-ref deletion, so those temporary refs are left untouched rather than removed through an unsafe workaround.
+Non-canonical historical and maintenance refs remain in the repository; the available connector does not expose branch-ref deletion, so those refs are left untouched rather than removed through an unsafe workaround.
 
 ## Release Discipline
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

@@ -344,7 +344,10 @@ export class RegressionSuiteRunner {
     positive("maxConcurrentEvaluations", limits.maxConcurrentEvaluations);
     positive("maxEvaluationRecordBytes", limits.maxEvaluationRecordBytes);
   }
-  async run(suiteId: string, candidateCommit: string, cases: RegressionCase[], context: NormalizedTraceContext): Promise<RegressionResult> {
+  async run(suiteId: string, candidateCommit: string, cases: RegressionCase[], context: NormalizedTraceContext, environmentFingerprint: string): Promise<RegressionResult> {
+    text("suiteId", suiteId);
+    text("candidateCommit", candidateCommit);
+    text("environmentFingerprint", environmentFingerprint);
     if (cases.length > this.limits.maxEvaluationRecords) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Regression case count exceeds limit");
     const results = new Array<EvaluationRecord>(cases.length);
     let nextIndex = 0;
@@ -357,7 +360,7 @@ export class RegressionSuiteRunner {
           suiteId,
           caseId: regressionCase.id,
           candidateCommit,
-          environmentFingerprint: context.contextDigest,
+          environmentFingerprint,
           input: { caseId: regressionCase.id },
           expected: true,
         };

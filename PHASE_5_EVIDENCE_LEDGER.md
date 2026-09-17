@@ -50,9 +50,9 @@ This ledger maps every required Phase 5 acceptance row to an executable test in 
 | F5-041 | `test("F5-041", ...)` | true bounded regression parallelism |
 | F5-042 | `test("F5-042", ...)` | regression failure capture |
 | F5-043 | `test("F5-043", ...)` | regression observation emission |
-| F5-044 | `test("F5-044", ...)` | regression candidate propagation |
+| F5-044 | `test("F5-044", ...)` | regression candidate + explicit environment propagation |
 | F5-045 | `test("F5-045", ...)` | regression case-count bound |
-| F5-046 | `test("F5-046", ...)` | observed fault requires evidence |
+| F5-046 | `test("F5-046", ...)` | observed fault requires explicit evidence; malformed observed claim fails closed |
 | F5-047 | `test("F5-047", ...)` | requested fault not observed |
 | F5-048 | `test("F5-048", ...)` | evaluator execution failure classification |
 | F5-049 | `test("F5-049", ...)` | unavailable fault evaluator classification |
@@ -76,5 +76,6 @@ A row is verified only when the exact candidate checkout has passed the full SIF
 
 - Candidate identity is the branch HEAD checked out by CI.
 - Artifact identity is the unpublished candidate archive produced by that same CI run.
+- Regression evaluation environment identity is the explicit `environmentFingerprint` supplied to the runner, independent from trace correlation identity.
 - Dynamic CI run IDs and artifact IDs are deliberately not committed into mutable repository state files.
 - A successful Phase 5 ledger does not claim production OpenTelemetry deployment, production-scale observability, or automatic promotion.

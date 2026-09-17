@@ -12,6 +12,7 @@
 - Observability failure is isolated from authorization and event-authority semantics.
 - Sensitive peer/domain identifiers are kept within declared scope and never silently repurposed as authorization.
 - Regression execution is bounded by case count, record payload size, and true execution concurrency.
+- Regression execution requires an explicit environment fingerprint; trace identity must not be repurposed as environment identity.
 - Promotion evidence is fail-closed when candidate identity or artifact identity cannot be established.
 
 ## Required interfaces
@@ -21,7 +22,7 @@
 3. Evaluation recorder and deterministic result model.
 4. Replay descriptor and execution boundary.
 5. Bounded fault injector with explicit observed-fault proof and unavailable/evaluation-failed classification.
-6. Regression suite coordinator with bounded parallel execution.
+6. Regression suite coordinator with bounded parallel execution and explicit environment provenance.
 7. Candidate/artifact provenance binding.
 
 ## Verification
@@ -29,6 +30,8 @@
 The Phase 5 test matrix must become executable F5-001..F5-060 coverage across deterministic evaluation, trace correlation, observer isolation, replay, fault proof, resource bounds, and cross-phase regressions.
 
 Every required fault scenario must demonstrate that the requested fault actually occurred before recording a verified result. Fault infrastructure failures must remain distinguishable from no-fault and unavailable outcomes.
+
+Regression evidence must carry candidate identity and the exact explicit environment fingerprint supplied to the runner; correlation trace context remains a separate observational identity.
 
 ## Release boundary
 

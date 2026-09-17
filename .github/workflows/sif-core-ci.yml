@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -33,7 +33,7 @@ jobs:
       CANDIDATE_COMMIT: ${{ github.sha }}
     steps:
       - name: Checkout exact candidate commit
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
       - name: Verify exact candidate checkout
@@ -42,7 +42,7 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$CANDIDATE_COMMIT"
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: 22
       - name: Verify artifact identity manifest
@@ -61,7 +61,7 @@ jobs:
           npm test 2>&1 | tee "$RUNNER_TEMP/sif-core-test.log"
       - name: Upload temporary test diagnostics
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: sif-core-temporary-test-diagnostics-${{ env.CANDIDATE_COMMIT }}
           path: ${{ runner.temp }}/sif-core-test.log
@@ -127,7 +127,7 @@ jobs:
           test "$(wc -c < sif-core-0.5.0.tgz)" -gt 0
           grep -Fx "commit=$CANDIDATE_COMMIT" MANIFEST.txt
       - name: Upload unpublished candidate artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: sif-core-unpublished-candidate-${{ env.CANDIDATE_COMMIT }}
           path: ${{ runner.temp }}/sif-candidate

@@ -178,6 +178,7 @@ export class BoundedFaultInjector implements FaultInjector {
 export interface RegressionCase {
   id: string;
   run: () => Promise<unknown>;
+  expected?: unknown;
 }
 
 export interface RegressionResult {
@@ -356,28 +357,35 @@ export class RegressionSuiteRunner {
         const index = nextIndex++;
         if (index >= cases.length) return;
         const regressionCase = cases[index]!;
-        const evaluationCase: EvaluationCase = {
+        const hasExpected = regressionCase.expected !== undefined;
+        let evaluationCase: EvaluationCase = {
           suiteId,
           caseId: regressionCase.id,
           candidateCommit,
           environmentFingerprint,
           input: { caseId: regressionCase.id },
-          expected: true,
+          expected: regressionCase.expected,
         };
         try {
-          await regressionCase.run();
-          const record = createEvaluationRecord({ evaluationCase, measured: true, status: "PASS", trace: context }, this.limits);
+          const measured = await regressionCase.run();
+          const expected = hasExpected ? regressionCase.expected : measured;
+          evaluationCase = { ...evaluationCase, expected };
+          const matches = !hasExpected || digest(measured) === digest(expected);
+          const status: EvaluationStatus = matches ? "PASS" : "FAIL";
+          const failure = matches ? undefined : "Measured result does not match expected result";
+          const record = createEvaluationRecord({ evaluationCase, measured, status, trace: context, ...(failure === undefined ? {} : { failure }) }, this.limits);
           results[index] = record;
           await emitObservationSafely(this.sink, createObservation({
             kind: "TRACE",
             name: `evaluation.${regressionCase.id}`,
             occurredAt: new Date().toISOString(),
             trace: context,
+            attributes: { status },
             evidenceRefs: [record.evaluationId],
           }, this.limits));
         } catch (error) {
           results[index] = createEvaluationRecord({
-            evaluationCase,
+            evaluationCase: { ...evaluationCase, expected: evaluationCase.expected ?? String(error) },
             measured: String(error),
             status: "FAIL",
             trace: context,

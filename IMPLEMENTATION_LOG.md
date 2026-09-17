@@ -58,19 +58,16 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Phase 9 was promoted into `feat/sif-core-1.2.0-reflexive-continuity` through PR #11 at merge commit `b9345786727cbd2692447d1ce53d472d7670b3df`.
 - The cumulative Phase 8+9 line was exact-head verified at `ec0a37072bca89313e15bd03a9902b145e3e801d` in Run `35255909084`, then promoted through PR #10 at merge commit `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
 - The cumulative Phase 7+8+9 line was exact-head verified at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` in Run `35256086808`, then promoted through PR #9 into `feat/sif-core-1.0.0-knowledge-semantic` at merge commit `77a605a936115815c2e833f6c4667f0e353aefbd`.
-- The canonical preservation line was finalized at `a0f6d897d2d95c18d1c6297e766cd34563142c79`; exact-head CI Run `35256562076` passed the full verification workflow on that final state.
+- Subsequent documentation reconciliations corrected current-state wording, historical evidence status, and the Phase 7 evidence ledger without changing the verified Phase 0–9 implementation tree.
+- The canonical preservation HEAD is now `5a57827bb52a5e82a59dfa329ab77bcd659eea85`.
 - Each promotion preserved the exact verified implementation tree; no merge to `main` was performed.
 - Historical PRs #1–#6 are closed superseded candidate records; PRs #9–#11 are closed completed promotion records.
 
 ## Final Verification Boundary
 
-The cumulative promotion chain was re-verified at every promotion head. The final canonical state at `a0f6d897d2d95c18d1c6297e766cd34563142c79` passed exact checkout, strict build/tests, 470/470 package tests, 7/7 live PostgreSQL integration tests, both crash-window characterizations, unpublished archive construction/verification, exact-head artifact upload, and cleanup.
+The established SIF Core verification gate is exact checkout, strict build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox crash-window characterization, PostgreSQL crash-window characterization, unpublished archive construction/verification, exact-head artifact provenance, upload, and cleanup.
 
-Final canonical artifact:
-`sif-core-unpublished-candidate-a0f6d897d2d95c18d1c6297e766cd34563142c79`
-
-Final canonical artifact digest:
-`sha256:537a99e128b580eb4f5aeda58875bef95b92ba04c15539060842100b85dbe59a`
+Earlier cumulative preservation heads were independently verified before promotion. The current canonical HEAD `5a57827bb52a5e82a59dfa329ab77bcd659eea85` is the authoritative identity for the final documentation/reconciliation state; its live verification is determined only by the SIF Core CI run whose `head_sha` exactly matches this HEAD.
 
 The current package remains `sif-core@0.5.0`. No registry publication, release tag, production deployment, direct external product integration, automatic authority promotion, or autonomous external action is claimed. `main` remains the preserved Genesis line.
 

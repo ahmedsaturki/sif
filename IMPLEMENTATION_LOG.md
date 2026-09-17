@@ -58,8 +58,8 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Phase 9 was promoted into `feat/sif-core-1.2.0-reflexive-continuity` through PR #11 at merge commit `b9345786727cbd2692447d1ce53d472d7670b3df`.
 - The cumulative Phase 8+9 line was exact-head verified at `ec0a37072bca89313e15bd03a9902b145e3e801d` in Run `35255909084`, then promoted through PR #10 at merge commit `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
 - The cumulative Phase 7+8+9 line was exact-head verified at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` in Run `35256086808`, then promoted through PR #9 into `feat/sif-core-1.0.0-knowledge-semantic` at merge commit `77a605a936115815c2e833f6c4667f0e353aefbd`.
-- Subsequent documentation reconciliations corrected current-state wording, historical evidence status, and the Phase 7 evidence ledger without changing the verified Phase 0–9 implementation tree.
-- The canonical preservation HEAD is now `5a57827bb52a5e82a59dfa329ab77bcd659eea85`.
+- Subsequent documentation reconciliations corrected current-state wording and historical evidence status without changing the verified Phase 0–9 implementation tree.
+- The canonical preservation branch `feat/sif-core-1.0.0-knowledge-semantic` is the authoritative current cumulative state.
 - Each promotion preserved the exact verified implementation tree; no merge to `main` was performed.
 - Historical PRs #1–#6 are closed superseded candidate records; PRs #9–#11 are closed completed promotion records.
 
@@ -67,7 +67,9 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 
 The established SIF Core verification gate is exact checkout, strict build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox crash-window characterization, PostgreSQL crash-window characterization, unpublished archive construction/verification, exact-head artifact provenance, upload, and cleanup.
 
-Earlier cumulative preservation heads were independently verified before promotion. The current canonical HEAD `5a57827bb52a5e82a59dfa329ab77bcd659eea85` is the authoritative identity for the final documentation/reconciliation state; its live verification is determined only by the SIF Core CI run whose `head_sha` exactly matches this HEAD.
+Earlier cumulative preservation heads were independently verified before promotion. The canonical preservation branch remains the authoritative current source state; its current HEAD is accepted as the final Phase 0–9 state only when the SIF Core CI run for that exact `head_sha` completes successfully.
+
+Dynamic CI run IDs, artifact IDs, and the current branch SHA are deliberately not embedded in this mutable implementation log because doing so would require another state commit and invalidate the reference.
 
 The current package remains `sif-core@0.5.0`. No registry publication, release tag, production deployment, direct external product integration, automatic authority promotion, or autonomous external action is claimed. `main` remains the preserved Genesis line.
 

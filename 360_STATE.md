@@ -11,15 +11,16 @@
 - Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`
 - Phase 7/9 cumulative promotion into Phase 6 line: `77a605a936115815c2e833f6c4667f0e353aefbd`
+- Final Phase 0–9 documentation closure commit: current HEAD of the canonical preservation line
 - Implementation language: TypeScript
 - Core dependency policy: dependency-free kernel
 - Primary persistence target: PostgreSQL
 
 ## Repository State
 - `main` remains the preserved Genesis line by deliberate release design.
-- Phases 2–9 are preserved on dedicated branches; the cumulative Phase 6 line now contains the promoted Phase 7, Phase 8, and Phase 9 implementation.
-- PR #11 (Phase 9), PR #10 (Phase 8), and PR #9 (Phase 7) are merged and closed.
-- PR #6 (Phase 6) remains only as a historical candidate review record; no implementation gate depends on it.
+- Phases 2–9 are preserved on dedicated branches; the cumulative Phase 6 line contains the promoted Phase 7, Phase 8, and Phase 9 implementation.
+- PRs #9, #10, and #11 are merged and closed as completed promotion records.
+- Historical candidate PRs #1–#6 are all closed as superseded records; no implementation gate depends on them.
 - The verified Phase 9 implementation branch remains available as exact source provenance.
 - No unresolved repository issue or active promotion gate remains in the current Phase 0–9 roadmap.
 
@@ -40,18 +41,20 @@ The cumulative Phase 8+9 line at `ec0a37072bca89313e15bd03a9902b145e3e801d` pass
 
 The cumulative Phase 7+8+9 line at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` passed another exact-head SIF Core verification run (`35256086808`) with the full gate set; artifact digest `sha256:4270a743ca802944784f22a0beacec37b9589a8cc18c36b5dd6090ecdc2f7c63`.
 
+The final canonical preservation line was re-verified at `5bafdd6b1a0f7d5f77b594a998bf520a39953b3c` by SIF Core CI Run `35256370476`. The final run passed exact checkout, build/tests, PostgreSQL schema and live integration, both crash-window characterizations, unpublished archive build/verification, artifact upload, and cleanup. Its cumulative artifact digest was `sha256:ab2ce01e42e8aea47786e5c5c0b62af7f4fa5a7e30ef304e063b512414bd9b2e`.
+
 ## Promotion / Release State
 - Phase 9 implementation, verification, and promotion are complete.
 - Phase 8 implementation, verification, and promotion are complete.
 - Phase 7 implementation, verification, and promotion are complete.
-- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic` at `77a605a936115815c2e833f6c4667f0e353aefbd`.
+- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic` at `5bafdd6b1a0f7d5f77b594a998bf520a39953b3c` before this final state-only correction.
 - `sif-core` remains version `0.5.0`.
 - No merge to `main` has been made.
 - No registry publication has been made.
 - No release tag has been created.
 - No production deployment or direct external product integration is claimed.
 - No production autonomous external action is claimed.
-- PRs #9, #10, and #11 are closed as completed promotion records; older PRs #1–#6 are historical candidates and are being closed as superseded rather than promoted into `main`.
+- PRs #1–#11 are now closed, with #9–#11 completed by merge into the preserved promotion chain and #1–#6 closed as superseded historical candidates.
 
 ## Explicit Unknown / Not Claimed
 - production distributed product-adapter deployment;

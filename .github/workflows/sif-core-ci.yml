@@ -102,14 +102,15 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/sif-candidate"
           unzip -t sif-core-source.zip >/dev/null
-          tar -tzf sif-core-0.5.0.tgz >/dev/null
-          unzip -l sif-core-source.zip | grep -Fq 'packages/sif-core/package.json'
-          unzip -l sif-core-source.zip | grep -Fq 'packages/sif-core/src/'
-          unzip -l sif-core-source.zip | grep -Fq 'packages/sif-core/test/'
-          unzip -l sif-core-source.zip | grep -Fq 'packages/sif-core/sql/'
-          tar -tzf sif-core-0.5.0.tgz | grep -Fq 'package/dist/src/index.js'
-          tar -tzf sif-core-0.5.0.tgz | grep -Fq 'package/dist/src/index.d.ts'
-          tar -tzf sif-core-0.5.0.tgz | grep -Fq 'package/sql/postgres-schema.sql'
+          tar -tzf sif-core-0.5.0.tgz > tarball-list.txt
+          unzip -l sif-core-source.zip > source-list.txt
+          grep -Fq 'packages/sif-core/package.json' source-list.txt
+          grep -Fq 'packages/sif-core/src/' source-list.txt
+          grep -Fq 'packages/sif-core/test/' source-list.txt
+          grep -Fq 'packages/sif-core/sql/' source-list.txt
+          grep -Fxq 'package/dist/src/index.js' tarball-list.txt
+          grep -Fxq 'package/dist/src/index.d.ts' tarball-list.txt
+          grep -Fxq 'package/sql/postgres-schema.sql' tarball-list.txt
           tar -xOf sif-core-0.5.0.tgz package/package.json > package.json.extracted
           node -e "const fs=require('node:fs'); const p=JSON.parse(fs.readFileSync('./package.json.extracted','utf8')); if(p.name!=='sif-core'||p.version!=='0.5.0'||p.exports?.['.']?.import!=='./dist/src/index.js'||p.types!=='./dist/src/index.d.ts') process.exit(1); console.log('verified '+p.name+'@'+p.version+' package entrypoints')"
           rm -rf "$RUNNER_TEMP/sif-consumer"

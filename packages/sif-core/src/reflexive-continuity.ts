@@ -362,19 +362,22 @@ export function buildContinuityLineage(nodes: ContinuityLineageNode[], limits: R
     for (const parent of node.parentIds) if (!map.has(parent)) throw new ReflexiveContinuityError("LINEAGE_MISMATCH", `Unknown lineage parent ${parent}`);
   }
   const visiting = new Set<string>();
-  const visited = new Set<string>();
-  const walk = (id: string, depth: number): void => {
-    if (depth > limits.maxAncestryDepth) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Lineage ancestry depth exceeded");
+  const depthMemo = new Map<string, number>();
+  const depthOf = (id: string): number => {
+    const memoized = depthMemo.get(id);
+    if (memoized !== undefined) return memoized;
     if (visiting.has(id)) throw new ReflexiveContinuityError("LINEAGE_CYCLE", "Lineage cycle detected");
-    if (visited.has(id)) return;
-    visiting.add(id);
     const current = map.get(id);
     if (current === undefined) throw new ReflexiveContinuityError("LINEAGE_MISMATCH", `Unknown lineage node ${id}`);
-    for (const parent of current.parentIds) walk(parent, depth + 1);
+    visiting.add(id);
+    let depth = 0;
+    for (const parent of current.parentIds) depth = Math.max(depth, depthOf(parent) + 1);
     visiting.delete(id);
-    visited.add(id);
+    if (depth > limits.maxAncestryDepth) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Lineage ancestry depth exceeded");
+    depthMemo.set(id, depth);
+    return depth;
   };
-  for (const node of nodes) walk(node.nodeId, 0);
+  for (const node of nodes) depthOf(node.nodeId);
   const ordered = [...nodes].map(clone).sort((a, b) => a.nodeId.localeCompare(b.nodeId));
   return { nodes: ordered, digest: digest(ordered) };
 }

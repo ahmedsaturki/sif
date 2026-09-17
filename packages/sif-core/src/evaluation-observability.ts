@@ -323,8 +323,14 @@ export function makeReplayDescriptor(record: EvaluationRecord, artifactDigest: s
 }
 
 export function verifyReplayDescriptor(descriptor: ReplayDescriptor, evaluationCase: EvaluationCase, artifactDigest: string): void {
-  if (descriptor.candidateCommit !== evaluationCase.candidateCommit || descriptor.artifactDigest !== artifactDigest || descriptor.suiteId !== evaluationCase.suiteId || descriptor.caseId !== evaluationCase.caseId) {
-    throw new EvaluationObservabilityError("CANDIDATE_MISMATCH", "Replay descriptor does not match candidate/case");
+  if (
+    descriptor.candidateCommit !== evaluationCase.candidateCommit ||
+    descriptor.artifactDigest !== artifactDigest ||
+    descriptor.environmentFingerprint !== evaluationCase.environmentFingerprint ||
+    descriptor.suiteId !== evaluationCase.suiteId ||
+    descriptor.caseId !== evaluationCase.caseId
+  ) {
+    throw new EvaluationObservabilityError("CANDIDATE_MISMATCH", "Replay descriptor does not match candidate/artifact/environment/case");
   }
   if (descriptor.inputDigest !== digest(evaluationCase.input) || descriptor.expectedDigest !== digest(evaluationCase.expected)) {
     throw new EvaluationObservabilityError("EVALUATION_NOT_REPLAYABLE", "Replay input identity does not match descriptor");

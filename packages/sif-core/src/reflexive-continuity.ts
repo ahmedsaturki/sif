@@ -1,6 +1,6 @@
 import { digest, stableStringify } from "./core.js";
-import type { Capability, SelfModel } from "./types.js";
-import type { SelfModelVerifier } from "./self-model.js";
+import type { Capability } from "./types.js";
+import type { SelfModel, SelfModelVerifier } from "./self-model.js";
 
 export type ContinuityNodeKind = "BIRTH" | "VERSION" | "FORK" | "MERGE" | "RECONSTRUCTION" | "SUCCESSOR" | "RETIREMENT";
 export type ImprovementEvaluationStatus = "PASS" | "FAIL" | "INDETERMINATE" | "UNAVAILABLE";
@@ -212,7 +212,7 @@ function subset(required: string[], available: string[]): boolean {
 function validateLimits(limits: ReflexiveContinuityLimits): void {
   for (const [key, value] of Object.entries(limits)) positive(key, value as number);
 }
-function validateEvidence(ids: string[], limits: ReflexiveContinuityLimits): void {
+function validateEvidence(ids: string[], limits: Pick<ReflexiveContinuityLimits, "maxEvidenceRefs">): void {
   if (ids.length > limits.maxEvidenceRefs) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Evidence reference limit exceeded");
   for (const id of ids) text("evidenceId", id);
   unique(ids, "evidence");
@@ -368,8 +368,9 @@ export function buildContinuityLineage(nodes: ContinuityLineageNode[], limits: R
     if (visiting.has(id)) throw new ReflexiveContinuityError("LINEAGE_CYCLE", "Lineage cycle detected");
     if (visited.has(id)) return;
     visiting.add(id);
-    const node = map.get(id)!;
-    for (const parent of node.parentIds) walk(parent, depth + 1);
+    const current = map.get(id);
+    if (current === undefined) throw new ReflexiveContinuityError("LINEAGE_MISMATCH", `Unknown lineage node ${id}`);
+    for (const parent of current.parentIds) walk(parent, depth + 1);
     visiting.delete(id);
     visited.add(id);
   };
@@ -400,9 +401,11 @@ export function createSelfImprovementProposal(args: {
   text("targetIdentityId", args.targetIdentityId);
   iso("createdAt", args.createdAt);
   if (args.changes.length > limits.maxChangeSetEntries) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Improvement change-set limit exceeded");
-  if (args.requiredEvaluationIds.length > limits.maxChangeSetEntries) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Required evaluation limit exceeded");
+  if (args.requiredEvaluationIds.length === 0 || args.requiredEvaluationIds.length > limits.maxChangeSetEntries) throw new ReflexiveContinuityError("IMPROVEMENT_REJECTED", "At least one bounded evaluation is required for self-improvement");
   unique(args.requiredEvaluationIds, "evaluation");
+  if (args.changes.some((change) => change.path.length === 0 || change.beforeDigest.length === 0 || change.afterDigest.length === 0)) throw new ReflexiveContinuityError("INVALID_CONTINUITY", "Improvement changes require explicit path and digest identities");
   validateEvidence(args.evidenceIds, limits);
+  if (args.evidenceIds.length === 0) throw new ReflexiveContinuityError("IMPROVEMENT_REJECTED", "Self-improvement requires evidence");
   if (bytes(args.targetState) > limits.maxStateBytes) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Improvement target state exceeds byte limit");
   if (!subset(args.proposedAuthorityScopes, args.baseSnapshot.authorityScopes)) throw new ReflexiveContinuityError("AUTHORITY_WIDENING", "Improvement cannot widen authority scopes");
   const targetStateDigest = digest(args.targetState);
@@ -430,7 +433,8 @@ export function reviewSelfImprovementProposal(args: {
   evidenceIds: string[];
 }): SelfImprovementReview {
   text("reviewerId", args.reviewerId);
-  validateEvidence(args.evidenceIds, { maxEvidenceRefs: Number.MAX_SAFE_INTEGER } as ReflexiveContinuityLimits);
+  if (args.evidenceIds.length === 0) throw new ReflexiveContinuityError("IMPROVEMENT_REJECTED", "Review requires evidence");
+  validateEvidence(args.evidenceIds, { maxEvidenceRefs: Number.MAX_SAFE_INTEGER });
   const byId = new Map(args.evaluations.map((evaluation) => [evaluation.evaluationId, evaluation]));
   const required = args.proposal.requiredEvaluationIds.map((id) => byId.get(id));
   const approved = required.every((evaluation) => evaluation !== undefined && evaluation.proposalId === args.proposal.proposalId && evaluation.status === "PASS");
@@ -491,6 +495,7 @@ export function createSuccessionCertificate(args: {
   if (args.successor.generation !== args.predecessor.generation + 1) throw new ReflexiveContinuityError("SUCCESSION_INVALID", "Successor generation must increment exactly once");
   if (!subset(args.successor.authorityScopes, args.predecessor.authorityScopes)) throw new ReflexiveContinuityError("AUTHORITY_WIDENING", "Succession cannot widen authority scopes");
   validateEvidence(args.evidenceIds, limits);
+  if (args.evidenceIds.length === 0) throw new ReflexiveContinuityError("SUCCESSION_INVALID", "Succession requires evidence");
   const base = {
     certificateId: args.certificateId,
     predecessorIdentityId: args.predecessor.identityId,
@@ -511,10 +516,8 @@ export function verifySuccessionCertificate(certificate: SuccessionCertificate, 
   if (certificate.predecessorSnapshotDigest !== predecessor.snapshotDigest || certificate.successorSnapshotDigest !== successor.snapshotDigest || certificate.predecessorIdentityId !== predecessor.identityId || certificate.successorIdentityId !== successor.identityId || certificate.authorityWidened || !subset(certificate.successorAuthorityScopes, certificate.predecessorAuthorityScopes)) {
     throw new ReflexiveContinuityError("SUCCESSION_INVALID", "Succession certificate does not match snapshots");
   }
-  const rebuilt = { ...certificate, certificateDigest: undefined };
   const { certificateDigest: _ignored, ...base } = certificate;
   if (digest(base) !== certificate.certificateDigest) throw new ReflexiveContinuityError("SUCCESSION_INVALID", "Succession certificate digest mismatch");
-  void rebuilt;
 }
 
 export function createPreservationManifest(args: {
@@ -537,6 +540,7 @@ export function createPreservationManifest(args: {
   text("formatVersion", args.formatVersion);
   iso("createdAt", args.createdAt);
   if (args.retentionUntil !== undefined) iso("retentionUntil", args.retentionUntil);
+  if (args.retentionUntil !== undefined && Date.parse(args.retentionUntil) < Date.parse(args.createdAt)) throw new ReflexiveContinuityError("INVALID_CONTINUITY", "Retention cannot end before preservation creation");
   if (args.files.length > limits.maxArchiveFiles) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Preservation file limit exceeded");
   if (args.artifactDigests.length > limits.maxArtifactDigests) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Artifact digest limit exceeded");
   if (args.eventStreamHeads.length > limits.maxEventStreamHeads) throw new ReflexiveContinuityError("RESOURCE_EXHAUSTED", "Event-stream head limit exceeded");
@@ -583,6 +587,12 @@ export function reconstructContinuity(input: ReconstructionInput, limits: Reflex
   const mismatches: string[] = [];
   try { verifyContinuitySnapshot(input.snapshot, limits); } catch (error) { mismatches.push(`snapshot:${String(error)}`); }
   try { verifyPreservationManifest(input.preservation, limits); } catch (error) { mismatches.push(`preservation:${String(error)}`); }
+  try {
+    const rebuiltLineage = buildContinuityLineage(input.lineage.nodes, limits);
+    if (rebuiltLineage.digest !== input.lineage.digest) mismatches.push("lineage.digest");
+  } catch (error) {
+    mismatches.push(`lineage:${String(error)}`);
+  }
   if (input.snapshot.identityId !== input.expectedIdentityId) mismatches.push("identity");
   if (input.snapshot.lineageNodeId !== input.expectedLineageNodeId) mismatches.push("lineageNode");
   if (input.preservation.identityId !== input.snapshot.identityId) mismatches.push("preservation.identity");
@@ -606,14 +616,20 @@ export function createContinuityArchive(args: {
   preservation: PreservationManifest;
 }): ContinuityArchive {
   text("archiveId", args.archiveId);
+  if (args.preservation.identityId !== args.snapshot.identityId || args.preservation.snapshotDigest !== args.snapshot.snapshotDigest || args.preservation.lineageDigest !== args.lineage.digest || !args.lineage.nodes.some((node) => node.nodeId === args.snapshot.lineageNodeId && node.snapshotDigest === args.snapshot.snapshotDigest)) {
+    throw new ReflexiveContinuityError("PRESERVATION_MISMATCH", "Archive components are not mutually bound");
+  }
   const base = { archiveId: args.archiveId, snapshot: clone(args.snapshot), lineage: clone(args.lineage), preservation: clone(args.preservation) };
   return { ...base, archiveDigest: digest({ archiveId: base.archiveId, snapshot: base.snapshot.snapshotDigest, lineage: base.lineage.digest, preservation: base.preservation.manifestDigest }) };
 }
 
 export function verifyContinuityArchive(archive: ContinuityArchive, limits: ReflexiveContinuityLimits): void {
   verifyContinuitySnapshot(archive.snapshot, limits);
-  buildContinuityLineage(archive.lineage.nodes, limits);
+  const lineage = buildContinuityLineage(archive.lineage.nodes, limits);
   verifyPreservationManifest(archive.preservation, limits);
+  if (archive.preservation.identityId !== archive.snapshot.identityId || archive.preservation.snapshotDigest !== archive.snapshot.snapshotDigest || archive.preservation.lineageDigest !== lineage.digest || !lineage.nodes.some((node) => node.nodeId === archive.snapshot.lineageNodeId && node.snapshotDigest === archive.snapshot.snapshotDigest)) {
+    throw new ReflexiveContinuityError("PRESERVATION_MISMATCH", "Continuity archive component binding failed");
+  }
   const expected = digest({ archiveId: archive.archiveId, snapshot: archive.snapshot.snapshotDigest, lineage: archive.lineage.digest, preservation: archive.preservation.manifestDigest });
   if (expected !== archive.archiveDigest) throw new ReflexiveContinuityError("PRESERVATION_MISMATCH", "Continuity archive digest mismatch");
 }

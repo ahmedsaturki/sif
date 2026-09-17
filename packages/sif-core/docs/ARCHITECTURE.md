@@ -26,9 +26,9 @@ The PostgreSQL schema lives in `sql/postgres-schema.sql`.
 
 ## Live verification
 
-GitHub Actions run 169 exercises the committed candidate `3f1a248b226122696dd612cd7740e3c851c9a31f` against a real PostgreSQL 16.15 service. The live harness uses two independent database connections for same-stream contention and directly verifies transaction, checkpoint, outbox lease, reclaim, owner-fencing, and crash-window behavior.
+The SIF Core CI exact-head gate exercises the committed candidate against a real PostgreSQL 16 service. The live harness uses independent database connections for same-stream contention and directly verifies transactional append/rollback, projection checkpoints, outbox lease/reclaim/owner-fencing behavior, federated inbox durability/idempotency, and crash-window behavior.
 
-Verified scenarios are documented in `RELEASE_EVIDENCE_0.6.0.md` and `VERIFICATION_MATRIX.md`. This is implementation-level integration evidence, not a claim of arbitrary production failure coverage.
+The exact-head CI run for the current canonical HEAD is the authoritative current verification record; mutable architecture documentation intentionally avoids embedding dynamic run IDs or commit SHAs. Historical milestone evidence is preserved in `RELEASE_EVIDENCE_0.6.0.md` and `VERIFICATION_MATRIX.md`. This is implementation-level integration evidence, not a claim of arbitrary production failure coverage.
 
 ## Durable delivery
 

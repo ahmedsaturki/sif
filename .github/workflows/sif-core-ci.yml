@@ -55,7 +55,18 @@ jobs:
           grep -Fq '/SIF/0.5.0/sif-core-0.5.0.tgz' artifacts/sif-core/0.5.0/ARCHIVE_PRESERVATION.md
       - name: Build and test committed SIF Core tree
         working-directory: packages/sif-core
-        run: npm test
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/sif-core-test.log"
+      - name: Upload temporary test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sif-core-temporary-test-diagnostics-${{ env.CANDIDATE_COMMIT }}
+          path: ${{ runner.temp }}/sif-core-test.log
+          if-no-files-found: ignore
+          retention-days: 1
       - name: Prepare PostgreSQL schema
         working-directory: packages/sif-core
         shell: bash

@@ -37,7 +37,7 @@ jobs:
       PGUSER: postgres
       PGDATABASE: postgres
       RUN_POSTGRES_INTEGRATION: '1'
-      CANDIDATE_COMMIT: ${{ github.sha }}
+      CANDIDATE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Checkout exact candidate commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

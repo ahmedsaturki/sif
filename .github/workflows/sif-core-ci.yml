@@ -108,6 +108,7 @@ jobs:
           grep -Fq 'packages/sif-core/src/' source-list.txt
           grep -Fq 'packages/sif-core/test/' source-list.txt
           grep -Fq 'packages/sif-core/sql/' source-list.txt
+          grep -Fxq 'package/LICENSE' tarball-list.txt
           grep -Fxq 'package/dist/src/index.js' tarball-list.txt
           grep -Fxq 'package/dist/src/index.d.ts' tarball-list.txt
           grep -Fxq 'package/sql/postgres-schema.sql' tarball-list.txt

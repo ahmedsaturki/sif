@@ -26,8 +26,12 @@ Status: implementation candidate on `feat/sif-core-0.8.0-policy-governance`; F4-
 ## Phase 5 — Evaluation and Observability
 OpenTelemetry, trace/evidence correlation, replayable evaluations, fault injection, regression suites and production-to-eval qualification.
 
+Status: implementation candidate on `feat/sif-core-0.9.0-evaluation-observability`; F5-001..F5-060 executable acceptance coverage and exact-head CI verification are present. No publication, merge, or production observability claim.
+
 ## Phase 6 — Knowledge / Semantic Plane
 Versioned ontology, semantic compatibility, epistemic state, semantic replay, provenance graph and legacy knowledge handoff.
+
+Status: implementation candidate on `feat/sif-core-1.0.0-knowledge-semantic-plane`; F6-001..F6-060 acceptance coverage is present. Full exact-head CI verification pending for this branch candidate.
 
 ## Phase 7 — Systemic / Ecological Plane
 Agents, players, strategies, markets, institutions, system dynamics, event simulation and bounded world-model experiments.

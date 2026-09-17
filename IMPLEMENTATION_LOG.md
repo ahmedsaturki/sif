@@ -61,24 +61,14 @@ Phase 4 established immutable policy bundles/versions, explicit lifecycle, histo
 
 ## 0.9 Evaluation & Observability — SPEC / CONTRACT / IMPLEMENT / TEST / FIX / VERIFY
 
-- Defined the Phase 5 evaluation/observability specification, implementation contract, and executable F5-001..F5-060 matrix.
-- Implemented dependency-free normalized trace/evidence correlation with bounded baggage and deterministic context identity.
-- Implemented structured TRACE/METRIC/LOG observation records with deterministic IDs, bounded attributes/payloads, immutable in-memory reads, and observation-backend failure isolation.
-- Implemented deterministic evaluation records with candidate/environment provenance, normalized input hashing, explicit input and record byte limits, and immutable evidence references.
-- Implemented replay descriptors bound to candidate, artifact, environment, suite/case, input digest, and expected-result digest with fail-closed mismatch detection.
-- Replaced interface-only fault modeling with a bounded concrete fault injector/executor boundary. Observed faults require explicit non-empty evidence; no-fault, evaluator failure, and unavailable outcomes remain distinct.
-- Upgraded regression execution to true bounded parallelism using `maxConcurrentEvaluations`, while preserving deterministic result ordering and candidate propagation.
-- Hardened promotion evidence checks so requested faults cannot pass without an observed status and evidence reference.
-- Fixed acceptance-harness defects uncovered by exact-head CI, including nested candidate override coverage and strict `exactOptionalPropertyTypes` handling.
-- Reconciled the acceptance matrix descriptions with the executable test groups instead of marking documentary code paths as proof.
-- Exact-head CI subsequently passed the full committed tree, live PostgreSQL integration, both crash-window characterizations, candidate archive build/verification, and candidate artifact upload on the resulting Phase 5 candidate.
+Phase 5 established dependency-free normalized trace/evidence correlation, structured TRACE/METRIC/LOG observations, deterministic evaluation records, candidate/environment-bound replay descriptors, a concrete bounded fault executor/injector boundary, true bounded regression parallelism, fail-closed promotion evidence, and executable F5-001..F5-060 coverage. Exact-head CI then passed strict build/tests, live PostgreSQL integration, both crash-window characterizations, candidate archive verification, and artifact upload on the Phase 5 candidate.
+
+## 1.0 Knowledge / Semantic Plane — SPEC / CONTRACT / IMPLEMENT / TEST / FIX
+
+Phase 6 implementation candidate introduces versioned ontology identity/lifecycle and temporal resolution, provider-neutral semantic compatibility, explicit epistemic states with attributable sources, a bounded acyclic provenance graph, semantic replay descriptors, deterministic semantic context hashing, and legacy knowledge handoff that preserves source identity while surfacing unmapped records. Executable F6-001..F6-060 coverage is committed; exact-head verification is the next gate.
 
 ## Current Verification Boundary
 
 The current candidate identity is the branch HEAD. The authoritative verification record is the successful exact-head SIF Core CI run for that same commit, together with its uploaded unpublished candidate artifact and digest. Dynamic run/artifact identifiers are not committed to this mutable log because recording them would create a self-referential commit loop.
 
-No package version bump, registry publication, merge to `main`, production observability claim, or automatic promotion is implied by Phase 5 verification.
-
-Phase 5 follows:
-
-`SPEC → CONTRACT → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
+No package version bump, registry publication, merge to `main`, production deployment claim, or automatic promotion is implied by an implementation candidate.

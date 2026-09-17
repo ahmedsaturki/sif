@@ -7,7 +7,7 @@ import {
   defaultSifAdoptionLimits,
   makeSifIntegrationEnvelope,
   type StandardSifHandlers,
-} from "../src/adoption.js";
+} from "../dist/adoption.js";
 import type { SifProductRequest, SifProductResponse } from "../../../packages/sif-core/dist/src/index.js";
 import { verifySifProductReplay } from "../../../packages/sif-core/dist/src/index.js";
 

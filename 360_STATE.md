@@ -5,8 +5,8 @@
 - Product: Sovereign Intelligence Fabric
 - Package baseline: `SIF Core 0.5.0`
 - Current implementation candidate: Phase 9 — Sovereign Products
-- Current candidate branch: `feat/sif-core-1.3.0-sovereign-products`
-- Current candidate HEAD: `fdb2a2e542f1745612e0617668258550bba5b12f`
+- Candidate branch: `feat/sif-core-1.3.0-sovereign-products`
+- Verified Phase 9 implementation anchor: `fdb2a2e542f1745612e0617668258550bba5b12f`
 - Implementation language: TypeScript
 - Core dependency policy: dependency-free kernel
 - Primary persistence target: PostgreSQL
@@ -15,6 +15,7 @@
 - `main` remains at the preserved Genesis line and is not merged with later candidate phases.
 - Phases 2–8 remain preserved on their dedicated candidate lines.
 - PR #11 is the active Phase 9 candidate; it remains open, draft, and unmerged.
+- The current branch may contain later documentation-only reconciliation commits; exact-head CI determines whether the latest branch HEAD is the authoritative verified candidate.
 - Candidate identity is always the branch HEAD; exact-head CI and its uploaded candidate artifact are the authoritative verification records.
 
 ## Preserved Foundation
@@ -39,11 +40,13 @@ Implemented capabilities include:
 The Phase 9 boundary does not claim direct Lara OS/REIE, QADRIX, Sovereign Library, Supabase, PostgreSQL, GitHub, browser, queue, credential, or external API integration. Product-facing work enters only through explicit handlers.
 
 ## Verification State
-The current Phase 9 candidate HEAD `fdb2a2e542f1745612e0617668258550bba5b12f` passed the full exact-head SIF Core CI workflow. The verified workflow completed exact checkout identity, strict TypeScript build/tests, 470/470 package tests, live PostgreSQL integration with 7/7 tests passing, federated inbox crash-window characterization, PostgreSQL before/after-commit crash-window characterization, unpublished source/package archive construction, archive integrity verification, candidate artifact upload, and cleanup.
+The Phase 9 implementation anchor `fdb2a2e542f1745612e0617668258550bba5b12f` passed the full exact-head SIF Core CI workflow. That verification completed exact checkout identity, strict TypeScript build/tests with 470/470 package tests passing, live PostgreSQL integration with 7/7 tests passing, federated inbox crash-window characterization, PostgreSQL before/after-commit crash-window characterization, unpublished source/package archive construction, archive integrity verification, candidate artifact upload, and cleanup.
 
-The unpublished candidate artifact was created from the exact candidate HEAD and its uploaded artifact digest was verified by the workflow as `sha256:271f5af78b8d585476b8eef815402ed99889b1ebd281469b3aab642cec0e2351`.
+The corresponding unpublished candidate artifact was created from that exact implementation HEAD and the workflow recorded artifact digest `sha256:271f5af78b8d585476b8eef815402ed99889b1ebd281469b3aab642cec0e2351`.
 
-Dynamic workflow run IDs and artifact IDs are not treated as mutable state; the exact candidate commit remains the primary content identity and CI records remain the verification evidence.
+Two documentation-only reconciliation commits followed the verified implementation to correct and complete `360_STATE.md` and `IMPLEMENTATION_LOG.md`. The repository release discipline therefore requires a fresh exact-head workflow on the resulting branch HEAD before that latest HEAD is treated as the final authoritative verified candidate.
+
+Dynamic workflow run IDs and artifact IDs are not treated as mutable state; exact commit identity plus CI/artifact evidence remains authoritative.
 
 ## Release / Promotion State
 - `sif-core` package remains `0.5.0`.
@@ -51,7 +54,7 @@ Dynamic workflow run IDs and artifact IDs are not treated as mutable state; the 
 - No registry publication or release tag is implied.
 - No merge to `main` has been made.
 - PR #11 remains draft and unmerged.
-- Phase 9 is a verified unpublished candidate; promotion, publication, and merge remain explicit separate gates.
+- Phase 9 is implemented and its implementation anchor is verified; final promotion/freeze requires the resulting documentation-reconciled HEAD to pass exact-head CI.
 - No production deployment or external product integration is claimed by this phase.
 
 ## Explicit Unknown / Not Claimed

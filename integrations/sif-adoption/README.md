@@ -13,6 +13,7 @@ It is intentionally **not** part of the frozen canonical SIF Core line. This dir
 - append-only product evidence recording
 - deterministic replay verification for valid Core responses
 - request-level idempotency with conflict detection
+- concurrent duplicate suppression
 - bounded processed-request memory
 - zero network, database, credential, browser, queue, or process-spawning behavior
 
@@ -32,10 +33,10 @@ npm ci
 npm test
 cd ../..
 ./packages/sif-core/node_modules/.bin/tsc -p integrations/sif-adoption/tsconfig.json
-node --test integrations/sif-adoption/dist/test/*.test.js
+node --experimental-strip-types --test integrations/sif-adoption/test/*.test.ts
 ```
 
-The GitHub workflow repeats the Core verification first, then verifies the adoption layer against the exact candidate commit.
+The GitHub workflow repeats the Core verification first, then builds the adoption source and runs the TypeScript tests directly with the pinned Node version. Tests are deliberately outside the shipped source build.
 
 ## Deliberate non-claims
 

@@ -6,12 +6,13 @@
 - Package baseline: `SIF Core 0.5.0`
 - Current promoted phase: Phase 9 — Sovereign Products
 - Canonical promoted preservation line: `feat/sif-core-1.0.0-knowledge-semantic`
+- Canonical preservation HEAD: `a0f6d897d2d95c18d1c6297e766cd34563142c79`
 - Phase 9 implementation branch: `feat/sif-core-1.3.0-sovereign-products`
 - Phase 9 verified exact-head: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`
 - Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`
 - Phase 7/9 cumulative promotion into Phase 6 line: `77a605a936115815c2e833f6c4667f0e353aefbd`
-- Final Phase 0–9 documentation closure commit: current HEAD of the canonical preservation line
+- Final documentation reconciliation commit: `a0f6d897d2d95c18d1c6297e766cd34563142c79`
 - Implementation language: TypeScript
 - Core dependency policy: dependency-free kernel
 - Primary persistence target: PostgreSQL
@@ -21,8 +22,10 @@
 - Phases 2–9 are preserved on dedicated branches; the cumulative Phase 6 line contains the promoted Phase 7, Phase 8, and Phase 9 implementation.
 - PRs #9, #10, and #11 are merged and closed as completed promotion records.
 - Historical candidate PRs #1–#6 are all closed as superseded records; no implementation gate depends on them.
+- No open pull request or open issue remains in the current repository state.
 - The verified Phase 9 implementation branch remains available as exact source provenance.
 - No unresolved repository issue or active promotion gate remains in the current Phase 0–9 roadmap.
+- Non-semantic temporary test branches `tmp-test-no` and `tmp-test-no2` remain as inert refs because the available GitHub connector exposes branch creation/update but not branch-ref deletion. They are not promotion, review, or implementation gates.
 
 ## Preserved Foundation
 SIF Core preserves append-only events, optimistic concurrency, hash-chain integrity, deterministic replay, resumable projections, SHA-256/CAS integrity, evidence/provenance/knowledge/semantic/lineage registries, scoped authority, delegation attenuation, default-deny policy, durable outbox/inbox, PostgreSQL transactional contracts, Ed25519 attestations, capability-gated execution, reconstruction verification, secure federation, policy governance, evaluation/observability, the Phase 6 semantic plane, the Phase 7 systemic/ecological plane, the Phase 8 reflexive/continuity plane, and the Phase 9 sovereign product adapter boundary.
@@ -37,24 +40,26 @@ The exact Phase 9 implementation HEAD `e1a0b5d47caabd61016cad92b0bc31c83ef01693`
 
 The exact-head Phase 9 artifact digest was `sha256:d10d1b5885b99acef71343214daa2194e9327b073da41aad0a72add65f2ec56a`.
 
-The cumulative Phase 8+9 line at `ec0a37072bca89313e15bd03a9902b145e3e801d` passed a fresh exact-head SIF Core verification run (`35255909084`) with the same full gate set; artifact digest `sha256:e64dee1fef5327d16f29d85046c8bcc25d16c95ddc83430f2c2e28bf5e54d4e8`.
+The cumulative Phase 8+9 line at `ec0a37072bca89313e15bd03a9902b145e3e801d` passed exact-head SIF Core verification run `35255909084`; artifact digest `sha256:e64dee1fef5327d16f29d85046c8bcc25d16c95ddc83430f2c2e28bf5e54d4e8`.
 
-The cumulative Phase 7+8+9 line at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` passed another exact-head SIF Core verification run (`35256086808`) with the full gate set; artifact digest `sha256:4270a743ca802944784f22a0beacec37b9589a8cc18c36b5dd6090ecdc2f7c63`.
+The cumulative Phase 7+8+9 line at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` passed exact-head SIF Core verification run `35256086808`; artifact digest `sha256:4270a743ca802944784f22a0beacec37b9589a8cc18c36b5dd6090ecdc2f7c63`.
 
-The final canonical preservation line was re-verified at `5bafdd6b1a0f7d5f77b594a998bf520a39953b3c` by SIF Core CI Run `35256370476`. The final run passed exact checkout, build/tests, PostgreSQL schema and live integration, both crash-window characterizations, unpublished archive build/verification, artifact upload, and cleanup. Its cumulative artifact digest was `sha256:ab2ce01e42e8aea47786e5c5c0b62af7f4fa5a7e30ef304e063b512414bd9b2e`.
+The canonical Phase 6 preservation line at `5bafdd6b1a0f7d5f77b594a998bf520a39953b3c` passed exact-head SIF Core verification run `35256370476`; artifact digest `sha256:ab2ce01e42e8aea47786e5c5c0b62af7f4fa5a7e30ef304e063b512414bd9b2e`.
+
+The final documentation state at `a0f6d897d2d95c18d1c6297e766cd34563142c79` passed exact-head SIF Core verification run `35256562076` with every workflow gate completed successfully, including exact checkout, strict build/tests, PostgreSQL schema and live integration, both crash-window characterizations, archive construction/verification, artifact upload, and cleanup. The final documentation-state artifact digest was `sha256:537a99e128b580eb4f5aeda58875bef95b92ba04c15539060842100b85dbe59a`.
 
 ## Promotion / Release State
 - Phase 9 implementation, verification, and promotion are complete.
 - Phase 8 implementation, verification, and promotion are complete.
 - Phase 7 implementation, verification, and promotion are complete.
-- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic` at `5bafdd6b1a0f7d5f77b594a998bf520a39953b3c` before this final state-only correction.
+- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic` at `a0f6d897d2d95c18d1c6297e766cd34563142c79`.
 - `sif-core` remains version `0.5.0`.
 - No merge to `main` has been made.
 - No registry publication has been made.
 - No release tag has been created.
 - No production deployment or direct external product integration is claimed.
 - No production autonomous external action is claimed.
-- PRs #1–#11 are now closed, with #9–#11 completed by merge into the preserved promotion chain and #1–#6 closed as superseded historical candidates.
+- PRs #1–#11 are closed; #9–#11 completed the Phase 7→8→9 promotion chain, while #1–#6 were closed as superseded historical candidate records.
 
 ## Explicit Unknown / Not Claimed
 - production distributed product-adapter deployment;

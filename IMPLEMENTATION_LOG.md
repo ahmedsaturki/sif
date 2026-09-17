@@ -58,16 +58,23 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Phase 9 was promoted into `feat/sif-core-1.2.0-reflexive-continuity` through PR #11 at merge commit `b9345786727cbd2692447d1ce53d472d7670b3df`.
 - The cumulative Phase 8+9 line was exact-head verified at `ec0a37072bca89313e15bd03a9902b145e3e801d` in Run `35255909084`, then promoted through PR #10 at merge commit `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
 - The cumulative Phase 7+8+9 line was exact-head verified at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` in Run `35256086808`, then promoted through PR #9 into `feat/sif-core-1.0.0-knowledge-semantic` at merge commit `77a605a936115815c2e833f6c4667f0e353aefbd`.
+- The canonical preservation line was finalized at `a0f6d897d2d95c18d1c6297e766cd34563142c79`; exact-head CI Run `35256562076` passed the full verification workflow on that final state.
 - Each promotion preserved the exact verified implementation tree; no merge to `main` was performed.
-- Historical PRs #1–#6 are superseded candidate records; they are not required for the completed Phase 0–9 preservation chain.
+- Historical PRs #1–#6 are closed superseded candidate records; PRs #9–#11 are closed completed promotion records.
 
 ## Final Verification Boundary
 
-The cumulative promotion chain was re-verified at each promotion head. The final Phase 7+8+9 line passed 470/470 package tests, 7/7 live PostgreSQL integration tests, both crash-window characterizations, archive construction/verification, exact-head artifact provenance, and cleanup immediately before the final promotion into the Phase 6 preservation line.
+The cumulative promotion chain was re-verified at every promotion head. The final canonical state at `a0f6d897d2d95c18d1c6297e766cd34563142c79` passed exact checkout, strict build/tests, 470/470 package tests, 7/7 live PostgreSQL integration tests, both crash-window characterizations, unpublished archive construction/verification, exact-head artifact upload, and cleanup.
 
-The latest pre-promotion cumulative artifact was `sif-core-unpublished-candidate-963a268e205fb0d2b0dcaf0e184a25ab91befd73` with digest `sha256:4270a743ca802944784f22a0beacec37b9589a8cc18c36b5dd6090ecdc2f7c63`.
+Final canonical artifact:
+`sif-core-unpublished-candidate-a0f6d897d2d95c18d1c6297e766cd34563142c79`
+
+Final canonical artifact digest:
+`sha256:537a99e128b580eb4f5aeda58875bef95b92ba04c15539060842100b85dbe59a`
 
 The current package remains `sif-core@0.5.0`. No registry publication, release tag, production deployment, direct external product integration, automatic authority promotion, or autonomous external action is claimed. `main` remains the preserved Genesis line.
+
+The only known non-semantic refs are `tmp-test-no` and `tmp-test-no2`; the available connector does not expose branch-ref deletion, so those temporary refs are left untouched rather than removed through an unsafe workaround.
 
 ## Release Discipline
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

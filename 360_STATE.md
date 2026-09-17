@@ -18,12 +18,12 @@
 ## Repository State
 - `main` remains the preserved Genesis line by deliberate release design.
 - Phases 2–9 are preserved on dedicated branches; the cumulative Phase 6 line contains the promoted Phase 7, Phase 8, and Phase 9 implementation.
-- PRs #9, #10, and #11 are merged and closed as completed promotion records.
+- All pull requests created so far are closed. PRs #9–#13 completed the later promotion/hardening chain; subsequent PRs completed final governance and documentation reconciliation.
 - Historical candidate PRs #1–#6 are all closed as superseded records; no implementation gate depends on them.
 - No open pull request or open issue remains in the current repository state.
 - The verified Phase 9 implementation branch remains available as exact source provenance.
 - No unresolved repository issue or active promotion gate remains in the current Phase 0–9 roadmap.
-- Non-semantic temporary test branches `tmp-test-no` and `tmp-test-no2` remain as inert refs because the available GitHub connector exposes branch creation/update but not branch-ref deletion. They are not promotion, review, or implementation gates.
+- Non-canonical historical and maintenance refs remain as inert repository refs. The available GitHub connector exposes branch creation/update but not branch-ref deletion, so they are intentionally preserved rather than removed through an unsafe workaround.
 
 ## Preserved Foundation
 SIF Core preserves append-only events, optimistic concurrency, hash-chain integrity, deterministic replay, resumable projections, SHA-256/CAS integrity, evidence/provenance/knowledge/semantic/lineage registries, scoped authority, delegation attenuation, default-deny policy, durable outbox/inbox, PostgreSQL transactional contracts, Ed25519 attestations, capability-gated execution, reconstruction verification, secure federation, policy governance, evaluation/observability, the Phase 6 semantic plane, the Phase 7 systemic/ecological plane, the Phase 8 reflexive/continuity plane, and the Phase 9 sovereign product adapter boundary.
@@ -51,7 +51,7 @@ Dynamic CI run IDs, artifact IDs, artifact digests, and the current branch SHA a
 - No release tag has been created.
 - No production deployment or direct external product integration is claimed.
 - No production autonomous external action is claimed.
-- PRs #1–#11 are closed; #9–#11 completed the Phase 7→8→9 promotion chain, while #1–#6 were closed as superseded historical candidate records.
+- All pull requests created so far are closed. PRs #9–#13 completed the Phase 7→9 promotion/hardening chain; later pull requests were documentation/governance reconciliation only.
 
 ## Explicit Unknown / Not Claimed
 - production distributed product-adapter deployment;

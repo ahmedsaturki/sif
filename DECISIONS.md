@@ -38,3 +38,12 @@ Trace, metric, and log records may correlate and explain execution, but they do 
 
 ## D013 — Fault success requires proof
 A requested fault is recorded as observed only when the execution boundary supplies explicit evidence of occurrence. No-fault, evaluator failure, and evaluator unavailability remain distinct classifications, and fault execution is resource-bounded.
+
+## D014 — Meaning is versioned, not silently migrated
+Ontology versions are immutable semantic identities. Compatibility is an explicit decision; ambiguous mappings never become implicit compatibility.
+
+## D015 — Knowledge is epistemic, not authoritative
+Evidence-qualified knowledge records preserve status, scope, time and provenance. Knowledge, confidence, provenance, or semantic compatibility cannot by themselves grant or widen authority.
+
+## D016 — Legacy handoff preserves provenance
+Legacy knowledge is adopted through an explicit boundary that preserves source identity and semantic version while recording that authority was not widened.

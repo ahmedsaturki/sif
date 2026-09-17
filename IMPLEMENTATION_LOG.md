@@ -70,15 +70,27 @@ Phase 4 established immutable policy bundles/versions, explicit lifecycle, histo
 - Upgraded regression execution to true bounded parallelism using `maxConcurrentEvaluations`, while preserving deterministic result ordering and candidate propagation.
 - Hardened promotion evidence checks so requested faults cannot pass without an observed status and evidence reference.
 - Fixed acceptance-harness defects uncovered by exact-head CI, including nested candidate override coverage and strict `exactOptionalPropertyTypes` handling.
+- Added explicit measured-vs-expected regression semantics while preserving successful execution-only `undefined` runners as measurable execution success.
 - Reconciled the acceptance matrix descriptions with the executable test groups instead of marking documentary code paths as proof.
 - Exact-head CI subsequently passed the full committed tree, live PostgreSQL integration, both crash-window characterizations, candidate archive build/verification, and candidate artifact upload on the resulting Phase 5 candidate.
 
+## 1.0 Knowledge / Semantic Plane — SPEC / CONTRACT / IMPLEMENT / TEST / FIX / VERIFY
+
+- Reused the existing evidence, knowledge, semantic, and authority primitives as the foundation for a higher-level versioned semantic plane.
+- Implemented immutable ontology versions with deterministic identity, explicit `DRAFT → ACTIVE → RETIRED` lifecycle, bounded concepts/mappings, and caller-immutable reads.
+- Implemented deterministic semantic compatibility decisions with explicit version-bound mappings and fail-closed missing, ambiguous, low-confidence, approximate, and conditional cases.
+- Implemented evidence-qualified epistemic knowledge with temporal validity, source attribution, contradiction detection, and history-preserving supersession/retraction.
+- Implemented immutable provenance nodes with parent validation, cycle rejection, bounded ancestry traversal, and graph identity.
+- Implemented append-only semantic operations and deterministic replay snapshots bound to exact ontology/version filters.
+- Implemented explicit legacy handoff preserving source identity, evidence/provenance, semantic version, and `authorityWidened: false`.
+- Added executable F6-001..F6-060 acceptance coverage.
+- The Phase 6 candidate is verified only through exact-head CI against the current branch head; dynamic run/artifact identifiers remain outside mutable state docs.
+
 ## Current Verification Boundary
 
-The current candidate identity is the branch HEAD. The authoritative verification record is the successful exact-head SIF Core CI run for that same commit, together with its uploaded unpublished candidate artifact and digest. Dynamic run/artifact identifiers are not committed to this mutable log because recording them would create a self-referential commit loop.
+The current candidate identity is the branch HEAD. The authoritative verification record is the successful exact-head SIF Core CI run for that same commit, together with its uploaded unpublished candidate artifact and digest. Dynamic run/artifact identifiers are intentionally not committed here.
 
-No package version bump, registry publication, merge to `main`, production observability claim, or automatic promotion is implied by Phase 5 verification.
+No package version bump, registry publication, merge to `main`, production semantic-graph deployment, automatic truth determination, or authority promotion is implied.
 
-Phase 5 follows:
-
-`SPEC → CONTRACT → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
+## Release Discipline
+`SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

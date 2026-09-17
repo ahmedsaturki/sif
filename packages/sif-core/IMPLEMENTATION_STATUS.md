@@ -21,9 +21,9 @@ F6-001..F6-060, F7-001..F7-060, F8-001..F8-060, and F9-001..F9-060 are executabl
 
 ## Verification rule
 
-The authoritative candidate identity is the exact branch HEAD. The authoritative verification record is a successful SIF Core CI run whose `head_sha` exactly equals that candidate. The final canonical preservation state is `1e72337789c79731368317bec01bff263eeb9e0a`, verified by SIF Core CI Run `35256893363` / check run `105322634515` with every gate completing successfully.
+The authoritative candidate identity is the exact branch HEAD. The authoritative verification record is a successful SIF Core CI run whose `head_sha` exactly equals that candidate. The current canonical preservation state is `5a57827bb52a5e82a59dfa329ab77bcd659eea85`; its live verification is the exact-head SIF Core CI run associated with that SHA.
 
-The final verification covered exact checkout and identity, strict build/tests, live PostgreSQL integration, federated inbox crash-window characterization, PostgreSQL crash-window characterization, unpublished candidate archive construction and verification, artifact upload, and cleanup.
+The established full verification gate covers exact checkout and identity, strict build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox crash-window characterization, PostgreSQL crash-window characterization, unpublished candidate archive construction and verification, artifact upload, and cleanup.
 
 ## Release boundary
 

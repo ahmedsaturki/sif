@@ -10,14 +10,7 @@ function ex(action: () => unknown, want: string): void { let got: unknown; try {
 async function axe(action: () => Promise<unknown>, want: string): Promise<void> { let got: unknown; try { await action(); } catch (e: unknown) { got = e; } assert.equal(err(got), want); }
 function r(over: Partial<EvaluationRecord> = {}): EvaluationRecord {
   const args = {
-    evaluationCase: {
-      suiteId: "s",
-      caseId: over.caseId ?? "c",
-      candidateCommit: over.candidateCommit ?? C,
-      environmentFingerprint: over.environmentFingerprint ?? E,
-      input: { x: 1 },
-      expected: true,
-    },
+    evaluationCase: { suiteId: "s", caseId: over.caseId ?? "c", candidateCommit: over.candidateCommit ?? C, environmentFingerprint: over.environmentFingerprint ?? E, input: { x: 1 }, expected: true },
     measured: true,
     status: over.status ?? "PASS",
     trace: normalizeTraceContext(T, L),
@@ -77,7 +70,7 @@ test("F5-042",async()=>{const s=new InMemoryObservationSink();const z=await new 
 test("F5-043",async()=>{const s=new InMemoryObservationSink();await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{}}],tr());assert.equal(s.all().length,1);});
 test("F5-044",async()=>{const s=new InMemoryObservationSink();const z=await new RegressionSuiteRunner(s,L).run("s",C,[{id:"a",run:async()=>{}}],tr());assert.equal(z.candidateCommit,C);});
 test("F5-045",async()=>{const s=new InMemoryObservationSink();const cs=Array.from({length:11},(_,i)=>({id:`c${i}`,run:async()=>{}}));await axe(()=>new RegressionSuiteRunner(s,L).run("s",C,cs,tr()),"RESOURCE_EXHAUSTED");});
-test("F5-046",async()=>{const injector=new BoundedFaultInjector({execute:async(request)=>({observed:true,evidenceRef:`evidence:${request.faultId}`})},L);const observed=await injector.inject({faultId:"f1",boundary:"transport",action:"disconnect"});assert.equal(observed.status,"OBSERVED");assert.equal(observed.observed,true);assert.equal(observed.evidenceRef,"evidence:f1");});
+test("F5-046",async()=>{const injector=new BoundedFaultInjector({execute:async(request)=>({observed:true,evidenceRef:`evidence:${request.faultId}`})},L);const observed=await injector.inject({faultId:"f1",boundary:"transport",action:"disconnect"});assert.equal(observed.status,"OBSERVED");assert.equal(observed.observed,true);assert.equal(observed.evidenceRef,"evidence:f1");const malformed=new BoundedFaultInjector({execute:async()=>({observed:true})},L);const rejected=await malformed.inject({faultId:"f1-malformed",boundary:"transport",action:"disconnect"});assert.equal(rejected.status,"EVALUATION_FAILED");assert.equal(rejected.observed,false);});
 test("F5-047",async()=>{const injector=new BoundedFaultInjector({execute:async()=>({observed:false,reason:"fault did not trigger"})},L);const observed=await injector.inject({faultId:"f2",boundary:"transport",action:"disconnect"});assert.equal(observed.status,"NOT_OBSERVED");assert.equal(observed.observed,false);});
 test("F5-048",async()=>{const injector=new BoundedFaultInjector({execute:async()=>{throw new Error("evaluator down");}},L);const observed=await injector.inject({faultId:"f3",boundary:"evaluator",action:"crash"});assert.equal(observed.status,"EVALUATION_FAILED");assert.equal(observed.observed,false);});
 test("F5-049",async()=>{const injector=new BoundedFaultInjector({execute:async()=>({observed:false,status:"UNAVAILABLE",reason:"backend unavailable"})},L);const observed=await injector.inject({faultId:"f4",boundary:"backend",action:"disable"});assert.equal(observed.status,"UNAVAILABLE");assert.equal(observed.reason,"backend unavailable");});

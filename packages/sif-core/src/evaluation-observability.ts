@@ -127,19 +127,31 @@ export class BoundedFaultInjector implements FaultInjector {
     positive("maxFaultActions", limits.maxFaultActions);
   }
   async inject(request: FaultRequest): Promise<FaultObservation> {
-    text("faultId", request.faultId); text("boundary", request.boundary); text("action", request.action);
-    if (this.usedActions >= this.limits.maxFaultActions) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Fault action limit exceeded");
+    text("faultId", request.faultId);
+    text("boundary", request.boundary);
+    text("action", request.action);
+    if (this.usedActions >= this.limits.maxFaultActions) {
+      throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Fault action limit exceeded");
+    }
     this.usedActions += 1;
     try {
       const result = await this.executor.execute(clone(request));
       if (result.observed) {
-        text("fault evidenceRef", result.evidenceRef ?? "");
+        if (result.evidenceRef === undefined || result.evidenceRef.length === 0) {
+          return {
+            faultId: request.faultId,
+            requested: true,
+            observed: false,
+            status: "EVALUATION_FAILED",
+            reason: "Fault executor reported observed=true without explicit evidence proof",
+          };
+        }
         return {
           faultId: request.faultId,
           requested: true,
           observed: true,
           status: "OBSERVED",
-          ...(result.evidenceRef === undefined ? {} : { evidenceRef: result.evidenceRef }),
+          evidenceRef: result.evidenceRef,
           ...(result.reason === undefined ? {} : { reason: result.reason }),
         };
       }
@@ -152,7 +164,13 @@ export class BoundedFaultInjector implements FaultInjector {
         ...(result.reason === undefined ? {} : { reason: result.reason }),
       };
     } catch (error) {
-      return { faultId: request.faultId, requested: true, observed: false, status: "EVALUATION_FAILED", reason: String(error) };
+      return {
+        faultId: request.faultId,
+        requested: true,
+        observed: false,
+        status: "EVALUATION_FAILED",
+        reason: String(error),
+      };
     }
   }
 }
@@ -207,12 +225,17 @@ function jsonBytes(value: unknown): number { return new TextEncoder().encode(sta
 function clone<T>(value: T): T { return structuredClone(value); }
 
 export function normalizeTraceContext(context: TraceContext, limits: EvaluationObservabilityLimits): NormalizedTraceContext {
-  text("traceId", context.traceId); text("spanId", context.spanId); text("correlationId", context.correlationId);
+  text("traceId", context.traceId);
+  text("spanId", context.spanId);
+  text("correlationId", context.correlationId);
   if (context.parentSpanId !== undefined) text("parentSpanId", context.parentSpanId);
   if (context.baggage !== undefined) {
     const keys = Object.keys(context.baggage);
     if (keys.length > limits.maxTraceBaggageEntries) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Trace baggage entry limit exceeded");
-    for (const key of keys) { text("baggage key", key); text("baggage value", context.baggage[key]!); }
+    for (const key of keys) {
+      text("baggage key", key);
+      text("baggage value", context.baggage[key]!);
+    }
   }
   const normalized: TraceContext = {
     traceId: context.traceId,
@@ -234,7 +257,8 @@ export function createObservation(args: {
   attributes?: Record<string, string | number | boolean | null>;
   evidenceRefs?: string[];
 }, limits: EvaluationObservabilityLimits): ObservationRecord {
-  text("name", args.name); iso("occurredAt", args.occurredAt);
+  text("name", args.name);
+  iso("occurredAt", args.occurredAt);
   const attributes = args.attributes === undefined ? {} : clone(args.attributes);
   if (Object.keys(attributes).length > limits.maxObservationAttributes) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Observation attribute limit exceeded");
   const recordWithoutId = {
@@ -259,7 +283,10 @@ export function createEvaluationRecord(args: {
   evidenceRefs?: string[];
   failure?: string;
 }, limits: EvaluationObservabilityLimits): EvaluationRecord {
-  text("suiteId", args.evaluationCase.suiteId); text("caseId", args.evaluationCase.caseId); text("candidateCommit", args.evaluationCase.candidateCommit); text("environmentFingerprint", args.evaluationCase.environmentFingerprint);
+  text("suiteId", args.evaluationCase.suiteId);
+  text("caseId", args.evaluationCase.caseId);
+  text("candidateCommit", args.evaluationCase.candidateCommit);
+  text("environmentFingerprint", args.evaluationCase.environmentFingerprint);
   const inputDigest = digest(args.evaluationCase.input);
   const expectedDigest = digest(args.evaluationCase.expected);
   const measuredDigest = digest(args.measured);
@@ -295,17 +322,27 @@ export function makeReplayDescriptor(record: EvaluationRecord, artifactDigest: s
 }
 
 export function verifyReplayDescriptor(descriptor: ReplayDescriptor, evaluationCase: EvaluationCase, artifactDigest: string): void {
-  if (descriptor.candidateCommit !== evaluationCase.candidateCommit || descriptor.artifactDigest !== artifactDigest || descriptor.suiteId !== evaluationCase.suiteId || descriptor.caseId !== evaluationCase.caseId) throw new EvaluationObservabilityError("CANDIDATE_MISMATCH", "Replay descriptor does not match candidate/case");
-  if (descriptor.inputDigest !== digest(evaluationCase.input) || descriptor.expectedDigest !== digest(evaluationCase.expected)) throw new EvaluationObservabilityError("EVALUATION_NOT_REPLAYABLE", "Replay input identity does not match descriptor");
+  if (descriptor.candidateCommit !== evaluationCase.candidateCommit || descriptor.artifactDigest !== artifactDigest || descriptor.suiteId !== evaluationCase.suiteId || descriptor.caseId !== evaluationCase.caseId) {
+    throw new EvaluationObservabilityError("CANDIDATE_MISMATCH", "Replay descriptor does not match candidate/case");
+  }
+  if (descriptor.inputDigest !== digest(evaluationCase.input) || descriptor.expectedDigest !== digest(evaluationCase.expected)) {
+    throw new EvaluationObservabilityError("EVALUATION_NOT_REPLAYABLE", "Replay input identity does not match descriptor");
+  }
 }
 
 export async function emitObservationSafely(sink: ObservationSink, record: ObservationRecord): Promise<void> {
-  try { await sink.emit(record); } catch { /* observability failure must not alter business semantics */ }
+  try {
+    await sink.emit(record);
+  } catch {
+    // Observability failure must not alter business semantics.
+  }
 }
 
 export class RegressionSuiteRunner {
   constructor(private readonly sink: ObservationSink, private readonly limits: EvaluationObservabilityLimits) {
-    positive("maxEvaluationRecords", limits.maxEvaluationRecords); positive("maxConcurrentEvaluations", limits.maxConcurrentEvaluations); positive("maxEvaluationRecordBytes", limits.maxEvaluationRecordBytes);
+    positive("maxEvaluationRecords", limits.maxEvaluationRecords);
+    positive("maxConcurrentEvaluations", limits.maxConcurrentEvaluations);
+    positive("maxEvaluationRecordBytes", limits.maxEvaluationRecordBytes);
   }
   async run(suiteId: string, candidateCommit: string, cases: RegressionCase[], context: NormalizedTraceContext): Promise<RegressionResult> {
     if (cases.length > this.limits.maxEvaluationRecords) throw new EvaluationObservabilityError("RESOURCE_EXHAUSTED", "Regression case count exceeds limit");
@@ -316,14 +353,33 @@ export class RegressionSuiteRunner {
         const index = nextIndex++;
         if (index >= cases.length) return;
         const regressionCase = cases[index]!;
-        const evaluationCase: EvaluationCase = { suiteId, caseId: regressionCase.id, candidateCommit, environmentFingerprint: context.contextDigest, input: { caseId: regressionCase.id }, expected: true };
+        const evaluationCase: EvaluationCase = {
+          suiteId,
+          caseId: regressionCase.id,
+          candidateCommit,
+          environmentFingerprint: context.contextDigest,
+          input: { caseId: regressionCase.id },
+          expected: true,
+        };
         try {
           await regressionCase.run();
           const record = createEvaluationRecord({ evaluationCase, measured: true, status: "PASS", trace: context }, this.limits);
           results[index] = record;
-          await emitObservationSafely(this.sink, createObservation({ kind: "TRACE", name: `evaluation.${regressionCase.id}`, occurredAt: new Date().toISOString(), trace: context, evidenceRefs: [record.evaluationId] }, this.limits));
+          await emitObservationSafely(this.sink, createObservation({
+            kind: "TRACE",
+            name: `evaluation.${regressionCase.id}`,
+            occurredAt: new Date().toISOString(),
+            trace: context,
+            evidenceRefs: [record.evaluationId],
+          }, this.limits));
         } catch (error) {
-          results[index] = createEvaluationRecord({ evaluationCase, measured: String(error), status: "FAIL", trace: context, failure: String(error) }, this.limits);
+          results[index] = createEvaluationRecord({
+            evaluationCase,
+            measured: String(error),
+            status: "FAIL",
+            trace: context,
+            failure: String(error),
+          }, this.limits);
         }
       }
     };
@@ -331,7 +387,9 @@ export class RegressionSuiteRunner {
     await Promise.all(Array.from({ length: workerCount }, () => worker()));
     const completed = results.filter((record): record is EvaluationRecord => record !== undefined);
     return {
-      suiteId, candidateCommit, completed: completed.length,
+      suiteId,
+      candidateCommit,
+      completed: completed.length,
       passed: completed.filter((x) => x.status === "PASS").length,
       failed: completed.filter((x) => x.status === "FAIL").length,
       indeterminate: completed.filter((x) => x.status === "INDETERMINATE" || x.status === "UNAVAILABLE").length,
@@ -341,9 +399,12 @@ export class RegressionSuiteRunner {
 }
 
 export function assertPromotionEvidence(input: PromotionEvidenceInput): void {
-  text("candidateCommit", input.candidateCommit); text("artifactDigest", input.artifactDigest);
+  text("candidateCommit", input.candidateCommit);
+  text("artifactDigest", input.artifactDigest);
   if (input.evaluations.length === 0) throw new EvaluationObservabilityError("EVIDENCE_INCOMPLETE", "No evaluation evidence supplied");
   if (input.evaluations.some((record) => record.candidateCommit !== input.candidateCommit)) throw new EvaluationObservabilityError("CANDIDATE_MISMATCH", "Evaluation evidence references another candidate");
   if (input.evaluations.some((record) => record.status !== "PASS")) throw new EvaluationObservabilityError("EVIDENCE_INCOMPLETE", "Not all promotion evidence passed");
-  if (input.faults.some((fault) => fault.requested && (!fault.observed || fault.status !== "OBSERVED" || fault.evidenceRef === undefined || fault.evidenceRef.length === 0))) throw new EvaluationObservabilityError("FAULT_NOT_PROVEN", "A requested fault was not proven observed");
+  if (input.faults.some((fault) => fault.requested && (!fault.observed || fault.status !== "OBSERVED" || fault.evidenceRef === undefined || fault.evidenceRef.length === 0))) {
+    throw new EvaluationObservabilityError("FAULT_NOT_PROVEN", "A requested fault was not proven observed");
+  }
 }

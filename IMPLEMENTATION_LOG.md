@@ -52,13 +52,13 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Implemented request/response replay verification with deterministic digest binding and `REPLAY_MISMATCH` failure on tampering.
 - Added executable F9-001..F9-060 acceptance coverage.
 - Fixed the adapter boundary so injected handlers for operations not exposed by a descriptor are ignored instead of becoming a constructor-time false failure; exposed operations still require a bound handler and remain `UNAVAILABLE` when not implemented.
-- Re-ran exact-head CI on candidate HEAD `fdb2a2e542f1745612e0617668258550bba5c12f`; full verification passed, including strict build/tests, live PostgreSQL integration, both crash-window characterizations, archive construction/verification, artifact upload, and cleanup. 
+- Exact-head CI passed implementation HEAD `fdb2a2e542f1745612e0617668258550bba5b12f`, including strict build/tests, live PostgreSQL integration, both crash-window characterizations, archive construction/verification, artifact upload, and cleanup.
 
 ## Current Verification Boundary
 
-The current Phase 9 candidate identity is the branch HEAD of `feat/sif-core-1.3.0-sovereign-products`. The verified implementation HEAD before documentation reconciliation was `fdb2a2e542f1745612e0617668258550bba5b12f`; the subsequent state/log documentation commits preserve the same implementation and trigger a fresh exact-head verification boundary.
+The Phase 9 implementation was verified at `fdb2a2e542f1745612e0617668258550bba5b12f`. Subsequent documentation-only commits reconcile repository state records without changing the Phase 9 implementation. Because the repository's release discipline requires exact-head verification, any post-verification documentation commit must itself pass the same exact-head CI before the new branch HEAD becomes the authoritative verified candidate.
 
-The successful Phase 9 verification demonstrated 470/470 package tests passing, 7/7 live PostgreSQL integration tests passing, successful federated inbox crash-window characterization, successful PostgreSQL before-commit rollback and after-commit preservation characterization, successful unpublished archive build/verification, and candidate artifact upload with exact-HEAD provenance.
+The verified Phase 9 implementation run demonstrated 470/470 package tests passing, 7/7 live PostgreSQL integration tests passing, successful federated inbox crash-window characterization, successful PostgreSQL before-commit rollback and after-commit preservation characterization, successful unpublished archive build/verification, and candidate artifact upload with exact-HEAD provenance.
 
 No package version bump, registry publication, release tag, merge to `main`, production product deployment, real-world forecasting claim, automatic authority promotion, or autonomous external action is implied.
 

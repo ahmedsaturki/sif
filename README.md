@@ -30,13 +30,21 @@ The established full verification gate covers exact checkout and identity, stric
 
 Current-state documents intentionally avoid embedding dynamic CI run IDs, artifact IDs, or the current branch SHA, because changing those values in a document would require another state commit and invalidate the reference.
 
+## Repository governance
+
+Repository-level merge protection is specified in `REPOSITORY_GOVERNANCE.md`. The canonical branch should require pull requests and the `SIF Core CI / verify-core` check, along with review, conversation-resolution, no-force-push, and no-deletion controls.
+
+The tree now includes `CODEOWNERS`, a pull-request template, PR-targeted CI, explicit workflow read-only permissions, a 15-minute verification timeout, and deterministic Node/npm/TypeScript build metadata.
+
+The connected GitHub administration surface currently exposes no active Rulesets or protected branches. The repository files therefore document and reinforce the governance contract but do not claim that the GitHub setting itself is active.
+
 ## Release discipline
 
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
 
 The current Phase 0–9 roadmap is closed. No Phase 10 is defined. No merge to `main`, package publication, release tag, production deployment, or direct external product integration is implied.
 
-All PRs #1–#11 are closed. PRs #9–#11 completed the cumulative Phase 7→8→9 promotion chain; PRs #1–#6 are retained only as closed historical candidate records.
+All PRs #1–#12 are closed. PRs #9–#12 completed the later promotion/hardening chain; PRs #1–#6 are retained only as closed historical candidate records.
 
 ## Cleanup note
 

@@ -1,7 +1,7 @@
 # SIF Implementation Log
 
 ## Verified Foundation
-SIF Core progressed through the preserved kernel line, live PostgreSQL persistence, secure federation, policy governance, evaluation/observability, and the knowledge/semantic plane. Every candidate phase is isolated on its own branch and must pass exact-head CI before promotion.
+SIF Core progressed through the preserved kernel line, live PostgreSQL persistence, secure federation, policy governance, evaluation/observability, the knowledge/semantic plane, the systemic/ecological plane, and the reflexive/continuity plane. Every candidate phase is isolated on its own branch and must pass exact-head CI before promotion.
 
 ## Phase 6 — Knowledge / Semantic Plane
 
@@ -28,13 +28,39 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - Kept the simulation boundary free of external network, shell, database mutation, or autonomous real-world action interfaces.
 - Added executable F7-001..F7-060 acceptance coverage.
 - Selected the more complete systemic implementation line and closed the older duplicate Phase 7 PR. Re-anchored the canonical candidate directly to the verified Phase 6 HEAD.
-- Exact-head CI passed the current Phase 7 candidate across strict build/tests, live PostgreSQL integration, both crash windows, archive verification, artifact upload, and cleanup.
+- Exact-head CI passed the Phase 7 candidate across strict build/tests, live PostgreSQL integration, both crash windows, archive verification, artifact upload, and cleanup.
+
+## Phase 8 — Reflexive / Continuity Plane
+
+- Preserved the self-model and capability-drift boundary as an evidence-gated description of actual system capabilities.
+- Implemented deterministic state snapshots with identity, capability, artifact, timestamp, and state-digest binding.
+- Implemented lineage validation with bounded ancestry, duplicate/self-parent rejection, unknown-parent rejection, deterministic ordering, and cycle detection.
+- Implemented controlled improvement proposals bound to a base identity/snapshot, explicit target state, required evaluations, preserved-or-narrowed authority, and generation increments.
+- Implemented review and succession constraints so approval requires matching evidence and cannot widen authority.
+- Implemented preservation manifests, reconstruction verification, bounded proposal/certificate storage, and deterministic continuity replay.
+- Executable F8-001..F8-060 acceptance coverage is preserved and regression-tested by the later Phase 9 candidate CI.
+
+## Phase 9 — Sovereign Products
+
+- Defined the narrow product adapter contract for `LARA_OS_REIE`, `QADRIX`, `SOVEREIGN_LIBRARY`, and future sovereign applications.
+- Implemented immutable-to-callers product descriptors with product identity, protocol version, adapter version, capabilities, planes, modes, operations, and authority scopes.
+- Implemented deterministic request normalization, timestamp normalization, array uniqueness/order normalization, bounded payloads, and request digests.
+- Implemented fail-closed product identity, adapter-version, capability, authority, and operation enforcement.
+- Implemented explicit injected operation handlers with no hidden external I/O and caller-immutable execution inputs/outputs.
+- Implemented bounded product-adapter registration with unique product identity, deterministic descriptor listing, dispatch, and unknown-product `UNAVAILABLE` handling.
+- Implemented append-only bounded product evidence records with sequence/linkage, record digests, tamper detection, and deterministic chain verification.
+- Implemented request/response replay verification with deterministic digest binding and `REPLAY_MISMATCH` failure on tampering.
+- Added executable F9-001..F9-060 acceptance coverage.
+- Fixed the adapter boundary so injected handlers for operations not exposed by a descriptor are ignored instead of becoming a constructor-time false failure; exposed operations still require a bound handler and remain `UNAVAILABLE` when not implemented.
+- Re-ran exact-head CI on candidate HEAD `fdb2a2e542f1745612e0617668258550bba5c12f`; full verification passed, including strict build/tests, live PostgreSQL integration, both crash-window characterizations, archive construction/verification, artifact upload, and cleanup. 
 
 ## Current Verification Boundary
 
-The current candidate identity is the branch HEAD. The authoritative verification record is the successful exact-head SIF Core CI run for that same commit, together with its uploaded unpublished candidate artifact and digest. Dynamic run/artifact identifiers are intentionally not committed into mutable state documents.
+The current Phase 9 candidate identity is the branch HEAD of `feat/sif-core-1.3.0-sovereign-products`. The verified implementation HEAD before documentation reconciliation was `fdb2a2e542f1745612e0617668258550bba5b12f`; the subsequent state/log documentation commits preserve the same implementation and trigger a fresh exact-head verification boundary.
 
-No package version bump, registry publication, merge to `main`, production simulation deployment, real-world forecasting claim, automatic authority promotion, or autonomous external action is implied.
+The successful Phase 9 verification demonstrated 470/470 package tests passing, 7/7 live PostgreSQL integration tests passing, successful federated inbox crash-window characterization, successful PostgreSQL before-commit rollback and after-commit preservation characterization, successful unpublished archive build/verification, and candidate artifact upload with exact-HEAD provenance.
+
+No package version bump, registry publication, release tag, merge to `main`, production product deployment, real-world forecasting claim, automatic authority promotion, or autonomous external action is implied.
 
 ## Release Discipline
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`

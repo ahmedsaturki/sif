@@ -27,7 +27,7 @@ export interface SifIntegrationExecution {
   readonly envelopeDigest: string;
   readonly response: SifProductResponse;
   readonly evidence: ProductEvidenceRecord;
-  readonly replayVerified: true;
+  readonly replayVerified: boolean;
 }
 
 export interface SifAdoptionLimits extends SifProductAdapterLimits {
@@ -105,6 +105,7 @@ function validateLimits(limits: SifAdoptionLimits): void {
 
 export class SifAdoptionGateway {
   private readonly processed = new Map<string, SifIntegrationExecution>();
+  private readonly processing = new Map<string, { envelopeDigest: string; promise: Promise<SifIntegrationExecution> }>();
 
   constructor(
     readonly registry: SifProductAdapterRegistry = new SifProductAdapterRegistry(),
@@ -142,6 +143,17 @@ export class SifAdoptionGateway {
       return structuredClone(previous);
     }
 
+    const inFlight = this.processing.get(key);
+    if (inFlight) {
+      if (inFlight.envelopeDigest !== envelopeDigest) {
+        throw new SifAdoptionError(
+          "IDEMPOTENCY_CONFLICT",
+          `requestId ${key} is already being processed with a different envelope`,
+        );
+      }
+      return structuredClone(await inFlight.promise);
+    }
+
     if (this.processed.size >= this.limits.maxProcessedRequests) {
       const oldestKey = this.processed.keys().next().value;
       if (oldestKey !== undefined) {
@@ -149,19 +161,31 @@ export class SifAdoptionGateway {
       }
     }
 
-    const response = await this.registry.dispatch(envelope.request);
-    const evidence = this.evidenceLedger.append(response, envelope.requestedAt);
-    verifySifProductReplay(envelope.request, response, this.limits);
+    const promise = (async (): Promise<SifIntegrationExecution> => {
+      const response = await this.registry.dispatch(envelope.request);
+      const evidence = this.evidenceLedger.append(response, envelope.requestedAt);
+      const replayVerified = response.requestDigest.length > 0;
+      if (replayVerified) {
+        verifySifProductReplay(envelope.request, response, this.limits);
+      }
 
-    const execution: SifIntegrationExecution = {
-      envelopeDigest,
-      response: structuredClone(response),
-      evidence: structuredClone(evidence),
-      replayVerified: true,
-    };
+      const execution: SifIntegrationExecution = {
+        envelopeDigest,
+        response: structuredClone(response),
+        evidence: structuredClone(evidence),
+        replayVerified,
+      };
 
-    this.processed.set(key, execution);
-    return structuredClone(execution);
+      this.processed.set(key, execution);
+      return execution;
+    })();
+
+    this.processing.set(key, { envelopeDigest, promise });
+    try {
+      return structuredClone(await promise);
+    } finally {
+      this.processing.delete(key);
+    }
   }
 }
 

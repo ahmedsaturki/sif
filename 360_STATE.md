@@ -6,13 +6,13 @@
 - Package baseline: `SIF Core 0.5.0`
 - Current promoted phase: Phase 9 — Sovereign Products
 - Canonical promoted preservation line: `feat/sif-core-1.0.0-knowledge-semantic`
-- Canonical preservation HEAD: `a0f6d897d2d95c18d1c6297e766cd34563142c79`
+- Canonical preservation HEAD: `5a57827bb52a5e82a59dfa329ab77bcd659eea85`
 - Phase 9 implementation branch: `feat/sif-core-1.3.0-sovereign-products`
 - Phase 9 verified exact-head: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`
 - Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`
 - Phase 7/9 cumulative promotion into Phase 6 line: `77a605a936115815c2e833f6c4667f0e353aefbd`
-- Final documentation reconciliation commit: `a0f6d897d2d95c18d1c6297e766cd34563142c79`
+- Current closure documentation reconciliation: `5a57827bb52a5e82a59dfa329ab77bcd659eea85`
 - Implementation language: TypeScript
 - Core dependency policy: dependency-free kernel
 - Primary persistence target: PostgreSQL
@@ -36,23 +36,15 @@ Implemented capabilities include explicit, version-pinned product adapters for `
 The adapter boundary does not claim direct production integration with Lara OS/REIE, QADRIX, Sovereign Library, Supabase, PostgreSQL, GitHub, browser, queue, credentials, or external APIs. Product-facing work enters through explicit handlers only.
 
 ## Verification State
-The exact Phase 9 implementation HEAD `e1a0b5d47caabd61016cad92b0bc31c83ef01693` passed SIF Core CI Run #530 with 470/470 package tests, 7/7 live PostgreSQL integration tests, both crash-window characterizations, unpublished source/package archive construction and integrity verification, exact-head artifact upload, and cleanup.
+The authoritative live verification record for the current canonical HEAD is the exact-head SIF Core CI run whose `head_sha` equals `5a57827bb52a5e82a59dfa329ab77bcd659eea85`. Current-state documentation intentionally avoids embedding dynamic run IDs and artifact IDs that would self-invalidate when the state documents change.
 
-The exact-head Phase 9 artifact digest was `sha256:d10d1b5885b99acef71343214daa2194e9327b073da41aad0a72add65f2ec56a`.
-
-The cumulative Phase 8+9 line at `ec0a37072bca89313e15bd03a9902b145e3e801d` passed exact-head SIF Core verification run `35255909084`; artifact digest `sha256:e64dee1fef5327d16f29d85046c8bcc25d16c95ddc83430f2c2e28bf5e54d4e8`.
-
-The cumulative Phase 7+8+9 line at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` passed exact-head SIF Core verification run `35256086808`; artifact digest `sha256:4270a743ca802944784f22a0beacec37b9589a8cc18c36b5dd6090ecdc2f7c63`.
-
-The canonical Phase 6 preservation line at `5bafdd6b1a0f7d5f77b594a998bf520a39953b3c` passed exact-head SIF Core verification run `35256370476`; artifact digest `sha256:ab2ce01e42e8aea47786e5c5c0b62af7f4fa5a7e30ef304e063b512414bd9b2e`.
-
-The final documentation state at `a0f6d897d2d95c18d1c6297e766cd34563142c79` passed exact-head SIF Core verification run `35256562076` with every workflow gate completed successfully, including exact checkout, strict build/tests, PostgreSQL schema and live integration, both crash-window characterizations, archive construction/verification, artifact upload, and cleanup. The final documentation-state artifact digest was `sha256:537a99e128b580eb4f5aeda58875bef95b92ba04c15539060842100b85dbe59a`.
+The full verification gate covers exact checkout and identity, strict TypeScript build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox and PostgreSQL crash-window characterization, unpublished archive construction and integrity verification, exact-head artifact upload, and cleanup. The previously verified Phase 9, Phase 8+9, Phase 7+8+9, and prior canonical promotion heads remain part of the promotion evidence chain.
 
 ## Promotion / Release State
 - Phase 9 implementation, verification, and promotion are complete.
 - Phase 8 implementation, verification, and promotion are complete.
 - Phase 7 implementation, verification, and promotion are complete.
-- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic` at `a0f6d897d2d95c18d1c6297e766cd34563142c79`.
+- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic` at the current canonical HEAD above.
 - `sif-core` remains version `0.5.0`.
 - No merge to `main` has been made.
 - No registry publication has been made.

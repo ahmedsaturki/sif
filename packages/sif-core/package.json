@@ -5,6 +5,20 @@
   "description": "Dependency-free TypeScript core for a Sovereign Intelligence Fabric with transactional PostgreSQL integration, durable outbox, cryptographic integrity, CAS, evidence/provenance, scoped authority, policy admission, semantic knowledge, lineage and reconstruction verification.",
   "license": "Apache-2.0",
   "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "dist/src",
+    "sql",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/test/*.test.js",

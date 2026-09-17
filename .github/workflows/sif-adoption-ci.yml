@@ -1,0 +1,63 @@
+name: SIF Adoption Layer CI
+
+on:
+  push:
+    branches:
+      - "feat/sif-adoption-layer-1.0.0"
+      - "integration/**"
+  pull_request:
+    branches:
+      - "feat/sif-core-1.0.0-knowledge-semantic"
+      - "main"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sif-adoption-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-adoption:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    env:
+      CANDIDATE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_COMMIT }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$CANDIDATE_COMMIT"
+
+      - name: Set Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.23.2"
+
+      - name: Install and verify frozen SIF Core
+        working-directory: packages/sif-core
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          node --version
+          npm --version
+          npm run build
+          npm test
+
+      - name: Build adoption layer
+        run: |
+          ./packages/sif-core/node_modules/.bin/tsc -p integrations/sif-adoption/tsconfig.json
+
+      - name: Test adoption layer
+        run: |
+          node --test integrations/sif-adoption/dist/test/*.test.js

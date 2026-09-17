@@ -6,12 +6,12 @@ SIF is a sovereignty-first intelligence fabric whose implementation grows throug
 
 - Phase 2 Live PostgreSQL, Phase 3 Secure Federation, Phase 4 Policy & Governance, Phase 5 Evaluation & Observability, Phase 6 Knowledge / Semantic, Phase 7 Systemic / Ecological, Phase 8 Reflexive / Continuity, and Phase 9 Sovereign Products are preserved on dedicated branches.
 - The cumulative Phase 7–9 tree is promoted into the preserved Phase 6 line `feat/sif-core-1.0.0-knowledge-semantic`.
-- Canonical preservation HEAD: `a0f6d897d2d95c18d1c6297e766cd34563142c79`.
+- Canonical preservation HEAD: `5a57827bb52a5e82a59dfa329ab77bcd659eea85`.
 - Phase 9 exact implementation HEAD: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`.
 - Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`.
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
 - Phase 7/9 cumulative promotion into the Phase 6 line: `77a605a936115815c2e833f6c4667f0e353aefbd`.
-- Final documentation reconciliation: `a0f6d897d2d95c18d1c6297e766cd34563142c79`.
+- Current closure documentation reconciliation: `5a57827bb52a5e82a59dfa329ab77bcd659eea85`.
 - The package version remains `0.5.0`; preservation and promotion do not imply package publication.
 
 ## Phase 9 Sovereign Products
@@ -26,11 +26,9 @@ F9-001..F9-060 are executable in `packages/sif-core/test/sovereign-products.test
 
 ## Verification boundary
 
-Each cumulative promotion layer was independently exact-head verified before promotion. Phase 9 passed Run #530; the cumulative Phase 8+9 line passed Run `35255909084`; the cumulative Phase 7+8+9 line passed Run `35256086808`; and the final canonical documentation state passed Run `35256562076`.
+Each cumulative promotion layer was independently exact-head verified before promotion. The final canonical preservation state is identified by the exact HEAD above; the authoritative live proof is the SIF Core CI run whose `head_sha` exactly equals that HEAD. Current-state documents intentionally avoid embedding dynamic run and artifact identifiers.
 
-The final documentation-state verification covered exact checkout, strict TypeScript build/tests, 470/470 package tests, 7/7 live PostgreSQL integration tests, federated inbox and PostgreSQL crash-window characterization, unpublished archive construction and integrity verification, exact-head artifact upload, and cleanup.
-
-Final documentation-state artifact digest: `sha256:537a99e128b580eb4f5aeda58875bef95b92ba04c15539060842100b85dbe59a`.
+The established full verification gate covers exact checkout and identity, strict TypeScript build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox and PostgreSQL crash-window characterization, unpublished archive construction and integrity verification, exact-head artifact upload, and cleanup.
 
 ## Release discipline
 

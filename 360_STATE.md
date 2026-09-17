@@ -6,13 +6,11 @@
 - Package baseline: `SIF Core 0.5.0`
 - Current promoted phase: Phase 9 — Sovereign Products
 - Canonical promoted preservation line: `feat/sif-core-1.0.0-knowledge-semantic`
-- Canonical preservation HEAD: `5a57827bb52a5e82a59dfa329ab77bcd659eea85`
 - Phase 9 implementation branch: `feat/sif-core-1.3.0-sovereign-products`
 - Phase 9 verified exact-head: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`
 - Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`
 - Phase 7/9 cumulative promotion into Phase 6 line: `77a605a936115815c2e833f6c4667f0e353aefbd`
-- Current closure documentation reconciliation: `5a57827bb52a5e82a59dfa329ab77bcd659eea85`
 - Implementation language: TypeScript
 - Core dependency policy: dependency-free kernel
 - Primary persistence target: PostgreSQL
@@ -36,15 +34,17 @@ Implemented capabilities include explicit, version-pinned product adapters for `
 The adapter boundary does not claim direct production integration with Lara OS/REIE, QADRIX, Sovereign Library, Supabase, PostgreSQL, GitHub, browser, queue, credentials, or external APIs. Product-facing work enters through explicit handlers only.
 
 ## Verification State
-The authoritative live verification record for the current canonical HEAD is the exact-head SIF Core CI run whose `head_sha` equals `5a57827bb52a5e82a59dfa329ab77bcd659eea85`. Current-state documentation intentionally avoids embedding dynamic run IDs and artifact IDs that would self-invalidate when the state documents change.
+The canonical preservation branch is the authoritative current source state. Its current HEAD is accepted as the final Phase 0–9 state only when a SIF Core CI run checks out that exact `head_sha` and every verification gate succeeds.
 
-The full verification gate covers exact checkout and identity, strict TypeScript build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox and PostgreSQL crash-window characterization, unpublished archive construction and integrity verification, exact-head artifact upload, and cleanup. The previously verified Phase 9, Phase 8+9, Phase 7+8+9, and prior canonical promotion heads remain part of the promotion evidence chain.
+The full verification gate covers exact checkout and identity, strict TypeScript build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox and PostgreSQL crash-window characterization, unpublished archive construction and integrity verification, exact-head artifact upload, and cleanup.
+
+Dynamic CI run IDs, artifact IDs, artifact digests, and the current branch SHA are intentionally kept out of this mutable state document. The live CI record and generated artifact are the authoritative external evidence for the current HEAD.
 
 ## Promotion / Release State
 - Phase 9 implementation, verification, and promotion are complete.
 - Phase 8 implementation, verification, and promotion are complete.
 - Phase 7 implementation, verification, and promotion are complete.
-- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic` at the current canonical HEAD above.
+- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic`.
 - `sif-core` remains version `0.5.0`.
 - No merge to `main` has been made.
 - No registry publication has been made.

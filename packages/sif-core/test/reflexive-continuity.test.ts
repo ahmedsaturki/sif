@@ -75,8 +75,8 @@ function node(snapshot: ContinuitySnapshot, id = snapshot.lineageNodeId, parentI
   return createLineageNode({ nodeId: id, identityId: snapshot.identityId, parentIds, kind, createdAt: snapshot.capturedAt, evidenceIds: ["evidence-a"], snapshotDigest: snapshot.snapshotDigest, authorityScopes: snapshot.authorityScopes }, L);
 }
 
-function proposalFor(snapshot: ContinuitySnapshot, targetState: unknown = { counter: 2, mode: "stable" }): SelfImprovementProposal {
-  return createSelfImprovementProposal({
+function proposalInput(snapshot: ContinuitySnapshot, targetState: unknown = { counter: 2, mode: "stable" }) {
+  return {
     proposalId: "proposal-a",
     baseSnapshot: snapshot,
     targetIdentityId: "self-a",
@@ -86,7 +86,11 @@ function proposalFor(snapshot: ContinuitySnapshot, targetState: unknown = { coun
     proposedAuthorityScopes: ["read", "evaluate"],
     evidenceIds: ["proposal-evidence"],
     createdAt: "2026-09-17T17:01:00.000Z",
-  }, L);
+  };
+}
+
+function proposalFor(snapshot: ContinuitySnapshot, targetState: unknown = { counter: 2, mode: "stable" }): SelfImprovementProposal {
+  return createSelfImprovementProposal(proposalInput(snapshot, targetState), L);
 }
 
 function evaluation(proposal: SelfImprovementProposal, status: ImprovementEvaluation["status"] = "PASS"): ImprovementEvaluation {
@@ -208,7 +212,7 @@ test("F8-027 proposal computes target state digest", () => {
   assert.notEqual(proposal.targetStateDigest, baseSnapshot().stateDigest);
 });
 test("F8-028 proposal rejects authority widening", () => {
-  throwsCode(() => createSelfImprovementProposal({ ...proposalFor(baseSnapshot()), proposedAuthorityScopes: ["read", "evaluate", "admin"] }, L), "AUTHORITY_WIDENING");
+  throwsCode(() => createSelfImprovementProposal({ ...proposalInput(baseSnapshot()), proposedAuthorityScopes: ["read", "evaluate", "admin"] }, L), "AUTHORITY_WIDENING");
 });
 test("F8-029 proposal rejects oversized target state", () => {
   throwsCode(() => proposalFor(baseSnapshot(), "x".repeat(10000)), "RESOURCE_EXHAUSTED");
@@ -253,7 +257,7 @@ test("F8-037 candidate requires approved review", () => {
 });
 test("F8-038 candidate preserves or narrows authority", () => {
   const snapshot = baseSnapshot();
-  const proposal = createSelfImprovementProposal({ ...proposalFor(snapshot), proposedAuthorityScopes: ["read"] }, L);
+  const proposal = createSelfImprovementProposal({ ...proposalInput(snapshot), proposedAuthorityScopes: ["read"] }, L);
   const review = reviewSelfImprovementProposal({ proposal, evaluations: [evaluation(proposal)], reviewerId: "reviewer-a", evidenceIds: ["review-evidence"] });
   const candidate = prepareImprovementCandidate({ proposal, baseSnapshot: snapshot, review, lineageNodeId: "next", capturedAt: "2026-09-17T17:03:00.000Z" }, L);
   assert.deepEqual(candidate.snapshot.authorityScopes, ["read"]);
@@ -300,7 +304,8 @@ test("F8-045 succession verification rejects tampering", () => {
 });
 test("F8-046 preservation manifest is deterministic", () => {
   const manifest = createPreservationManifest({ archiveId: "archive-a", identityId: "self-a", snapshotDigest: baseSnapshot().snapshotDigest, lineageDigest: "lineage-a", files: [{ path: "snapshot.json", digest: "file-a", bytes: 123 }], artifactDigests: ["artifact-a"], eventStreamHeads: ["stream-a"], formatVersion: "1", createdAt: "2026-09-17T17:05:00.000Z" }, L);
-  assert.equal(manifest.manifestDigest, createPreservationManifest({ ...manifest, manifestDigest: undefined as never }, L).manifestDigest);
+  const { manifestDigest: _manifestDigest, ...manifestInput } = manifest;
+  assert.equal(manifest.manifestDigest, createPreservationManifest(manifestInput, L).manifestDigest);
 });
 test("F8-047 preservation rejects duplicate paths", () => {
   throwsCode(() => createPreservationManifest({ archiveId: "archive-a", identityId: "self-a", snapshotDigest: "s", lineageDigest: "l", files: [{ path: "x", digest: "a", bytes: 1 }, { path: "x", digest: "b", bytes: 2 }], artifactDigests: [], eventStreamHeads: [], formatVersion: "1", createdAt: "2026-09-17T17:05:00.000Z" }, L), "INVALID_CONTINUITY");
@@ -326,7 +331,7 @@ test("F8-051 reconstruction reports identity mismatch", () => {
   const preservation = createPreservationManifest({ archiveId: "archive-a", identityId: snapshot.identityId, snapshotDigest: snapshot.snapshotDigest, lineageDigest: graph.digest, files: [], artifactDigests: snapshot.artifactDigests, eventStreamHeads: snapshot.eventStreamHeads, formatVersion: "1", createdAt: snapshot.capturedAt }, L);
   const result = reconstructContinuity({ snapshot, lineage: graph, preservation, expectedIdentityId: "other", expectedLineageNodeId: snapshot.lineageNodeId }, L);
   assert.equal(result.verified, false);
-  assert.ok(result.mismatches.includes("identity"));
+  assert.equal(result.mismatches.includes("identity"), true);
 });
 test("F8-052 reconstruction reports preservation mismatch", () => {
   const snapshot = baseSnapshot();
@@ -334,7 +339,7 @@ test("F8-052 reconstruction reports preservation mismatch", () => {
   const preservation = createPreservationManifest({ archiveId: "archive-a", identityId: snapshot.identityId, snapshotDigest: "wrong", lineageDigest: graph.digest, files: [], artifactDigests: [], eventStreamHeads: [], formatVersion: "1", createdAt: snapshot.capturedAt }, L);
   const result = reconstructContinuity({ snapshot, lineage: graph, preservation, expectedIdentityId: snapshot.identityId, expectedLineageNodeId: snapshot.lineageNodeId }, L);
   assert.equal(result.verified, false);
-  assert.ok(result.mismatches.includes("preservation.snapshot"));
+  assert.equal(result.mismatches.includes("preservation.snapshot"), true);
 });
 test("F8-053 continuity archive binds snapshot and lineage", () => {
   const snapshot = baseSnapshot();
@@ -359,7 +364,7 @@ test("F8-055 continuity archive rejects tampered archive digest", () => {
 test("F8-056 store bounds proposals", () => {
   const store = new ReflexiveContinuityStore({ ...L, maxProposals: 1 });
   store.addProposal(proposalFor(baseSnapshot()));
-  throwsCode(() => store.addProposal(createSelfImprovementProposal({ ...proposalFor(baseSnapshot()), proposalId: "proposal-b" }, L)), "RESOURCE_EXHAUSTED");
+  throwsCode(() => store.addProposal(createSelfImprovementProposal({ ...proposalInput(baseSnapshot()), proposalId: "proposal-b" }, L)), "RESOURCE_EXHAUSTED");
 });
 test("F8-057 store returns immutable proposal", () => {
   const store = new ReflexiveContinuityStore(L);
@@ -367,7 +372,7 @@ test("F8-057 store returns immutable proposal", () => {
   store.addProposal(proposal);
   const returned = store.getProposal(proposal.proposalId);
   returned.targetState = { changed: true };
-  assert.notDeepEqual(store.getProposal(proposal.proposalId).targetState, { changed: true });
+  assert.notEqual(JSON.stringify(store.getProposal(proposal.proposalId).targetState), JSON.stringify({ changed: true }));
 });
 test("F8-058 store bounds certificates", () => {
   const store = new ReflexiveContinuityStore({ ...L, maxCertificates: 1 });

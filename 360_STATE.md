@@ -26,7 +26,7 @@ Preserved verified candidate capabilities include canonical federation envelopes
 Preserved verified candidate capabilities include immutable policy bundles and versions, explicit lifecycle, historical resolution, overlap fail-closed behavior, deny-overrides-allow, provider-neutral OPA/Cedar-shaped integration boundaries, provider-result identity binding, deterministic evidence, non-widening federated policy metadata, bounded resources, and caller-immutable evidence ledgers.
 
 ## Phase 5 Evaluation & Observability
-Preserved verified candidate capabilities include bounded deterministic trace/evidence correlation, structured TRACE/METRIC/LOG observation, sink isolation, deterministic evaluation records with candidate/environment provenance, candidate/artifact/environment-bound replay, explicit fault proof and distinct fault classifications, bounded parallel regression execution, and fail-closed promotion evidence.
+Preserved verified candidate capabilities include bounded deterministic trace/evidence correlation, structured TRACE/METRIC/LOG observation, sink isolation, deterministic evaluation records with candidate/environment provenance, candidate/artifact/environment-bound replay, explicit fault proof and distinct fault classifications, bounded parallel regression execution, measured-vs-expected semantics, and fail-closed promotion evidence.
 
 ## Phase 6 Knowledge / Semantic Plane
 Implemented capabilities include:
@@ -43,7 +43,7 @@ Implemented capabilities include:
 - executable acceptance coverage F6-001..F6-060.
 
 ## Verification State
-The current Phase 6 candidate is accepted only when the exact branch HEAD has passed the full SIF Core CI workflow. The workflow verifies checkout identity, strict build/tests, live PostgreSQL integration, both crash-window characterizations, candidate archive construction/verification, and candidate artifact upload.
+The current Phase 6 candidate has passed the full exact-head SIF Core CI workflow on the current branch HEAD. The workflow verified checkout identity, strict build/tests, live PostgreSQL integration, both crash-window characterizations, candidate archive construction/verification, and candidate artifact upload.
 
 Dynamic CI run numbers, IDs, artifact IDs, and artifact digests are intentionally not committed into this mutable state file because doing so creates a self-referential provenance loop.
 

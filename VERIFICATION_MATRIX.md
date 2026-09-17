@@ -1,4 +1,6 @@
-# SIF Verification Matrix — 0.6 Live PostgreSQL Milestone
+# SIF Verification Matrix — Historical 0.6 Live PostgreSQL Milestone
+
+This document is a preserved historical verification record for the 0.6 Live PostgreSQL milestone. It is not the current SIF release or promotion gate. The current cumulative verification boundary is defined by the canonical Phase 6 preservation branch and its exact-head SIF Core CI.
 
 | Surface | Status | Evidence / Boundary |
 |---|---|---|
@@ -26,6 +28,6 @@
 | Exactly-once external side effects | NOT CLAIMED | Requires effect-side idempotency/transaction semantics |
 | Binary artifact preservation | VERIFIED | Existing 0.5.0 byte-for-byte artifacts preserved in Library; 0.6.0 artifacts not yet created |
 
-## 0.6 Promotion Gate
+## Historical 0.6 Promotion Gate
 
-The 0.6 implementation milestone is live-verified on PostgreSQL 16.15 by GitHub Actions run 169 for verified code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`. The remaining release gate is artifact production and independent verification. NOT IMPLEMENTED / NOT VERIFIED / NOT CLAIMED entries remain hard boundaries and must not be represented as production capabilities.
+At the 0.6 implementation milestone, the implementation was live-verified on PostgreSQL 16.15 by GitHub Actions run 169 for verified code candidate `3f1a248b226122696dd612cd7740e3c851c9a31f`. At that historical point, artifact production and independent verification remained the next release-gate work. The later Phase 2–9 implementation and promotion history superseded this milestone record. NOT IMPLEMENTED / NOT VERIFIED / NOT CLAIMED entries remain hard boundaries and must not be represented as production capabilities.

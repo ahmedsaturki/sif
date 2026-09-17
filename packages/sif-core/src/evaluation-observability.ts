@@ -367,7 +367,8 @@ export class RegressionSuiteRunner {
           expected: regressionCase.expected,
         };
         try {
-          const measured = await regressionCase.run();
+          const rawMeasured = await regressionCase.run();
+          const measured = rawMeasured === undefined ? true : rawMeasured;
           const expected = hasExpected ? regressionCase.expected : measured;
           evaluationCase = { ...evaluationCase, expected };
           const matches = !hasExpected || digest(measured) === digest(expected);

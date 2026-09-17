@@ -41,8 +41,12 @@ Status: verified implementation candidate on `feat/sif-core-1.1.0-systemic-ecolo
 ## Phase 8 — Reflexive / Continuity Plane
 Self-model, controlled self-improvement, reconstruction, succession, identity lineage and long-term preservation.
 
+Status: implemented verified candidate preserved on `feat/sif-core-1.2.0-reflexive-continuity`; its acceptance coverage is regression-tested by the later Phase 9 candidate CI. Promotion remains a separate explicit boundary.
+
 ## Phase 9 — Sovereign Products
 Reusable SIF capabilities exposed to Lara OS/REIE, QADRIX, Sovereign Library and future sovereign applications through explicit adapters.
+
+Status: implemented candidate on `feat/sif-core-1.3.0-sovereign-products`; F9-001..F9-060 executable acceptance coverage passed exact-head CI at implementation HEAD `fdb2a2e542f1745612e0617668258550bba5b12f`. Documentation reconciliation followed without changing the implementation. The resulting branch HEAD must pass the same exact-head CI before final promotion/freeze.
 
 ## Release Discipline
 Every phase follows:

@@ -8,7 +8,7 @@ import {
   makeSifIntegrationEnvelope,
   type StandardSifHandlers,
 } from "../src/adoption.js";
-import type { SifProductRequest, SifProductResponse } from "../../../packages/sif-core/src/index.js";
+import type { SifProductRequest, SifProductResponse } from "../../../packages/sif-core/dist/src/index.js";
 import { verifySifProductReplay } from "../../../packages/sif-core/dist/src/index.js";
 
 const NOW = "2026-09-18T00:00:00.000Z";

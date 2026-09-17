@@ -48,7 +48,7 @@ All PRs #1–#13 are closed. PRs #9–#13 completed the later promotion/hardenin
 
 ## Cleanup note
 
-The only remaining known non-semantic refs are `tmp-test-no` and `tmp-test-no2`. They are inert temporary test branches. The available GitHub connector exposes branch creation and movement but does not expose branch-ref deletion, so they are intentionally left untouched rather than risking an unsafe workaround.
+The temporary test refs `tmp-test-no` and `tmp-test-no2` remain as inert historical branches. The available GitHub connector exposes branch creation and movement but does not expose branch-ref deletion, so merged or temporary non-canonical refs are intentionally left untouched rather than risking an unsafe workaround.
 
 ## License
 

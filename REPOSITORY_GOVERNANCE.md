@@ -34,4 +34,4 @@ These controls are repository-level settings; files in this repository cannot ac
 
 ## Enforcement status
 
-The connected GitHub administration surface currently reports no active GitHub Rulesets; the branch-protection endpoint is not readable through the connected integration, so protected-branch status is not asserted here. This document therefore describes the intended enforcement contract and does not claim that GitHub has already activated those settings.
+The connected GitHub administration surface currently reports no active GitHub Rulesets. Live branch metadata currently reports `protected: false` for the canonical branch and `main`; the detailed branch-protection endpoint is not readable through the connected integration, so the exact protection configuration cannot be inspected or changed here. This document therefore describes the intended enforcement contract and records the observed live gap without claiming that GitHub has activated those settings.

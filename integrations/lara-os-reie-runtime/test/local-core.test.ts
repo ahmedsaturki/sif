@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { openReieWorkspace } from "../dist/persistence.js";
 import { resolveEntityCandidates } from "../dist/resolution.js";
-import { generateReieSignals } from "../signals.js";
+import { generateReieSignals } from "../dist/signals.js";
 import type { ReieEntity } from "../reie.js";
 
 const NOW = "2026-09-18T00:00:00.000Z";

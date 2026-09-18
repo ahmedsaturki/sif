@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "feat/reie-local-core-1.0.0"
+      - "feat/reie-ingestion-adapter-1.1.0"
   pull_request:
     branches:
       - "feat/sif-adoption-layer-1.0.0"

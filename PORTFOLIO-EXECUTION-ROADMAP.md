@@ -48,13 +48,13 @@ Consumers own:
 | System | Current verified state | Action |
 | --- | --- | --- |
 | SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
-| ai-team-v1 | `main` advanced to `436eba05bd876ff54bf2c19fd1407b3759725b65`; legacy PR backlog consolidated into current-main waves; only PR #76 remains open | Finish CI/reconciliation before merge |
-| Sovereign Library | `main` is `8e60dc2bc280c49fe1ac546ce99fcb27626b1980`; PR #125 remains governed/open; Python, phase3, verify, release-engineering, Kotlin checks pass; security pipeline/CodeQL evidence is not terminal-green | Resolve security gate, then follow repository authorization |
+| ai-team-v1 | `main` remains `436eba05bd876ff54bf2c19fd1407b3759725b65`; legacy PR backlog consolidated; only PR #76 remains open with current-main product/governance wave; latest wave commits include Project/Delivery/MLS/Workforce hardening | Finish CI/reconciliation before merge |
+| Sovereign Library | `main` is `8e60dc2bc280c49fe1ac546ce99fcb27626b1980`; PR #125 remains governed/open; current head `542427a8e83c032deb1b8476b61a52d088c80e8b`; phase3 is green and the refreshed verification wave is active; security workflow fails before creating job steps | Resolve workflow/security gate, then follow repository authorization |
 | Aqarat | Production previously verified healthy; no open PR/issue in connected repo state | Keep stable; modify only on evidence |
 | Sadat MLS | Production deployment previously verified; health endpoint returned 200; no open PR/issue | Keep stable; monitor and fix only evidence-backed defects |
 | Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |
 | Nabatos Agri Platform | Production deployment verified responding successfully | Keep stable |
-| Meta Operations Runtime | Core/repository qualification substantially complete; explicit live/deployment/effect gates remain | Advance only with real live evidence |
+| Meta Operations Runtime | Core/repository qualification substantially complete; PR #70 adds Facebook page/profile/media read-only capability implementation; live evidence and side-effect gates remain separate | Finish CI on PR #70, then promote only with authorized live evidence |
 | Lara OS / REIE | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 | QADRIX / QRX | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 

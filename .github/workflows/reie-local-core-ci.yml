@@ -79,7 +79,7 @@ jobs:
           {
             "records": [
               {
-                "entityId": "cli-property-1",
+                "entityId": "demo-property-1",
                 "entityType": "property",
                 "canonicalName": "Galaxy Mall",
                 "location": "Sadat City",

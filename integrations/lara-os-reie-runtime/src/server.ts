@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
 import { openReieWorkspace, type PersistentReieWorkspace } from "./persistence.js";
-import { ReieReviewQueue } from "./review.js";
+import { ReieOperationalStore } from "./operational-persistence.js";
 import { extractReieTextCandidates, type ReieExtractionRule, type ReieCandidateValueType } from "./extraction.js";
 
 export interface ReieLocalServerOptions {
@@ -8,14 +8,14 @@ export interface ReieLocalServerOptions {
   readonly host?: "127.0.0.1";
   readonly port?: number;
   readonly maxBodyBytes?: number;
-  readonly reviews?: ReieReviewQueue;
+  readonly operationalPath?: string;
 }
 
 export class ReieLocalServer {
   private server: Server | undefined;
   private persistent: PersistentReieWorkspace | undefined;
   private readonly options: Required<Pick<ReieLocalServerOptions, "host" | "port" | "maxBodyBytes">>;
-  readonly reviews: ReieReviewQueue;
+  readonly operational: ReieOperationalStore;
   private readonly optionsJournalPath: string;
 
   constructor(options: ReieLocalServerOptions) {
@@ -25,14 +25,15 @@ export class ReieLocalServer {
       maxBodyBytes: options.maxBodyBytes ?? 256 * 1024,
     };
     if (this.options.maxBodyBytes <= 0) throw new Error("maxBodyBytes must be positive");
-    this.reviews = options.reviews ?? new ReieReviewQueue();
     if (!options.journalPath.trim()) throw new Error("journalPath must not be empty");
     this.optionsJournalPath = options.journalPath;
+    this.operational = new ReieOperationalStore(options.operationalPath ?? options.journalPath + ".ops.jsonl");
   }
 
   async start(): Promise<{ host: string; port: number }> {
     if (this.server) throw new Error("REIE server is already running");
     this.persistent = await openReieWorkspace(this.optionsJournalPath);
+    await this.operational.load();
     this.server = createServer((req, res) => {
       void this.handle(req, res).catch((error) => this.writeError(res, 500, error));
     });
@@ -72,7 +73,7 @@ export class ReieLocalServer {
     }
 
     if (method === "GET" && url.pathname === "/reviews") {
-      return this.writeJson(res, 200, this.reviews.list());
+      return this.writeJson(res, 200, this.operational.reviews.list());
     }
 
     if (method === "POST" && url.pathname === "/extract") {
@@ -98,14 +99,15 @@ export class ReieLocalServer {
         String(body.observedAt ?? new Date().toISOString()),
         rules,
       );
-      const items = candidates.map((candidate) => this.reviews.add(candidate));
+      const items = [];
+      for (const candidate of candidates) items.push(await this.operational.addCandidate(candidate));
       return this.writeJson(res, 200, { candidates, reviewItems: items });
     }
 
     if (method === "POST" && url.pathname.startsWith("/reviews/")) {
       const candidateId = decodeURIComponent(url.pathname.slice("/reviews/".length));
       const body = await this.readJson(req);
-      const item = await this.reviews.decide(candidateId, body.decision, String(body.reviewer ?? ""), this.persistent.workspace, String(body.reviewedAt ?? new Date().toISOString()));
+      const item = await this.operational.decide(candidateId, body.decision, String(body.reviewer ?? ""), this.persistent.workspace, String(body.reviewedAt ?? new Date().toISOString()));
       return this.writeJson(res, 200, item);
     }
 

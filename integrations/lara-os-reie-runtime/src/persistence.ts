@@ -57,7 +57,10 @@ export class PersistentReieWorkspace {
       let raw = "";
       try { raw = await readFile(this.journalPath, "utf8"); }
       catch (error) {
-        if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+        const code = error && typeof error === "object" && "code" in error
+          ? (error as { code?: unknown }).code
+          : undefined;
+        if (code === "ENOENT") return;
         throw error;
       }
       const lines = raw.split("\n").filter((line) => line.trim().length > 0);

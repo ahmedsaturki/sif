@@ -86,3 +86,28 @@ test("ART-004 detects on-disk tampering", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("ART-005 refuses a different artifact for an existing sourceId", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-art-"));
+  try {
+    const store = new ReieSourceArtifactStore(dir);
+    await store.put({
+      sourceId: "s1",
+      observedAt: NOW,
+      mediaType: "text/plain",
+      content: "first",
+    });
+    await assert.rejects(
+      () => store.put({
+        sourceId: "s1",
+        observedAt: NOW,
+        mediaType: "text/plain",
+        content: "second",
+      }),
+      (error: unknown) => error instanceof ReieSourceArtifactError && error.code === "CONFLICT",
+    );
+    assert.equal((await store.get("s1")).content, "first");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

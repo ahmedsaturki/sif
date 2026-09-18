@@ -7,7 +7,8 @@ SIF follows:
 ## Branching
 
 - Keep `main` on the preserved Genesis line unless the project design is explicitly changed.
-- Use `feat/sif-core-1.0.0-knowledge-semantic` for the verified promoted cumulative line.
+- Use `feat/sif-adoption-layer-1.0.0` for the verified promoted application line.
+- The historical SIF Core cumulative preservation line `feat/sif-core-1.0.0-knowledge-semantic` remains preserved as historical source provenance.
 - Develop changes on a dedicated branch and merge through a pull request.
 - Do not force-push the canonical branch after promotion.
 
@@ -21,7 +22,7 @@ npm ci
 npm test
 ```
 
-The GitHub SIF Core CI is the authoritative exact-checkout verification for the candidate commit.
+For Core changes, SIF Core CI is the authoritative exact-checkout verification. For promoted application changes, SIF Adoption Layer CI is the authoritative adoption-line gate, with Core verification retained as a prerequisite.
 
 ## Change discipline
 

@@ -1,6 +1,6 @@
 import test, { before, after } from "node:test";
 import assert from "node:assert/strict";
-import { ReiePostgresStore } from "../src/store.js";
+import { ReiePostgresStore } from "../dist/store.js";
 
 const connectionString = process.env.REIE_TEST_DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:5432/reie";
 const store = ReiePostgresStore.fromConfig({ connectionString });

@@ -1,6 +1,8 @@
 import { appendFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { deepClone, canonicalJson, sha256 } from "./deterministic.js";
+import { ingestReieDocument, type ReieCsvMapping, type ReieIngestionDocument, type ReieIngestionResult } from "./ingestion.js";
+import { deriveReieOpportunities, type ReieOpportunity } from "./opportunity.js";
 import { ReieWorkspace, type ReieWorkspaceState } from "./workspace.js";
 import type { ReieClaim, ReieEntity, ReieSource } from "./reie.js";
 
@@ -132,6 +134,15 @@ export class PersistentReieWorkspace {
     for (const entity of snapshot.entities) await this.upsertEntity(entity);
     for (const claim of snapshot.claims) await this.recordClaim(claim);
     return deepClone(snapshot);
+  }
+
+  async ingestDocument(document: ReieIngestionDocument, csvMapping?: ReieCsvMapping): Promise<ReieIngestionResult> {
+    return ingestReieDocument(this, document, csvMapping);
+  }
+
+  opportunities(asOf: string): ReieOpportunity[] {
+    const state = this.workspace.getState();
+    return deriveReieOpportunities(state.entities, state.claims, state.sources, asOf);
   }
 
   counts() {

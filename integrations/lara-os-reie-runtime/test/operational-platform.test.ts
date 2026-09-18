@@ -282,3 +282,25 @@ test("OPS-012 agent API fails closed without an explicit governance gate", async
   }
 });
 
+
+test("OPS-013 SIF governance gate rejects an explicit policy deny", async () => {
+  const gate = new SifReieGovernanceGate({
+    policyCheck: async () => ({
+      response: {
+        status: "PASS",
+        productId: "LARA_OS_REIE",
+        operation: "policy.check",
+        output: { accepted: false },
+      },
+      evidence: null,
+      replayVerified: true,
+    }),
+  } as never);
+  await assert.rejects(
+    () => gate.check(
+      { id: "research", requestedCapabilities: ["sif.knowledge.query"], run: () => null },
+      { workspace: new ReieWorkspace(), asOf: NOW, input: null },
+    ),
+    /policy denied agent research/i,
+  );
+});

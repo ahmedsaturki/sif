@@ -218,12 +218,13 @@ function rowToRecord(headers: string[], row: string[], mapping: ReieCsvMapping, 
     .filter((x): x is { field: string; value: unknown } => x !== null);
 
   const entityId = read(mapping.entityId);
+  const location = read(mapping.location);
   return {
     recordId: "csv:" + rowIndex,
     ...(entityId ? { entityId } : {}),
     entityType: entityTypeValue,
     canonicalName,
-    ...(read(mapping.location) ? { location: read(mapping.location) } : {}),
+    ...(location ? { location } : {}),
     aliases: splitAliases(read(mapping.aliases)),
     claims,
   };

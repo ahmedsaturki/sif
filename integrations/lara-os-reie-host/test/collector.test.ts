@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ReiePublicSourceCollector } from "../src/collector.js";
+import { ReiePublicSourceCollector } from "../src/collector.ts";
 
 test("HOST-003 public collector passes browser capture to source-only ingestion", async () => {
   const calls: string[] = [];

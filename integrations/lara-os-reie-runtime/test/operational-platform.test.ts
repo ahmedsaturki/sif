@@ -247,3 +247,38 @@ test("OPS-010 governance identity changes when agent input changes", async () =>
   assert.equal(calls.length, 2);
   assert.notEqual(first[0]?.runId, second[0]?.runId);
 });
+test("OPS-011 local dashboard is served from the REIE API", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-dashboard-"));
+  const server = new ReieLocalServer({ journalPath: join(dir, "events.jsonl"), port: 0 });
+  const bound = await server.start();
+  try {
+    const response = await fetch(`http://${bound.host}:${bound.port}/`);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /REIE Local Intelligence Console/);
+  } finally {
+    await server.stop();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("OPS-012 agent API fails closed without an explicit governance gate", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-agent-api-"));
+  const server = new ReieLocalServer({ journalPath: join(dir, "events.jsonl"), port: 0 });
+  const bound = await server.start();
+  try {
+    const response = await fetch(`http://${bound.host}:${bound.port}/agents/run`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ agents: ["qa"], input: null, asOf: NOW }),
+    });
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body[0].status, "FAILED");
+    assert.match(body[0].error, /governance/i);
+  } finally {
+    await server.stop();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+

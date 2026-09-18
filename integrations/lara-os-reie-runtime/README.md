@@ -92,7 +92,11 @@ Example JSON shape:
 }
 ```
 
-Workspace entry points are `ingestDocument(...)` and `opportunities(...)`. Opportunity output is evidence-derived and deterministic; it does not make external decisions or perform outreach.
+Workspace entry points are `ingestDocument(...)` and `opportunities(...)`. The persistent workspace uses the same ingestion path and journals source/entity/claim mutations.
+
+The CLI supports `ingest <journal> <file> <sourceId> [mediaType] [mappingJson]`; JSON media is detected from `.json`, CSV from `.csv`, and plain text is source-only. CSV requires an explicit mapping, and `claimTypes` can explicitly parse numeric, boolean, or JSON claim values.
+
+Opportunity output is evidence-derived and deterministic; it does not make external decisions or perform outreach.
 
 ## Future adapters
 

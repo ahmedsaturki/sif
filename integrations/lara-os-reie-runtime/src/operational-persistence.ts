@@ -101,9 +101,12 @@ export class ReieOperationalStore {
   }
 
   async addRelation(input: Omit<ReieRelationEdge, "relationId"> & { relationId?: string }): Promise<ReieRelationEdge> {
+    const requestedId = input.relationId?.trim();
+    const before = requestedId
+      ? this.relations.listFor().find((value) => value.relationId === requestedId)
+      : undefined;
     const edge = this.relations.add(input);
-    const existed = this.relations.listFor().some((value) => value.relationId === edge.relationId);
-    if (!existed) await this.append("relation.add", edge);
+    if (!before) await this.append("relation.add", edge);
     return edge;
   }
 

@@ -39,8 +39,8 @@ export class ReiePublicSourceCollector {
       content: capture.content,
       mediaType: "text/plain" as const,
     };
-    const ingestion = await this.workspace.ingestDocument(document);
     await this.artifacts?.put(document);
+    const ingestion = await this.workspace.ingestDocument(document);
     return { capture, ingestion };
   }
 }

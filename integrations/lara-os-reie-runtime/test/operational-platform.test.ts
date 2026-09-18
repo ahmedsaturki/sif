@@ -340,3 +340,32 @@ test("OPS-014 REIE API maps client errors to non-500 statuses", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("OPS-015 operational journal remains idempotent for duplicate relation and agent-run writes", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-ops-idempotent-"));
+  const path = join(dir, "ops.jsonl");
+  try {
+    const store = new ReieOperationalStore(path);
+    await store.load();
+    const edge = {
+      fromEntityId: "p1",
+      toEntityId: "person1",
+      relation: "listed_by",
+      sourceIds: ["s1"],
+      observedAt: NOW,
+      relationId: "rel-1",
+    };
+    await store.addRelation(edge);
+    await store.addRelation(edge);
+    await store.recordAgentRun({ runId: "run-1", agentId: "qa", status: "SUCCESS", output: { ok: true } });
+    await store.recordAgentRun({ runId: "run-1", agentId: "qa", status: "SUCCESS", output: { ok: true } });
+    const raw = await (await import("node:fs/promises")).readFile(path, "utf8");
+    assert.equal(raw.trim().split("\n").length, 2);
+    await assert.rejects(
+      () => store.recordAgentRun({ runId: "run-1", agentId: "qa", status: "SUCCESS", output: { ok: false } }),
+      /already exists with different content/i,
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

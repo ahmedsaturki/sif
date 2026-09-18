@@ -26,7 +26,7 @@ function canonical(value: unknown): unknown {
 }
 
 export function canonicalJson(value: unknown): string {
-  return JSON.stringify(canonical(value));
+  return JSON.stringify(canonical(value)) ?? "null";
 }
 
 export function sha256(value: unknown): string {

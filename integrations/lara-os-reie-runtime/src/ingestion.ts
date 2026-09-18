@@ -217,9 +217,10 @@ function rowToRecord(headers: string[], row: string[], mapping: ReieCsvMapping, 
     })
     .filter((x): x is { field: string; value: unknown } => x !== null);
 
+  const entityId = read(mapping.entityId);
   return {
     recordId: "csv:" + rowIndex,
-    ...(read(mapping.entityId) ? { entityId: read(mapping.entityId) } : {}),
+    ...(entityId ? { entityId } : {}),
     entityType: entityTypeValue,
     canonicalName,
     ...(read(mapping.location) ? { location: read(mapping.location) } : {}),
@@ -369,7 +370,7 @@ export async function ingestReieDocument(
     entityIds: [...new Set(entityIds)].sort(),
     claimIds: [...new Set(claimIds)].sort(),
     recordsAccepted,
-    recordsSkipped,
+    recordsSkipped: 0,
     parseMode,
   };
 }

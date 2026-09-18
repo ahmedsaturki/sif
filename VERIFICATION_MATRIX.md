@@ -1,6 +1,6 @@
 # SIF Verification Matrix — Historical 0.6 Live PostgreSQL Milestone
 
-This document is a preserved historical verification record for the 0.6 Live PostgreSQL milestone. It is not the current SIF release or promotion gate. The current cumulative verification boundary is defined by the canonical Phase 6 preservation branch and its exact-head SIF Core CI.
+This document is a preserved historical verification record for the 0.6 Live PostgreSQL milestone. It is not the current SIF release or promotion gate. The current promoted application line is `feat/sif-adoption-layer-1.0.0`; the historical Phase 6 preservation branch referenced by older records is retained only as historical provenance.
 
 | Surface | Status | Evidence / Boundary |
 |---|---|---|

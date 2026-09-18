@@ -2,9 +2,11 @@
 
 ## Canonical branch
 
-The verified cumulative SIF line is:
+The verified promoted application line is:
 
-`feat/sif-core-1.0.0-knowledge-semantic`
+`feat/sif-adoption-layer-1.0.0`
+
+The historical cumulative SIF Core preservation line is `feat/sif-core-1.0.0-knowledge-semantic` and remains preserved for source provenance.
 
 `main` is intentionally preserved at the Genesis baseline and is not the publication or promotion branch.
 
@@ -13,7 +15,7 @@ The verified cumulative SIF line is:
 GitHub repository settings SHOULD enforce these controls on the canonical branch:
 
 - pull request required before merge
-- required status check: `SIF Core CI / verify-core`
+- required status checks: `SIF Adoption Layer CI / verify-adoption` and `SIF Core CI / verify-core`
 - branch must be up to date before merge
 - at least one approving review
 - conversation resolution before merge
@@ -26,7 +28,7 @@ These controls are repository-level settings; files in this repository cannot ac
 ## Local guardrails in this tree
 
 - `CODEOWNERS` records ownership for review routing.
-- SIF Core CI runs for pull requests targeting the canonical branch.
+- SIF Adoption Layer CI and SIF Core CI run for pull requests targeting the canonical branch.
 - SIF Core CI has explicit read-only workflow permissions.
 - CI runs on the pinned `ubuntu-24.04` label and has a finite 15-minute job timeout.
 - Build tooling is pinned through `package.json`, `package-lock.json`, and the CI Node/npm toolchain.

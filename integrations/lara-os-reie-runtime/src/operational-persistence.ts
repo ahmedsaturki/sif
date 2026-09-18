@@ -79,8 +79,9 @@ export class ReieOperationalStore {
   }
 
   async addCandidate(candidate: ReieExtractionCandidate): Promise<ReieReviewItem> {
+    const before = this.reviews.list().find((value) => value.candidate.candidateId === candidate.candidateId);
     const item = this.reviews.add(candidate);
-    await this.append("review.upsert", item);
+    if (!before) await this.append("review.upsert", item);
     return item;
   }
 
@@ -91,19 +92,30 @@ export class ReieOperationalStore {
     sink: ReieClaimSink,
     reviewedAt?: string,
   ): Promise<ReieReviewItem> {
+    const before = this.reviews.list().find((value) => value.candidate.candidateId === candidateId.trim());
     const item = await this.reviews.decide(candidateId, decision, reviewer, sink, reviewedAt);
-    await this.append("review.upsert", item);
+    if (!before || JSON.stringify(before) !== JSON.stringify(item)) {
+      await this.append("review.upsert", item);
+    }
     return item;
   }
 
   async addRelation(input: Omit<ReieRelationEdge, "relationId"> & { relationId?: string }): Promise<ReieRelationEdge> {
     const edge = this.relations.add(input);
-    await this.append("relation.add", edge);
+    const existed = this.relations.listFor().some((value) => value.relationId === edge.relationId);
+    if (!existed) await this.append("relation.add", edge);
     return edge;
   }
 
   async recordAgentRun(run: ReieAgentRun): Promise<ReieAgentRun> {
     const value = deepClone(run);
+    const existing = this.agentRunMap.get(value.runId);
+    if (existing) {
+      if (JSON.stringify(existing) !== JSON.stringify(value)) {
+        throw new ReieOperationalPersistenceError("IO_ERROR", "Agent run already exists with different content");
+      }
+      return deepClone(existing);
+    }
     this.agentRunMap.set(value.runId, value);
     await this.append("agent.run", value);
     return value;

@@ -62,7 +62,7 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - The historical SIF Core preservation branch `feat/sif-core-1.0.0-knowledge-semantic` remains the authoritative frozen Core provenance.
 - The current promoted application line is `feat/sif-adoption-layer-1.0.0`.
 - Each promotion preserved the exact verified implementation tree; no merge to `main` was performed.
-- All pull requests created so far are closed. PRs #1–#6 remain superseded historical candidate records; PRs #9–#13 completed the later promotion/hardening chain; later pull requests were documentation/governance reconciliation only.
+- All pull requests created so far are closed. PRs #1–#6 remain superseded historical candidate records; PRs #9–#13 completed the later promotion/hardening chain; PR #39 completed application CI supply-chain hardening; PR #40 recorded the final hardening state.
 
 ## Final Verification Boundary
 
@@ -98,3 +98,11 @@ Phase 0–9 is complete as the currently defined roadmap. No Phase 10 is current
 - The current promoted application line is `feat/sif-adoption-layer-1.0.0`.
 - Post-merge SIF Core CI #821 and SIF Adoption Layer CI #94 both passed on `7ecca31ccabab009b1db56f8c76fa9f1a904dd7e`.
 - The current application release includes the governed REIE host, browser collection boundary, durable raw-source artifacts, governance-deny enforcement, client-error status mapping, and operational journal idempotency hardening.
+
+
+## Final State Reconciliation — Application Line
+
+- PR #39 completed application CI supply-chain hardening on the promoted application line: immutable GitHub Action references, a verified PostgreSQL service-image digest, and SIF Core verification on canonical application pull requests.
+- PR #40 recorded the hardening in `IMPLEMENTATION_LOG.md` and `REPOSITORY_GOVERNANCE.md`.
+- The canonical application branch was then verified post-merge by SIF Core CI and SIF Adoption Layer CI on the final merge commit.
+- No runtime or package behavior changed in this final hardening/reconciliation cycle.

@@ -48,13 +48,13 @@ Consumers own:
 | System | Current verified state | Action |
 | --- | --- | --- |
 | SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
-| ai-team-v1 | `main` remains `436eba05bd876ff54bf2c19fd1407b3759725b65`; legacy PR backlog consolidated; only PR #76 remains open with current-main product/governance wave; latest wave HEAD `896a0a202358537351baafcea9fcd59bf33423d2` includes Project/Delivery/MLS/Workforce hardening | Finish CI/reconciliation before merge |
-| Sovereign Library | `main` is `8e60dc2bc280c49fe1ac546ce99fcb27626b1980`; PR #125 remains governed/open; current PR head `b98ce8ffa1be9bc0ba089c53e8c6edee59b5ebe1`; phase3 is green and the refreshed verification wave is active; security workflow fails before creating job steps | Resolve workflow/security gate, then follow repository authorization |
+| ai-team-v1 | `main` remains `436eba05bd876ff54bf2c19fd1407b3759725b65`; legacy PR backlog consolidated; only PR #76 remains open with current-main product/governance wave; latest wave HEAD `2550250da1da3e80076809fd0d5bca3fd2dc8562` includes Project/Delivery/MLS/Workforce hardening | Finish CI/reconciliation before merge |
+| Sovereign Library | `main` is `8e60dc2bc280c49fe1ac546ce99fcb27626b1980`; PR #125 remains governed/open; current PR head `5f9913af91218948fb9493cabce4905cac2f2015`; phase3 is green and the refreshed verification wave is active; security workflow fails before creating job steps | Resolve workflow/security gate, then follow repository authorization |
 | Aqarat | Production previously verified healthy; no open PR/issue in connected repo state | Keep stable; modify only on evidence |
 | Sadat MLS | Production deployment previously verified; health endpoint returned 200; no open PR/issue | Keep stable; monitor and fix only evidence-backed defects |
 | Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |
 | Nabatos Agri Platform | Production deployment verified responding successfully | Keep stable |
-| Meta Operations Runtime | Core/repository qualification substantially complete; PR #70 HEAD `abd3d26492c9fc9d0dc3b9861d466b84a77ef13b` adds Facebook page/profile/media read-only capability implementation and registry dispatch; live evidence and side-effect gates remain separate | Finish CI on PR #70, then promote only with authorized live evidence |
+| Meta Operations Runtime | Core/repository qualification substantially complete; PR #70 HEAD `698df7d3fdba7fd9ce4e7fd0b9ba7f1b70220c82` adds Facebook page/profile/media read-only capability implementation and registry dispatch; live evidence and side-effect gates remain separate | Finish CI on PR #70, then promote only with authorized live evidence |
 | Lara OS / REIE | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 | QADRIX / QRX | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 
@@ -63,7 +63,7 @@ Consumers own:
 The active consolidation is **PR #76**:
 
 - Head branch: `feat/current-main-integration-wave`
-- Latest observed head: `3c81deaf68aacb986d1be4fa1462e9ddfa5b03f3`
+- Latest observed head: `2550250da1da3e80076809fd0d5bca3fd2dc8562`
 - Base: `main` at `436eba05bd876ff54bf2c19fd1407b3759725b65`
 - Semgrep: successful
 - Build check: repeatedly failing before useful job execution on the current workflow path; retries produced immediate workflow failure without actionable job steps/logs
@@ -111,7 +111,7 @@ PR #125 remains governed and open.
 
 Latest verified head:
 
-`b3e6ae5b5e64853530182bbd31e36dfd1b9c4ae1`
+`5f9913af91218948fb9493cabce4905cac2f2015`
 
 Verified current-head workflows include successful:
 

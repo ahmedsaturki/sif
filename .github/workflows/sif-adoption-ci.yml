@@ -71,3 +71,4 @@ jobs:
       - name: Test local-first REIE runtime
         run: |
           node --experimental-strip-types --test integrations/lara-os-reie-runtime/test/*.test.ts
+

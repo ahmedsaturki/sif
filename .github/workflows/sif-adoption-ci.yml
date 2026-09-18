@@ -61,3 +61,11 @@ jobs:
       - name: Test adoption layer
         run: |
           node --experimental-strip-types --test integrations/sif-adoption/test/*.test.ts
+
+      - name: Build local-first REIE runtime
+        run: |
+          ./packages/sif-core/node_modules/.bin/tsc -p integrations/lara-os-reie-runtime/tsconfig.json
+
+      - name: Test local-first REIE runtime
+        run: |
+          node --experimental-strip-types --test integrations/lara-os-reie-runtime/test/*.test.ts

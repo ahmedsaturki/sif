@@ -73,9 +73,21 @@ export function extractReieTextCandidates(
       throw new ReieExtractionError("INVALID_INPUT", "ruleId and field must not be empty");
     }
     const flags = rule.pattern.flags.includes("g") ? rule.pattern.flags : rule.pattern.flags + "g";
+    if (rule.pattern.source.length > 1000) {
+      throw new ReieExtractionError("INVALID_INPUT", "Extraction regex is too large");
+    }
     const regex = new RegExp(rule.pattern.source, flags);
     let match: RegExpExecArray | null;
+    let matchCount = 0;
     while ((match = regex.exec(content)) !== null) {
+      matchCount += 1;
+      if (matchCount > 1000) {
+        throw new ReieExtractionError("INVALID_INPUT", "Extraction rule produced too many candidates");
+      }
+      if (match[0].length === 0) {
+        regex.lastIndex = Math.min(content.length, match.index + 1);
+        continue;
+      }
       const group = rule.captureGroup ?? 1;
       const raw = (match[group] ?? match[0] ?? "").trim();
       if (!raw) continue;

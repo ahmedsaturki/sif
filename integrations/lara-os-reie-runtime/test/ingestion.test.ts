@@ -41,6 +41,20 @@ test("REIE-ING001 ingests explicit JSON records without inference", async () => 
   });
 });
 
+test("REIE-ING003 invalid JSON does not mutate the workspace", async () => {
+  const workspace = new ReieWorkspace();
+  await assert.rejects(
+    () => ingestReieDocument(workspace, {
+      sourceId: "bad-json",
+      observedAt: NOW,
+      mediaType: "application/json",
+      content: "{not-json}"
+    }),
+    /array or an object containing records/,
+  );
+  assert.deepEqual(workspace.getState(), { sources: [], entities: [], claims: [] });
+});
+
 test("REIE-ING002 text sources are preserved but not semantically guessed", async () => {
   const workspace = new ReieWorkspace();
   const result = await ingestReieDocument(workspace, {
@@ -54,7 +68,7 @@ test("REIE-ING002 text sources are preserved but not semantically guessed", asyn
   assert.equal(workspace.getState().entities.length, 0);
 });
 
-test("REIE-ING003 CSV requires explicit mapping", async () => {
+test("REIE-ING004 CSV requires explicit mapping", async () => {
   const workspace = new ReieWorkspace();
   await assert.rejects(
     () => ingestReieDocument(workspace, {
@@ -67,7 +81,7 @@ test("REIE-ING003 CSV requires explicit mapping", async () => {
   );
 });
 
-test("REIE-ING004 CSV mapping produces deterministic claims", async () => {
+test("REIE-ING005 CSV mapping produces deterministic claims", async () => {
   const workspace = new ReieWorkspace();
   const result = await ingestReieDocument(workspace, {
     sourceId: "csv-2",
@@ -90,7 +104,7 @@ test("REIE-ING004 CSV mapping produces deterministic claims", async () => {
   }), '{"canonicalName":"P","claims":[{"field":"x","value":1}],"entityType":"property"}');
 });
 
-test("REIE-ING005 generates evidence-linked research opportunities deterministically", async () => {
+test("REIE-ING006 generates evidence-linked research opportunities deterministically", async () => {
   const workspace = new ReieWorkspace();
   await ingestReieDocument(workspace, {
     sourceId: "s1",

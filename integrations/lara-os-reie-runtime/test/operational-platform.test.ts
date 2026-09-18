@@ -223,3 +223,27 @@ test("OPS-008 operational journal survives reload for reviews, relations, and ag
   }
 });
 
+
+test("OPS-009 extraction handles zero-length regexes without looping", () => {
+  const candidates = extractReieTextCandidates(
+    "s1",
+    "p1",
+    "abc",
+    NOW,
+    [{ ruleId: "bounded", field: "x", pattern: /(?=b)/u, captureGroup: 0 }],
+  );
+  assert.equal(candidates.length, 1);
+  assert.equal(candidates[0]?.evidenceText, "b");
+});
+
+test("OPS-010 governance identity changes when agent input changes", async () => {
+  const calls: string[] = [];
+  const governance = { check: async (agent: { id: string }, context: { input: unknown }) => {
+    calls.push(agent.id + ":" + JSON.stringify(context.input));
+  }};
+  const orchestrator = new ReieAgentOrchestrator(governance);
+  const agent = { id: "same", requestedCapabilities: [], run: () => ({ ok: true }) };
+  await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 1 } });
+  await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 2 } });
+  assert.equal(calls.length, 2);
+});

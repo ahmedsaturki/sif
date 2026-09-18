@@ -14,6 +14,7 @@ import {
   createReieContentAgent,
   createReieQaAgent,
   createReieResearchAgent,
+  SifReieGovernanceGate,
 } from "../dist/agents.js";
 import { ReieLocalServer } from "../dist/server.js";
 import { ReieOperationalStore } from "../dist/operational-persistence.js";

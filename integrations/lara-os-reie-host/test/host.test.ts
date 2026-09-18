@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { createGovernedReieHost } from "../src/host.js";
+import { createGovernedReieHost } from "../src/host.ts";
 
 const NOW = "2026-09-18T12:00:00.000Z";
 

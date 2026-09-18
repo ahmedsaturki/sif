@@ -106,7 +106,14 @@ export class ReieSourceArtifactStore {
     try {
       const { readdir } = await import("node:fs/promises");
       const names = await readdir(this.directory);
-      return names.filter((name) => name.endsWith(".json")).map((name) => name.slice(0, -5)).sort();
+      const ids: string[] = [];
+      for (const name of names.filter((value) => value.endsWith(".json")).sort()) {
+        try {
+          const artifact = JSON.parse(await readFile(join(this.directory, name), "utf8")) as ReieSourceArtifact;
+          if (artifact.sourceId && sha256(artifact.content) === artifact.contentDigest) ids.push(artifact.sourceId);
+        } catch {}
+      }
+      return ids.sort();
     } catch (error) {
       const code = error && typeof error === "object" && "code" in error
         ? (error as { code?: unknown }).code

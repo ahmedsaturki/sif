@@ -103,12 +103,12 @@ test("REIE-ING006 CSV mapping produces deterministic claims", async () => {
     sourceId: "csv-2",
     observedAt: NOW,
     mediaType: "text/csv",
-    content: "name,type,location,price\nGalaxy Mall,mall,Sadat City,2500000\n",
+    content: "name,type,location,price,property_type\nGalaxy Mall,property,Sadat City,2500000,mall\n",
   }, {
     entityType: "type",
     canonicalName: "name",
     location: "location",
-    claims: { "propertyType": "type", "price.amount": "price" },
+    claims: { "propertyType": "property_type", "price.amount": "price" },
     claimTypes: { "price.amount": "number" }
   });
   assert.equal(result.parseMode, "csv");

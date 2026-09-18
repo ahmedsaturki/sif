@@ -108,11 +108,14 @@ test("REIE-ING006 CSV mapping produces deterministic claims", async () => {
     entityType: "type",
     canonicalName: "name",
     location: "location",
-    claims: { "propertyType": "type", "price.amount": "price" }
+    claims: { "propertyType": "type", "price.amount": "price" },
+    claimTypes: { "price.amount": "number" }
   });
   assert.equal(result.parseMode, "csv");
   assert.equal(result.recordsAccepted, 1);
   assert.equal(workspace.getState().claims.length, 2);
+  const price = workspace.getState().claims.find((claim) => claim.field === "price.amount");
+  assert.equal(price?.value, 2500000);
   assert.deepEqual(canonicalIngestionRecord({
     entityType: "property",
     canonicalName: "P",

@@ -3,6 +3,7 @@ import { openReieWorkspace, type PersistentReieWorkspace } from "./persistence.j
 import { ReieOperationalStore } from "./operational-persistence.js";
 import { extractReieTextCandidates, type ReieExtractionRule, type ReieCandidateValueType } from "./extraction.js";
 import { ReieAgentOrchestrator, createReieContentAgent, createReieQaAgent, createReieResearchAgent, createReieStrategyAgent, type ReieGovernanceGate } from "./agents.js";
+import { ReieSourceArtifactStore } from "./source-artifacts.js";
 
 export interface ReieLocalServerOptions {
   readonly journalPath: string;
@@ -11,6 +12,7 @@ export interface ReieLocalServerOptions {
   readonly maxBodyBytes?: number;
   readonly operationalPath?: string;
   readonly governance?: ReieGovernanceGate;
+  readonly artifactPath?: string;
 }
 
 export class ReieLocalServer {
@@ -18,6 +20,7 @@ export class ReieLocalServer {
   private persistent: PersistentReieWorkspace | undefined;
   private readonly options: Required<Pick<ReieLocalServerOptions, "host" | "port" | "maxBodyBytes">>;
   readonly operational: ReieOperationalStore;
+  readonly artifacts: ReieSourceArtifactStore;
   private readonly optionsJournalPath: string;
   private readonly orchestrator: ReieAgentOrchestrator;
 
@@ -32,6 +35,7 @@ export class ReieLocalServer {
     this.optionsJournalPath = options.journalPath;
     this.operational = new ReieOperationalStore(options.operationalPath ?? options.journalPath + ".ops.jsonl");
     this.orchestrator = new ReieAgentOrchestrator(options.governance);
+    this.artifacts = new ReieSourceArtifactStore(options.artifactPath ?? options.journalPath + ".artifacts");
   }
 
   async start(): Promise<{ host: string; port: number }> {
@@ -70,6 +74,12 @@ export class ReieLocalServer {
     }
 
     if (!this.persistent) return this.writeError(res, 503, "REIE server is not initialized");
+
+    if (method === "GET" && url.pathname.startsWith("/artifacts/")) {
+      const sourceId = decodeURIComponent(url.pathname.slice("/artifacts/".length));
+      const artifact = await this.artifacts.get(sourceId);
+      return this.writeJson(res, 200, artifact);
+    }
 
     if (method === "GET" && url.pathname === "/knowledge") {
       const q = url.searchParams.get("q") ?? "";
@@ -160,6 +170,7 @@ export class ReieLocalServer {
     if (method === "POST" && url.pathname === "/ingest") {
       const body = await this.readJson(req);
       const result = await this.persistent.ingestDocument(body.document, body.csvMapping);
+      await this.artifacts.put(body.document);
       return this.writeJson(res, 200, result);
     }
 

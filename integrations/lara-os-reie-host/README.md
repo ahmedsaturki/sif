@@ -28,3 +28,13 @@ The policy gate is implemented through a real `LARA_OS_REIE` SIF Adoption reques
 ## Public-source collection
 
 `ReiePublicSourceCollector` connects a Playwright browser worker to a REIE ingestion target. Browser capture becomes a source-only record; semantic claims still require an explicit extraction rule and human review in the REIE runtime.
+
+## Public source collection CLI
+
+The host can capture a public HTTP(S) page into the REIE journal without semantic inference:
+
+```sh
+node dist/cli.js collect ./data/reie-events.jsonl source-1 https://example.com ./data/browser-profile
+```
+
+The browser worker uses a persistent profile directory. Any session state in that profile remains under human control. Captured unstructured text is stored as source evidence only; entity/claim creation still requires explicit ingestion or reviewed extraction.

@@ -33,6 +33,14 @@ Release commit: `b7b5d2298e3fe07d7c377b7715e4760ecbde6967` via PR #33.
 
 This is an application-layer promotion, not a new SIF roadmap phase. The frozen `sif-core@0.5.0` contract remains unchanged.
 
+## REIE Governed Host 2.1.0
+
+REIE Operational Platform 2.0.0 has been completed by an executable governed host on the isolated adoption line. The host composes SIF Adoption, REIE Local Core, the local operational API, public-source browser collection, and durable raw-source provenance.
+
+Release merge commit: `809d602542f26df38333fafded3e14227bca183d` via PR #35.
+
+The host release does not change the frozen `sif-core@0.5.0` contract and does not create a new SIF roadmap phase.
+
 ## Verification boundary
 
 Each cumulative promotion layer was independently exact-head verified before promotion. The canonical cumulative branch is the authoritative current source state, and its current HEAD must be covered by a successful exact-head SIF Core CI run before that state is treated as verified.
@@ -55,7 +63,7 @@ The connected GitHub administration surface currently reports no active Rulesets
 
 The current Phase 0–9 roadmap is closed. No Phase 10 is defined. No merge to `main`, package publication, release tag, production deployment, or direct external product integration is implied.
 
-All pull requests currently created in the repository are closed. PR #33 promoted REIE Operational Platform 2.0.0 into the adoption line after exact-head verification. PRs #9–#13 completed the later promotion/hardening chain; PRs #14 onward completed final documentation reconciliation and cleanup. PRs #1–#6 are retained only as closed historical candidate records.
+All pull requests currently created in the repository are closed. PR #35 promoted REIE Governed Host 2.1.0 into the adoption line after exact-head verification. PR #33 promoted REIE Operational Platform 2.0.0 into the adoption line after exact-head verification. PRs #9–#13 completed the later promotion/hardening chain; PRs #14 onward completed final documentation reconciliation and cleanup. PRs #1–#6 are retained only as closed historical candidate records.
 
 ## Cleanup note
 

@@ -33,6 +33,35 @@ test("REIE-LC001 persists and reloads a complete workspace", async () => {
   } finally { await rm(t.dir, { recursive: true, force: true }); }
 });
 
+test("REIE-LC003 persistent ingestion appends to the journal and reloads", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-ingest-"));
+  const journal = join(dir, "events.jsonl");
+  try {
+    const first = await openReieWorkspace(journal);
+    const result = await first.ingestDocument({
+      sourceId: "s1",
+      observedAt: NOW,
+      mediaType: "application/json",
+      content: JSON.stringify({
+        records: [{
+          entityId: "p1",
+          entityType: "property",
+          canonicalName: "Galaxy Mall",
+          location: "Sadat City",
+          claims: [{ field: "propertyType", value: "mall" }]
+        }]
+      })
+    });
+    assert.equal(result.recordsAccepted, 1);
+    assert.equal(first.counts().journalRecords, 3);
+
+    const second = await openReieWorkspace(journal);
+    assert.deepEqual(second.counts(), { sources: 1, entities: 1, claims: 1, journalRecords: 3 });
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("REIE-LC002 detects journal tampering", async () => {
   const t = await tempJournal();
   try {
@@ -44,7 +73,7 @@ test("REIE-LC002 detects journal tampering", async () => {
   } finally { await rm(t.dir, { recursive: true, force: true }); }
 });
 
-test("REIE-LC003 exports and imports atomically", async () => {
+test("REIE-LC004 exports and imports atomically", async () => {
   const t = await tempJournal();
   try {
     const first = await openReieWorkspace(t.journal);
@@ -59,7 +88,7 @@ test("REIE-LC003 exports and imports atomically", async () => {
   } finally { await rm(t.dir, { recursive: true, force: true }); }
 });
 
-test("REIE-LC004 resolution returns candidates without merging", () => {
+test("REIE-LC005 resolution returns candidates without merging", () => {
   const entities: ReieEntity[] = [
     { entityId: "p1", entityType: "property", canonicalName: "Galaxy Mall", location: "Sadat City", aliases: ["Galaxy"] },
     { entityId: "p2", entityType: "property", canonicalName: "Galaxy Residence", location: "Sadat City", aliases: [] },
@@ -70,7 +99,7 @@ test("REIE-LC004 resolution returns candidates without merging", () => {
   assert.equal(result.length, 2);
 });
 
-test("REIE-LC005 signal engine emits corroboration and missing-field signals", async () => {
+test("REIE-LC006 signal engine emits corroboration and missing-field signals", async () => {
   const t = await tempJournal();
   try {
     const db = await openReieWorkspace(t.journal);
@@ -86,7 +115,7 @@ test("REIE-LC005 signal engine emits corroboration and missing-field signals", a
   } finally { await rm(t.dir, { recursive: true, force: true }); }
 });
 
-test("REIE-LC006 price-change signal is deterministic", () => {
+test("REIE-LC007 price-change signal is deterministic", () => {
   const entity: ReieEntity = { entityId: "p1", entityType: "property", canonicalName: "P", location: "S", aliases: [] };
   const signals = generateReieSignals(
     entity,

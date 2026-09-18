@@ -6,3 +6,5 @@ export * from "./workspace.js";
 export * from "./persistence.js";
 export * from "./priority.js";
 export * from "./web-fetch.js";
+export * from "./ingestion.js";
+export * from "./opportunity.js";

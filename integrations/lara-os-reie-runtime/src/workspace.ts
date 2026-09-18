@@ -10,6 +10,8 @@ import {
 import { resolveEntityCandidates, type ReieResolutionCandidate, type ReieResolutionInput } from "./resolution.js";
 import { generateReieSignals, type ReieSignalSnapshot } from "./signals.js";
 import { deepClone } from "./deterministic.js";
+import { ingestReieDocument, type ReieCsvMapping, type ReieIngestionDocument, type ReieIngestionResult } from "./ingestion.js";
+import { deriveReieOpportunities, type ReieOpportunity } from "./opportunity.js";
 
 export interface ReieWorkspaceState {
   readonly sources: readonly ReieSource[];
@@ -69,6 +71,15 @@ export class ReieWorkspace {
 
   resolve(input: ReieResolutionInput): ReieResolutionCandidate[] {
     return resolveEntityCandidates(input, [...this.entityMap.values()]);
+  }
+
+  async ingestDocument(document: ReieIngestionDocument, csvMapping?: ReieCsvMapping): Promise<ReieIngestionResult> {
+    return ingestReieDocument(this, document, csvMapping);
+  }
+
+  opportunities(asOf: string): ReieOpportunity[] {
+    const state = this.getState();
+    return deriveReieOpportunities(state.entities, state.claims, state.sources, asOf);
   }
 
   signals(entityId: string, asOf: string, coreFields?: readonly string[]): ReieSignalSnapshot {

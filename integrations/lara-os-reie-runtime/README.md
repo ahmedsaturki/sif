@@ -16,6 +16,9 @@ Local-first Real Estate Intelligence & Entity research runtime with an explicit 
 - optional public HTTP(S) text/JSON source fetch with size and timeout limits
 - snapshot export and validated import
 - zero-dependency Node CLI
+- deterministic ingestion for explicit JSON records and explicitly mapped CSV rows
+- source-only preservation for plain text without semantic guessing
+- evidence-derived opportunity projection for research prioritization
 - SIF policy, knowledge, evaluation, systemic, and continuity invocation boundaries
 
 ## Architecture
@@ -64,6 +67,37 @@ The Local Core does not include browser automation, credential storage, paid AI 
 
 The public fetch adapter accepts only HTTP(S) URLs and textual responses, uses bounded reads/timeouts, sends no credentials, and does not expose a crawler.
 
+## Ingestion
+
+The ingestion adapter accepts explicit JSON records or CSV rows with a required column mapping. It computes a content digest, registers the source, creates deterministic entity/claim identifiers, and rejects ambiguous or invalid records rather than guessing.
+
+Plain-text sources are preserved as sources but are intentionally not converted into entities or claims by string heuristics. Semantic extraction belongs in a separately governed adapter.
+
+Example JSON shape:
+
+```json
+{
+  "records": [
+    {
+      "entityId": "p1",
+      "entityType": "property",
+      "canonicalName": "Galaxy Mall",
+      "location": "Sadat City",
+      "claims": [
+        { "field": "propertyType", "value": "mall" },
+        { "field": "price.amount", "value": 2500000 }
+      ]
+    }
+  ]
+}
+```
+
+Workspace entry points are `ingestDocument(...)` and `opportunities(...)`. The persistent workspace uses the same ingestion path and journals source/entity/claim mutations.
+
+The CLI supports `ingest <journal> <file> <sourceId> [mediaType] [mappingJson]`; JSON media is detected from `.json`, CSV from `.csv`, and plain text is source-only. CSV requires an explicit mapping, and `claimTypes` can explicitly parse numeric, boolean, or JSON claim values.
+
+Opportunity output is evidence-derived and deterministic; it does not make external decisions or perform outreach.
+
 ## Future adapters
 
-Browser workers, PostgreSQL persistence, model inference, entity extraction, and agent orchestration can be added above this core without changing the provenance and authority contracts.
+Browser workers, PostgreSQL persistence, model inference, semantic entity extraction, and agent orchestration can be added above this layer without changing the provenance and authority contracts.

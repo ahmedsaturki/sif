@@ -134,6 +134,13 @@ test("OPS-006 local HTTP API ingests, extracts, reviews, and queries on loopback
     });
     assert.equal(ingest.status, 200);
 
+    const artifact = await fetch(base + "/artifacts/api-source");
+    assert.equal(artifact.status, 200);
+    const artifactBody = await artifact.json();
+    assert.equal(artifactBody.sourceId, "api-source");
+    assert.equal(artifactBody.contentDigest.length, 64);
+    assert.match(artifactBody.content, /api-p1/);
+
     const extraction = await fetch(base + "/extract", {
       method: "POST",
       headers: { "content-type": "application/json" },

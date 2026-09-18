@@ -135,7 +135,7 @@ test("REIE-ING007 generates evidence-linked research opportunities deterministic
           { field: "price.amount", value: 100 },
           { field: "location", value: "Sadat" },
           { field: "propertyType", value: "land" }
-        ] }
+        ]
       }
     ]})
   });

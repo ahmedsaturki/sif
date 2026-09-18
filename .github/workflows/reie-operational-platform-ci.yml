@@ -64,6 +64,10 @@ jobs:
         working-directory: integrations/lara-os-reie-browser-worker
         run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
 
+      - name: Install Chromium for browser worker smoke test
+        working-directory: integrations/lara-os-reie-browser-worker
+        run: npx playwright install --with-deps chromium
+
       - name: Build browser worker
         working-directory: integrations/lara-os-reie-browser-worker
         run: npm run build

@@ -50,6 +50,10 @@ Reusable SIF capabilities exposed to Lara OS/REIE, QADRIX, Sovereign Library and
 
 Status: implemented, exact-head verified, promoted through PR #11 into the preserved Phase 8 line, then included in the cumulative Phase 7 and Phase 6 promotion chain. F9-001..F9-060 passed on exact implementation HEAD `e1a0b5d47caabd61016cad92b0bc31c83ef01693` in Run #530.
 
+### Phase 9 product realization — Lara OS / REIE 2.0.0
+
+A post-Phase-9 application-layer realization was completed on the isolated `feat/sif-adoption-layer-1.0.0` line and promoted through PR #33. It does not create a Phase 10. The release adds deterministic ingestion, evidence-first extraction and human review, durable operational state, explicit relations, price history and opportunity projections, governed agents, local API/dashboard, optional Playwright browser collection, and optional PostgreSQL persistence. The verified merge commit is `b7b5d2298e3fe07d7c377b7715e4760ecbde6967`.
+
 ## Roadmap Boundary
 Phase 0–9 is the complete currently defined roadmap. No Phase 10 is currently defined. Any future phase requires a new explicit specification and evidence-gated implementation cycle.
 

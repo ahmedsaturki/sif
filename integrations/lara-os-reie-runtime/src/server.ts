@@ -3,7 +3,10 @@ import { openReieWorkspace, type PersistentReieWorkspace } from "./persistence.j
 import { ReieOperationalStore } from "./operational-persistence.js";
 import { extractReieTextCandidates, type ReieExtractionRule, type ReieCandidateValueType } from "./extraction.js";
 import { ReieAgentOrchestrator, createReieContentAgent, createReieQaAgent, createReieResearchAgent, createReieStrategyAgent, type ReieGovernanceGate } from "./agents.js";
-import { ReieSourceArtifactStore } from "./source-artifacts.js";
+import { ReieSourceArtifactStore, ReieSourceArtifactError } from "./source-artifacts.js";
+import { ReieIngestionError } from "./ingestion.js";
+import { ReieReviewError } from "./review.js";
+import { ReieRelationError } from "./relations.js";
 
 export interface ReieLocalServerOptions {
   readonly journalPath: string;
@@ -43,7 +46,7 @@ export class ReieLocalServer {
     this.persistent = await openReieWorkspace(this.optionsJournalPath);
     await this.operational.load();
     this.server = createServer((req, res) => {
-      void this.handle(req, res).catch((error) => this.writeError(res, 500, error));
+      void this.handle(req, res).catch((error) => this.writeError(res, this.errorStatus(error), error));
     });
     await new Promise<void>((resolve, reject) => {
       this.server!.once("error", reject);
@@ -207,6 +210,28 @@ export class ReieLocalServer {
   private writeJson(res: ServerResponse, status: number, body: unknown): void {
     res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
     res.end(JSON.stringify(body) + "\n");
+  }
+
+  private errorStatus(error: unknown): number {
+    if (error instanceof ReieSourceArtifactError) {
+      if (error.code === "NOT_FOUND") return 404;
+      if (error.code === "CONFLICT") return 409;
+      if (error.code === "TOO_LARGE") return 413;
+      return 400;
+    }
+    if (error instanceof ReieIngestionError) return error.code === "CONFLICT" ? 409 : 400;
+    if (error instanceof ReieReviewError) {
+      if (error.code === "NOT_FOUND") return 404;
+      if (error.code === "CONFLICT") return 409;
+      return 400;
+    }
+    if (error instanceof ReieRelationError) return error.code === "CONFLICT" ? 409 : 400;
+    if (error instanceof Error) {
+      if (/Request body exceeds byte limit/i.test(error.message)) return 413;
+      if (/Request body must be valid JSON/i.test(error.message)) return 400;
+      if (/Unknown agent:/i.test(error.message)) return 400;
+    }
+    return 500;
   }
 
   private writeError(res: ServerResponse, status: number, error: unknown): void {

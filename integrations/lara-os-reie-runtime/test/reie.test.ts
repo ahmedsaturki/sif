@@ -138,3 +138,27 @@ test("REIE-R005 requires explicit SIF configuration", async () => {
     (e: unknown) => e instanceof ReieRuntimeError && e.code === "NOT_FOUND",
   );
 });
+
+test("REIE-R006 uses the real SIF Adoption bridge when configured", async () => {
+  const { createDefaultSifAdoptionGateway } = await import("../../sif-adoption/src/adoption.js");
+  const { createReieSifBridge } = await import("../../sif-adoption/src/reie.js");
+  const handlers = {
+    "policy.check": ({ request }: any) => ({ accepted: true, payload: request.payload }),
+    "knowledge.query": ({ request }: any) => ({ knowledge: request.payload }),
+    "evaluation.run": ({ request }: any) => ({ evaluation: request.payload }),
+    "systemic.query": ({ request }: any) => ({ systemic: request.payload }),
+    "continuity.read": ({ request }: any) => ({ continuity: request.payload }),
+    "federation.inspect": ({ request }: any) => ({ federation: request.payload }),
+  };
+  const bridge = createReieSifBridge(createDefaultSifAdoptionGateway(handlers));
+  const runtime = new LaraOsReieRuntime(new InMemoryReieStore(), bridge);
+  const result = await runtime.knowledgeQuery(
+    { entityId: "P-1", query: "facts" },
+    "sif-reie-real-1",
+    ["source-1"],
+    NOW,
+  );
+  assert.equal(result.response.productId, "LARA_OS_REIE");
+  assert.equal(result.response.status, "PASS");
+  assert.equal(result.replayVerified, true);
+});

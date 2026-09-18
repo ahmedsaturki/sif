@@ -14,7 +14,8 @@
     ],
     "types": [
       "node"
-    ]
+    ],
+    "rootDir": "./src"
   },
   "include": [
     "src/**/*.ts"

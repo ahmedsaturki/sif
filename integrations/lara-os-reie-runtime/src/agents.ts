@@ -1,6 +1,7 @@
 import type { LaraOsReieRuntime } from "./reie.js";
 import type { ReieWorkspace } from "./workspace.js";
 import { deriveReieOpportunities, type ReieOpportunity } from "./opportunity.js";
+import { sha256 } from "./deterministic.js";
 
 export interface ReieAgentContext {
   readonly workspace: ReieWorkspace;
@@ -30,12 +31,13 @@ export class SifReieGovernanceGate implements ReieGovernanceGate {
 
   async check(agent: ReieAgent, context: ReieAgentContext): Promise<void> {
     if (!this.runtime) throw new ReieGovernanceError("REIE governance runtime is not configured");
-    const requestId = "agent-policy:" + agent.id + ":" + context.asOf;
+    const inputDigest = sha256(context.input);
+    const requestId = "agent-policy:" + agent.id + ":" + context.asOf + ":" + inputDigest;
     await this.runtime.policyCheck(
       {
         agentId: agent.id,
         requestedCapabilities: [...agent.requestedCapabilities],
-        inputDigest: JSON.stringify(context.input),
+        inputDigest,
       },
       requestId,
       [],
@@ -63,7 +65,7 @@ export class ReieAgentOrchestrator {
     const ordered = [...agents].sort((a, b) => a.id.localeCompare(b.id));
     const results: ReieAgentRun[] = [];
     for (const agent of ordered) {
-      const runId = "agent-run:" + agent.id + ":" + context.asOf;
+      const runId = "agent-run:" + agent.id + ":" + context.asOf + ":" + sha256(context.input);
       try {
         if (!this.governance) throw new ReieGovernanceError("No REIE governance gate configured");
         await this.governance.check(agent, context);

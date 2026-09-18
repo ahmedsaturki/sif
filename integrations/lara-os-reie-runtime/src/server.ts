@@ -1,5 +1,4 @@
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
-import { URL } from "node:url";
 import { openReieWorkspace, type PersistentReieWorkspace } from "./persistence.js";
 import { ReieReviewQueue } from "./review.js";
 import { extractReieTextCandidates, type ReieExtractionRule } from "./extraction.js";
@@ -17,6 +16,7 @@ export class ReieLocalServer {
   private persistent: PersistentReieWorkspace | undefined;
   private readonly options: Required<Pick<ReieLocalServerOptions, "host" | "port" | "maxBodyBytes">>;
   readonly reviews: ReieReviewQueue;
+  private readonly optionsJournalPath: string;
 
   constructor(options: ReieLocalServerOptions) {
     this.options = {
@@ -26,14 +26,13 @@ export class ReieLocalServer {
     };
     if (this.options.maxBodyBytes <= 0) throw new Error("maxBodyBytes must be positive");
     this.reviews = options.reviews ?? new ReieReviewQueue();
-    void options.journalPath;
+    if (!options.journalPath.trim()) throw new Error("journalPath must not be empty");
+    this.optionsJournalPath = options.journalPath;
   }
 
-  async start(journalPath = this.options.port === 0 ? "" : ""): Promise<{ host: string; port: number }> {
+  async start(): Promise<{ host: string; port: number }> {
     if (this.server) throw new Error("REIE server is already running");
-    const path = journalPath;
-    if (!path) throw new Error("journalPath must be provided to start");
-    this.persistent = await openReieWorkspace(path);
+    this.persistent = await openReieWorkspace(this.optionsJournalPath);
     this.server = createServer((req, res) => {
       void this.handle(req, res).catch((error) => this.writeError(res, 500, error));
     });
@@ -90,6 +89,13 @@ export class ReieLocalServer {
       return this.writeJson(res, 200, { candidates, reviewItems: items });
     }
 
+    if (method === "POST" && url.pathname.startsWith("/reviews/")) {
+      const candidateId = decodeURIComponent(url.pathname.slice("/reviews/".length));
+      const body = await this.readJson(req);
+      const item = await this.reviews.decide(candidateId, body.decision, String(body.reviewer ?? ""), this.persistent.workspace, String(body.reviewedAt ?? new Date().toISOString()));
+      return this.writeJson(res, 200, item);
+    }
+
     if (method === "POST" && url.pathname === "/ingest") {
       const body = await this.readJson(req);
       const result = await this.persistent.ingestDocument(body.document, body.csvMapping);
@@ -105,7 +111,7 @@ export class ReieLocalServer {
     return await new Promise((resolve, reject) => {
       req.setEncoding("utf8");
       req.on("data", (chunk) => {
-        size += Buffer.byteLength(String(chunk), "utf8");
+        size += new TextEncoder().encode(String(chunk)).byteLength;
         if (size > this.options.maxBodyBytes) {
           reject(new Error("Request body exceeds byte limit"));
           req.destroy();

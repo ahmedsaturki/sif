@@ -70,4 +70,4 @@ jobs:
 
       - name: Test browser worker safety boundaries
         working-directory: integrations/lara-os-reie-browser-worker
-        run: node --test dist/test/*.test.js
+        run: node --experimental-strip-types --test test/*.test.ts

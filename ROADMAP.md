@@ -54,6 +54,10 @@ Status: implemented, exact-head verified, promoted through PR #11 into the prese
 
 A post-Phase-9 application-layer realization was completed on the isolated `feat/sif-adoption-layer-1.0.0` line and promoted through PR #33. It does not create a Phase 10. The release adds deterministic ingestion, evidence-first extraction and human review, durable operational state, explicit relations, price history and opportunity projections, governed agents, local API/dashboard, optional Playwright browser collection, and optional PostgreSQL persistence. The verified merge commit is `b7b5d2298e3fe07d7c377b7715e4760ecbde6967`.
 
+### REIE governed host realization — 2.1.0
+
+The post-Phase-9 REIE product line now includes an executable governed host that composes the SIF Adoption Gateway with REIE runtime services. PR #35 promoted this host and durable source-provenance boundary into the adoption line. This remains an application-layer realization and does not define Phase 10.
+
 ## Roadmap Boundary
 Phase 0–9 is the complete currently defined roadmap. No Phase 10 is currently defined. Any future phase requires a new explicit specification and evidence-gated implementation cycle.
 

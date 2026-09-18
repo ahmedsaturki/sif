@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { ReieSourceArtifactStore, ReieSourceArtifactError } from "../src/source-artifacts.ts";
+import { ReieSourceArtifactStore, ReieSourceArtifactError } from "../dist/source-artifacts.js";
 
 const NOW = "2026-09-18T12:00:00.000Z";
 

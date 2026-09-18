@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { sha256 } from "./deterministic.js";
 
@@ -113,7 +113,6 @@ export class ReieSourceArtifactStore {
 
   async listSourceIds(): Promise<string[]> {
     try {
-      const { readdir } = await import("node:fs/promises");
       const names = await readdir(this.directory);
       const ids: string[] = [];
       for (const name of names.filter((value) => value.endsWith(".json")).sort()) {

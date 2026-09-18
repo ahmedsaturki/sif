@@ -1,6 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { canonicalJson, sha256 } from "./deterministic.js";
+import { sha256 } from "./deterministic.js";
 
 export interface ReieSourceArtifact {
   readonly sourceId: string;
@@ -19,7 +19,7 @@ export interface ReieSourceArtifactStoreOptions {
 
 export class ReieSourceArtifactError extends Error {
   constructor(
-    readonly code: "INVALID_INPUT" | "NOT_FOUND" | "TOO_LARGE" | "CORRUPT",
+    readonly code: "INVALID_INPUT" | "NOT_FOUND" | "TOO_LARGE" | "CORRUPT" | "CONFLICT",
     message: string,
   ) {
     super(message);
@@ -57,6 +57,15 @@ export class ReieSourceArtifactStore {
       throw new ReieSourceArtifactError("TOO_LARGE", "Source artifact exceeds byte limit");
     }
     const contentDigest = sha256(content);
+    try {
+      const existing = await this.get(sourceId);
+      if (existing.contentDigest !== contentDigest) {
+        throw new ReieSourceArtifactError("CONFLICT", "Source artifact already exists with different content");
+      }
+      return existing;
+    } catch (error) {
+      if (!(error instanceof ReieSourceArtifactError) || !["NOT_FOUND"].includes(error.code)) throw error;
+    }
     if (input.contentDigest && input.contentDigest !== contentDigest) {
       throw new ReieSourceArtifactError("CORRUPT", "Provided contentDigest does not match content");
     }

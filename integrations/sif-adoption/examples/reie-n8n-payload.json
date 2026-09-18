@@ -1,0 +1,17 @@
+{
+  "requestId": "reie-example-001",
+  "productId": "LARA_OS_REIE",
+  "adapterVersion": "1.0.0",
+  "operation": "knowledge.query",
+  "requestedCapabilities": ["sif.knowledge.query"],
+  "authorityScopes": ["product:lara:read"],
+  "evidenceIds": ["reie-evidence-001"],
+  "payload": {
+    "entityType": "property",
+    "entityId": "P-001",
+    "query": "retrieve normalized facts"
+  },
+  "correlationId": "reie-correlation-001",
+  "requestedAt": "2026-09-18T00:00:00.000Z",
+  "sourceSystem": "lara-os-reie"
+}

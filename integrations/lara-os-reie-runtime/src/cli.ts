@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 import { openReieWorkspace } from "./persistence.js";
+import type { ReieCsvMapping } from "./ingestion.js";
 
 function usage(): never {
   console.error(`REIE Local Core
@@ -81,11 +82,11 @@ const main = async () => {
       const file = args[1];
       const sourceId = args[2];
       const mediaType = mediaTypeForFile(file, args[3]);
-      let csvMapping: Record<string, unknown> | undefined;
+      let csvMapping: ReieCsvMapping | undefined;
       if (mediaType === "text/csv") {
         if (!args[4]) usage();
         try {
-          csvMapping = JSON.parse(args[4]) as Record<string, unknown>;
+          csvMapping = JSON.parse(args[4]) as ReieCsvMapping;
         } catch {
           throw new Error("mappingJson must be valid JSON");
         }
@@ -97,7 +98,7 @@ const main = async () => {
         observedAt: new Date().toISOString(),
         content,
         mediaType,
-      }, csvMapping as never);
+      }, csvMapping);
       console.log(JSON.stringify(result, null, 2));
       return;
     }

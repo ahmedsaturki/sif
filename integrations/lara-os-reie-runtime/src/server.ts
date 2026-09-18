@@ -76,6 +76,15 @@ export class ReieLocalServer {
       return this.writeJson(res, 200, this.operational.reviews.list());
     }
 
+    if (method === "GET" && url.pathname === "/relations") {
+      return this.writeJson(res, 200, this.operational.relations.listFor(url.searchParams.get("entityId") ?? undefined));
+    }
+
+    if (method === "GET" && url.pathname === "/agent-runs") {
+      return this.writeJson(res, 200, this.operational.listAgentRuns());
+    }
+
+
     if (method === "POST" && url.pathname === "/extract") {
       const body = await this.readJson(req);
       const rules = (Array.isArray(body.rules) ? body.rules : []).map((rule: {
@@ -102,6 +111,12 @@ export class ReieLocalServer {
       const items = [];
       for (const candidate of candidates) items.push(await this.operational.addCandidate(candidate));
       return this.writeJson(res, 200, { candidates, reviewItems: items });
+    }
+
+    if (method === "POST" && url.pathname === "/relations") {
+      const body = await this.readJson(req);
+      const edge = await this.operational.addRelation(body);
+      return this.writeJson(res, 200, edge);
     }
 
     if (method === "POST" && url.pathname.startsWith("/reviews/")) {

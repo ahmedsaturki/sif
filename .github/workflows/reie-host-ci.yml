@@ -62,6 +62,10 @@ jobs:
         working-directory: integrations/lara-os-reie-browser-worker
         run: npm run build
 
+      - name: Install governed host dependencies
+        working-directory: integrations/lara-os-reie-host
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+
       - name: Build governed host
         run: ./packages/sif-core/node_modules/.bin/tsc -p integrations/lara-os-reie-host/tsconfig.json
 

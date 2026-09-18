@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
 import { openReieWorkspace, type PersistentReieWorkspace } from "./persistence.js";
 import { ReieReviewQueue } from "./review.js";
-import { extractReieTextCandidates, type ReieExtractionRule } from "./extraction.js";
+import { extractReieTextCandidates, type ReieExtractionRule, type ReieCandidateValueType } from "./extraction.js";
 
 export interface ReieLocalServerOptions {
   readonly journalPath: string;
@@ -77,7 +77,20 @@ export class ReieLocalServer {
 
     if (method === "POST" && url.pathname === "/extract") {
       const body = await this.readJson(req);
-      const rules = body.rules as ReieExtractionRule[];
+      const rules = (Array.isArray(body.rules) ? body.rules : []).map((rule: {
+        ruleId?: unknown;
+        field?: unknown;
+        pattern?: unknown;
+        flags?: unknown;
+        valueType?: unknown;
+        captureGroup?: unknown;
+      }): ReieExtractionRule => ({
+        ruleId: String(rule.ruleId ?? ""),
+        field: String(rule.field ?? ""),
+        pattern: new RegExp(String(rule.pattern ?? ""), String(rule.flags ?? "")),
+        ...(rule.valueType ? { valueType: String(rule.valueType) as ReieCandidateValueType } : {}),
+        ...(rule.captureGroup !== undefined ? { captureGroup: Number(rule.captureGroup) } : {}),
+      }));
       const candidates = extractReieTextCandidates(
         String(body.sourceId ?? ""),
         String(body.entityId ?? ""),

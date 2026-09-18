@@ -228,12 +228,11 @@ test("OPS-009 extraction handles zero-length regexes without looping", () => {
   const candidates = extractReieTextCandidates(
     "s1",
     "p1",
-    "abc",
+    "a\nb",
     NOW,
-    [{ ruleId: "bounded", field: "x", pattern: /(?=b)/u, captureGroup: 0 }],
+    [{ ruleId: "zero", field: "x", pattern: /^/gmu, captureGroup: 0 }],
   );
-  assert.equal(candidates.length, 1);
-  assert.equal(candidates[0]?.evidenceText, "b");
+  assert.equal(candidates.length, 0);
 });
 
 test("OPS-010 governance identity changes when agent input changes", async () => {
@@ -244,6 +243,8 @@ test("OPS-010 governance identity changes when agent input changes", async () =>
   const orchestrator = new ReieAgentOrchestrator(governance);
   const agent = { id: "same", requestedCapabilities: [], run: () => ({ ok: true }) };
   await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 1 } });
-  await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 2 } });
-  assert.equal(calls.length, 2);
+  const first = await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 1 } });
+  const second = await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 2 } });
+  assert.equal(calls.length, 4);
+  assert.notEqual(first[0]?.runId, second[0]?.runId);
 });

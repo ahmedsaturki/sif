@@ -276,6 +276,17 @@ export async function ingestReieDocument(
   if (!content.length) throw new ReieIngestionError("INVALID_DOCUMENT", "content must not be empty");
 
   const contentDigest = sha256(content);
+
+  const registerSource = async (): Promise<void> => {
+    await target.ingestSource({
+      sourceId,
+      ...(document.uri ? { uri: document.uri.trim() } : {}),
+      ...(document.title ? { title: document.title.trim() } : {}),
+      ...(document.publisher ? { publisher: document.publisher.trim() } : {}),
+      observedAt,
+      contentDigest,
+    });
+  };
   const mediaType = document.mediaType ?? "text/plain";
   let records: ReieIngestionRecord[] = [];
   let parseMode: ReieIngestionResult["parseMode"] = "source-only";
@@ -296,6 +307,7 @@ export async function ingestReieDocument(
     records = dataRows.map((row, index) => rowToRecord(normalizedHeaders, row, csvMapping, index + 2));
     parseMode = "csv";
   } else {
+    await registerSource();
     return {
       sourceId,
       contentDigest,
@@ -307,14 +319,7 @@ export async function ingestReieDocument(
     };
   }
 
-  await target.ingestSource({
-    sourceId,
-    ...(document.uri ? { uri: document.uri.trim() } : {}),
-    ...(document.title ? { title: document.title.trim() } : {}),
-    ...(document.publisher ? { publisher: document.publisher.trim() } : {}),
-    observedAt,
-    contentDigest,
-  });
+  await registerSource();
 
   const entityIds: string[] = [];
   const claimIds: string[] = [];

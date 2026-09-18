@@ -12,7 +12,14 @@
     "declaration": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    "lib": ["ESNext"]
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

@@ -334,6 +334,44 @@ export class LaraOsReieRuntime {
     );
   }
 
+  async systemicQuery(
+    payload: unknown,
+    requestId: string,
+    evidenceIds: readonly string[],
+    requestedAt: string,
+    correlationId = requestId,
+  ): Promise<ReieSifResultLike> {
+    return this.callSif(
+      "systemic.query",
+      ["sif.systemic.query"],
+      ["product:lara:read"],
+      payload,
+      requestId,
+      evidenceIds,
+      requestedAt,
+      correlationId,
+    );
+  }
+
+  async continuityRead(
+    payload: unknown,
+    requestId: string,
+    evidenceIds: readonly string[],
+    requestedAt: string,
+    correlationId = requestId,
+  ): Promise<ReieSifResultLike> {
+    return this.callSif(
+      "continuity.read",
+      ["sif.continuity.read"],
+      ["product:lara:read"],
+      payload,
+      requestId,
+      evidenceIds,
+      requestedAt,
+      correlationId,
+    );
+  }
+
   private async callSif(
     operation: string,
     requestedCapabilities: readonly string[],

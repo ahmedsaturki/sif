@@ -140,8 +140,8 @@ test("REIE-R005 requires explicit SIF configuration", async () => {
 });
 
 test("REIE-R006 uses the real SIF Adoption bridge when configured", async () => {
-  const { createDefaultSifAdoptionGateway } = await import("../../sif-adoption/src/adoption.js");
-  const { createReieSifBridge } = await import("../../sif-adoption/src/reie.js");
+  const { createDefaultSifAdoptionGateway } = await import("../../sif-adoption/dist/adoption.js");
+  const { createReieSifBridge } = await import("../../sif-adoption/dist/reie.js");
   const handlers = {
     "policy.check": ({ request }: any) => ({ accepted: true, payload: request.payload }),
     "knowledge.query": ({ request }: any) => ({ knowledge: request.payload }),

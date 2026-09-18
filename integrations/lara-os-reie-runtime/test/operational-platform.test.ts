@@ -16,6 +16,7 @@ import {
   createReieResearchAgent,
 } from "../dist/agents.js";
 import { ReieLocalServer } from "../dist/server.js";
+import { ReieOperationalStore } from "../dist/operational-persistence.js";
 
 const NOW = "2026-09-18T12:00:00.000Z";
 
@@ -181,3 +182,44 @@ test("OPS-007 default content agent emits only source-backed facts", async () =>
   assert.match(result.factualDraft, /location/);
   assert.deepEqual(result.evidenceIds, ["s1"]);
 });
+
+test("OPS-008 operational journal survives reload for reviews, relations, and agent runs", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-ops-journal-"));
+  const path = join(dir, "ops.jsonl");
+  try {
+    const a = new ReieOperationalStore(path);
+    await a.load();
+    const workspace = new ReieWorkspace();
+    workspace.ingestSource({ sourceId: "s1", observedAt: NOW, contentDigest: "d" });
+    workspace.upsertEntity({ entityId: "p1", entityType: "property", canonicalName: "P", aliases: [] });
+    const candidate = extractReieTextCandidates(
+      "s1",
+      "p1",
+      "Price: 100",
+      NOW,
+      [{ ruleId: "price", field: "price.amount", pattern: /Price:\s*([0-9]+)/u, valueType: "number" }],
+    )[0]!;
+    await a.addCandidate(candidate);
+    await a.addRelation({
+      fromEntityId: "p1",
+      toEntityId: "person1",
+      relation: "listed_by",
+      sourceIds: ["s1"],
+      observedAt: NOW,
+    });
+    await a.recordAgentRun({ runId: "r1", agentId: "qa", status: "SUCCESS", output: { ok: true } });
+
+    const b = new ReieOperationalStore(path);
+    await b.load();
+    assert.equal(b.reviews.list().length, 1);
+    assert.equal(b.relations.listFor("p1").length, 1);
+    assert.equal(b.listAgentRuns().length, 1);
+    await b.decide(candidate.candidateId, "ACCEPT", "reviewer", workspace, NOW);
+    const c2 = new ReieOperationalStore(path);
+    await c2.load();
+    assert.equal(c2.reviews.list("ACCEPTED").length, 1);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+

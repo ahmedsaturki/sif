@@ -15,3 +15,4 @@ export * from "./price-history.js";
 export * from "./agents.js";
 export * from "./server.js";
 export * from "./operational-persistence.js";
+export * from "./source-artifacts.js";

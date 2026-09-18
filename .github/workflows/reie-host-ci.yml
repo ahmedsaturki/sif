@@ -1,0 +1,84 @@
+name: REIE Governed Host CI
+
+on:
+  push:
+    branches:
+      - "feat/reie-host-2.1.0"
+  pull_request:
+    branches:
+      - "feat/sif-adoption-layer-1.0.0"
+      - "main"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reie-host-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-reie-host:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CANDIDATE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_COMMIT }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate checkout
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_COMMIT"
+
+      - name: Set Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.23.2"
+
+      - name: Install and verify frozen SIF Core
+        working-directory: packages/sif-core
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          npm test
+
+      - name: Build SIF Adoption
+        run: ./packages/sif-core/node_modules/.bin/tsc -p integrations/sif-adoption/tsconfig.json
+
+      - name: Build REIE runtime
+        run: ./packages/sif-core/node_modules/.bin/tsc -p integrations/lara-os-reie-runtime/tsconfig.json
+
+      - name: Test REIE runtime
+        run: node --experimental-strip-types --test integrations/lara-os-reie-runtime/test/*.test.ts
+
+      - name: Install browser worker dependencies
+        working-directory: integrations/lara-os-reie-browser-worker
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+
+      - name: Build browser worker
+        working-directory: integrations/lara-os-reie-browser-worker
+        run: npm run build
+
+      - name: Install governed host dependencies
+        working-directory: integrations/lara-os-reie-host
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+
+      - name: Build governed host
+        run: ./packages/sif-core/node_modules/.bin/tsc -p integrations/lara-os-reie-host/tsconfig.json
+
+      - name: Test governed host
+        run: node --experimental-strip-types --test integrations/lara-os-reie-host/test/*.test.ts
+
+      - name: Verify host CLI usage failure is deterministic
+        working-directory: integrations/lara-os-reie-host
+        shell: bash
+        run: |
+          set +e
+          node dist/cli.js invalid >/tmp/reie-host-cli.out 2>&1
+          code=$?
+          set -e
+          test $code -eq 2
+          grep -F 'Usage: reie-host serve' /tmp/reie-host-cli.out

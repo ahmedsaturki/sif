@@ -33,7 +33,7 @@ export class SifReieGovernanceGate implements ReieGovernanceGate {
     if (!this.runtime) throw new ReieGovernanceError("REIE governance runtime is not configured");
     const inputDigest = sha256(context.input);
     const requestId = "agent-policy:" + agent.id + ":" + context.asOf + ":" + inputDigest;
-    await this.runtime.policyCheck(
+    const decision = await this.runtime.policyCheck(
       {
         agentId: agent.id,
         requestedCapabilities: [...agent.requestedCapabilities],
@@ -44,6 +44,15 @@ export class SifReieGovernanceGate implements ReieGovernanceGate {
       context.asOf,
       "reie-agent:" + agent.id,
     );
+    const output = decision.response.output as { accepted?: unknown } | undefined;
+    if (
+      decision.response.status !== "PASS" ||
+      output?.accepted !== true
+    ) {
+      throw new ReieGovernanceError(
+        "SIF policy denied agent " + agent.id,
+      );
+    }
   }
 }
 

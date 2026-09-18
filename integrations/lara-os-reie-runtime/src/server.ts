@@ -3,6 +3,10 @@ import { openReieWorkspace, type PersistentReieWorkspace } from "./persistence.j
 import { ReieOperationalStore } from "./operational-persistence.js";
 import { extractReieTextCandidates, type ReieExtractionRule, type ReieCandidateValueType } from "./extraction.js";
 import { ReieAgentOrchestrator, createReieContentAgent, createReieQaAgent, createReieResearchAgent, createReieStrategyAgent, type ReieGovernanceGate } from "./agents.js";
+import { ReieSourceArtifactStore, ReieSourceArtifactError } from "./source-artifacts.js";
+import { ReieIngestionError } from "./ingestion.js";
+import { ReieReviewError } from "./review.js";
+import { ReieRelationError } from "./relations.js";
 
 export interface ReieLocalServerOptions {
   readonly journalPath: string;
@@ -11,6 +15,7 @@ export interface ReieLocalServerOptions {
   readonly maxBodyBytes?: number;
   readonly operationalPath?: string;
   readonly governance?: ReieGovernanceGate;
+  readonly artifactPath?: string;
 }
 
 export class ReieLocalServer {
@@ -18,6 +23,7 @@ export class ReieLocalServer {
   private persistent: PersistentReieWorkspace | undefined;
   private readonly options: Required<Pick<ReieLocalServerOptions, "host" | "port" | "maxBodyBytes">>;
   readonly operational: ReieOperationalStore;
+  readonly artifacts: ReieSourceArtifactStore;
   private readonly optionsJournalPath: string;
   private readonly orchestrator: ReieAgentOrchestrator;
 
@@ -32,6 +38,7 @@ export class ReieLocalServer {
     this.optionsJournalPath = options.journalPath;
     this.operational = new ReieOperationalStore(options.operationalPath ?? options.journalPath + ".ops.jsonl");
     this.orchestrator = new ReieAgentOrchestrator(options.governance);
+    this.artifacts = new ReieSourceArtifactStore(options.artifactPath ?? options.journalPath + ".artifacts");
   }
 
   async start(): Promise<{ host: string; port: number }> {
@@ -39,7 +46,7 @@ export class ReieLocalServer {
     this.persistent = await openReieWorkspace(this.optionsJournalPath);
     await this.operational.load();
     this.server = createServer((req, res) => {
-      void this.handle(req, res).catch((error) => this.writeError(res, 500, error));
+      void this.handle(req, res).catch((error) => this.writeError(res, this.errorStatus(error), error));
     });
     await new Promise<void>((resolve, reject) => {
       this.server!.once("error", reject);
@@ -70,6 +77,12 @@ export class ReieLocalServer {
     }
 
     if (!this.persistent) return this.writeError(res, 503, "REIE server is not initialized");
+
+    if (method === "GET" && url.pathname.startsWith("/artifacts/")) {
+      const sourceId = decodeURIComponent(url.pathname.slice("/artifacts/".length));
+      const artifact = await this.artifacts.get(sourceId);
+      return this.writeJson(res, 200, artifact);
+    }
 
     if (method === "GET" && url.pathname === "/knowledge") {
       const q = url.searchParams.get("q") ?? "";
@@ -159,6 +172,7 @@ export class ReieLocalServer {
 
     if (method === "POST" && url.pathname === "/ingest") {
       const body = await this.readJson(req);
+      await this.artifacts.put(body.document);
       const result = await this.persistent.ingestDocument(body.document, body.csvMapping);
       return this.writeJson(res, 200, result);
     }
@@ -196,6 +210,28 @@ export class ReieLocalServer {
   private writeJson(res: ServerResponse, status: number, body: unknown): void {
     res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
     res.end(JSON.stringify(body) + "\n");
+  }
+
+  private errorStatus(error: unknown): number {
+    if (error instanceof ReieSourceArtifactError) {
+      if (error.code === "NOT_FOUND") return 404;
+      if (error.code === "CONFLICT") return 409;
+      if (error.code === "TOO_LARGE") return 413;
+      return 400;
+    }
+    if (error instanceof ReieIngestionError) return error.code === "CONFLICT" ? 409 : 400;
+    if (error instanceof ReieReviewError) {
+      if (error.code === "NOT_FOUND") return 404;
+      if (error.code === "CONFLICT") return 409;
+      return 400;
+    }
+    if (error instanceof ReieRelationError) return error.code === "CONFLICT" ? 409 : 400;
+    if (error instanceof Error) {
+      if (/Request body exceeds byte limit/i.test(error.message)) return 413;
+      if (/Request body must be valid JSON/i.test(error.message)) return 400;
+      if (/Unknown agent:/i.test(error.message)) return 400;
+    }
+    return 500;
   }
 
   private writeError(res: ServerResponse, status: number, error: unknown): void {

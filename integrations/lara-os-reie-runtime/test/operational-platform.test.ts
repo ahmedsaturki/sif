@@ -14,6 +14,7 @@ import {
   createReieContentAgent,
   createReieQaAgent,
   createReieResearchAgent,
+  SifReieGovernanceGate,
 } from "../dist/agents.js";
 import { ReieLocalServer } from "../dist/server.js";
 import { ReieOperationalStore } from "../dist/operational-persistence.js";
@@ -133,6 +134,13 @@ test("OPS-006 local HTTP API ingests, extracts, reviews, and queries on loopback
       }),
     });
     assert.equal(ingest.status, 200);
+
+    const artifact = await fetch(base + "/artifacts/api-source");
+    assert.equal(artifact.status, 200);
+    const artifactBody = await artifact.json();
+    assert.equal(artifactBody.sourceId, "api-source");
+    assert.equal(artifactBody.contentDigest.length, 64);
+    assert.match(artifactBody.content, /api-p1/);
 
     const extraction = await fetch(base + "/extract", {
       method: "POST",
@@ -282,3 +290,82 @@ test("OPS-012 agent API fails closed without an explicit governance gate", async
   }
 });
 
+
+test("OPS-013 SIF governance gate rejects an explicit policy deny", async () => {
+  const gate = new SifReieGovernanceGate({
+    policyCheck: async () => ({
+      response: {
+        status: "PASS",
+        productId: "LARA_OS_REIE",
+        operation: "policy.check",
+        output: { accepted: false },
+      },
+      evidence: null,
+      replayVerified: true,
+    }),
+  } as never);
+  await assert.rejects(
+    () => gate.check(
+      { id: "research", requestedCapabilities: ["sif.knowledge.query"], run: () => null },
+      { workspace: new ReieWorkspace(), asOf: NOW, input: null },
+    ),
+    /policy denied agent research/i,
+  );
+});
+
+test("OPS-014 REIE API maps client errors to non-500 statuses", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-http-status-"));
+  const server = new ReieLocalServer({ journalPath: join(dir, "events.jsonl"), port: 0 });
+  const bound = await server.start();
+  const base = `http://${bound.host}:${bound.port}`;
+  try {
+    const badJson = await fetch(base + "/ingest", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{",
+    });
+    assert.equal(badJson.status, 400);
+
+    const missing = await fetch(base + "/artifacts/unknown");
+    assert.equal(missing.status, 404);
+
+    const badAgent = await fetch(base + "/agents/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ agents: ["does-not-exist"] }),
+    });
+    assert.equal(badAgent.status, 400);
+  } finally {
+    await server.stop();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("OPS-015 operational journal remains idempotent for duplicate relation and agent-run writes", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-ops-idempotent-"));
+  const path = join(dir, "ops.jsonl");
+  try {
+    const store = new ReieOperationalStore(path);
+    await store.load();
+    const edge = {
+      fromEntityId: "p1",
+      toEntityId: "person1",
+      relation: "listed_by",
+      sourceIds: ["s1"],
+      observedAt: NOW,
+      relationId: "rel-1",
+    };
+    await store.addRelation(edge);
+    await store.addRelation(edge);
+    await store.recordAgentRun({ runId: "run-1", agentId: "qa", status: "SUCCESS", output: { ok: true } });
+    await store.recordAgentRun({ runId: "run-1", agentId: "qa", status: "SUCCESS", output: { ok: true } });
+    const raw = await (await import("node:fs/promises")).readFile(path, "utf8");
+    assert.equal(raw.trim().split("\n").length, 2);
+    await assert.rejects(
+      () => store.recordAgentRun({ runId: "run-1", agentId: "qa", status: "SUCCESS", output: { ok: false } }),
+      /already exists with different content/i,
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

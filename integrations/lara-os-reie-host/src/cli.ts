@@ -2,6 +2,7 @@ import { createGovernedReieHost } from "./host.js";
 import { ReiePublicSourceCollector } from "./collector.js";
 import { ReiePlaywrightBrowserWorker } from "../../lara-os-reie-browser-worker/dist/worker.js";
 import { openReieWorkspace } from "../../lara-os-reie-runtime/dist/persistence.js";
+import { ReieSourceArtifactStore } from "../../lara-os-reie-runtime/dist/source-artifacts.js";
 
 const [command, journal, arg3, arg4, arg5] = process.argv.slice(2);
 
@@ -39,7 +40,7 @@ if (command === "collect") {
     userDataDir: profileDir,
     headless: true,
   });
-  const collector = new ReiePublicSourceCollector(browser, workspace);
+  const collector = new ReiePublicSourceCollector(browser, workspace, new ReieSourceArtifactStore(journal + ".artifacts"));
   try {
     const result = await collector.collect(sourceId, uri);
     console.log(JSON.stringify({

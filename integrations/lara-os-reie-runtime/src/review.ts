@@ -110,8 +110,10 @@ export class ReieReviewQueue {
 
   restore(items: readonly ReieReviewItem[]): void {
     for (const item of items) {
-      if (this.items.has(item.candidate.candidateId)) continue;
-      this.items.set(item.candidate.candidateId, structuredClone(item));
+      const existing = this.items.get(item.candidate.candidateId);
+      if (!existing || JSON.stringify(existing) !== JSON.stringify(item)) {
+        this.items.set(item.candidate.candidateId, structuredClone(item));
+      }
     }
   }
 }

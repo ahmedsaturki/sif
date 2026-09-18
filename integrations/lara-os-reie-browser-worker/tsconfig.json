@@ -7,7 +7,14 @@
     "exactOptionalPropertyTypes": true,
     "noEmitOnError": true,
     "declaration": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/**/*.ts",

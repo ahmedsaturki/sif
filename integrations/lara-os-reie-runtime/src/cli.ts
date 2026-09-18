@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 import { openReieWorkspace } from "./persistence.js";
+import { ReieLocalServer } from "./server.js";
 import type { ReieCsvMapping } from "./ingestion.js";
 
 function usage(): never {
@@ -18,6 +19,7 @@ Commands:
   import <journal> <snapshot>
   ingest <journal> <file> <sourceId> [mediaType] [mappingJson]
   opportunities <journal> [asOf]
+  serve <journal> [port]
 `);
   process.exit(2);
 }
@@ -105,6 +107,15 @@ const main = async () => {
     case "opportunities":
       console.log(JSON.stringify(store.opportunities(args[1] ?? new Date().toISOString()), null, 2));
       return;
+    case "serve": {
+      const port = args[1] ? Number(args[1]) : 8787;
+      if (!Number.isSafeInteger(port) || port < 0 || port > 65_535) usage();
+      const server = new ReieLocalServer({ journalPath: journal, port });
+      const bound = await server.start();
+      console.log(JSON.stringify({ ok: true, host: bound.host, port: bound.port, message: "REIE local API running; press Ctrl+C to stop." }, null, 2));
+      await new Promise<void>(() => {});
+      return;
+    }
     case "demo": {
       if (store.counts().entities > 0) {
         console.log(JSON.stringify({ ok: true, alreadySeeded: true, ...store.counts() }, null, 2));

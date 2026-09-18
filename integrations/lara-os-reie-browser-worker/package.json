@@ -1,0 +1,20 @@
+{
+  "name": "lara-os-reie-browser-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Optional Playwright browser worker for public-source REIE collection.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/worker.js",
+  "types": "./dist/worker.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "playwright": "1.63.0"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

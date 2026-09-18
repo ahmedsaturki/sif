@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { openReieWorkspace } from "../persistence.js";
+import { openReieWorkspace } from "../dist/persistence.js";
 import { resolveEntityCandidates } from "../resolution.js";
 import { generateReieSignals } from "../signals.js";
 import type { ReieEntity } from "../reie.js";

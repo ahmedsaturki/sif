@@ -169,8 +169,8 @@ export class ReieLocalServer {
 
     if (method === "POST" && url.pathname === "/ingest") {
       const body = await this.readJson(req);
-      const result = await this.persistent.ingestDocument(body.document, body.csvMapping);
       await this.artifacts.put(body.document);
+      const result = await this.persistent.ingestDocument(body.document, body.csvMapping);
       return this.writeJson(res, 200, result);
     }
 

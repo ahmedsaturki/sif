@@ -1,6 +1,6 @@
 {
   "name": "lara-os-reie-runtime",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Local-first Real Estate Intelligence & Entity research runtime with an explicit SIF governance boundary.",
   "license": "Apache-2.0",

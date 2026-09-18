@@ -101,3 +101,13 @@ Opportunity output is evidence-derived and deterministic; it does not make exter
 ## Future adapters
 
 Browser workers, PostgreSQL persistence, model inference, semantic entity extraction, and agent orchestration can be added above this layer without changing the provenance and authority contracts.
+
+## Operational platform
+
+The operational layer now includes governed text-extraction candidates, a human review queue, explicit relation edges, deterministic price-history projections, a fail-closed multi-agent orchestrator, and a loopback-only local HTTP API.
+
+Text extraction never auto-commits semantic claims. It produces evidence-bearing candidates with REVIEW confidence; a human review decision is required before the candidate becomes a claim. Relation edges are explicit only.
+
+The local API exposes health, knowledge, opportunities, extraction, ingestion, and review decisions. It binds to 127.0.0.1 by default.
+
+The separate browser-worker package is the browser-as-worker boundary. It can use a persistent Playwright profile for human-maintained sessions but deliberately has no credential injection, automatic login, form submission, or outreach.

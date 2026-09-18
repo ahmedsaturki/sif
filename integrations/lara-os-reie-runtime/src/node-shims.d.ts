@@ -30,3 +30,28 @@ declare const process: {
   exitCode: number;
   exit(code?: number): never;
 };
+
+declare module "node:http" {
+  export interface IncomingMessage {
+    method?: string;
+    url?: string;
+    on(event: "data", listener: (chunk: unknown) => void): this;
+    on(event: "end", listener: () => void): this;
+    on(event: "error", listener: (error: unknown) => void): this;
+    setEncoding(encoding: string): this;
+    destroy(): void;
+  }
+  export interface ServerResponse {
+    writeHead(status: number, headers?: Record<string, string>): this;
+    end(data?: string): void;
+  }
+  export interface Server {
+    once(event: "error", listener: (error: unknown) => void): this;
+    listen(port: number, host: string, listener: () => void): this;
+    address(): { port: number } | string | null;
+    close(callback: (error?: unknown) => void): void;
+  }
+  export function createServer(
+    handler: (req: IncomingMessage, res: ServerResponse) => void,
+  ): Server;
+}

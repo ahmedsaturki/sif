@@ -100,10 +100,10 @@ function parseCsv(content: string): string[][] {
     const next = content[i + 1];
 
     if (quoted) {
-      if (char === """ && next === """) {
-        cell += """;
+      if (char === '"' && next === '"') {
+        cell += '"';
         i += 1;
-      } else if (char === """) {
+      } else if (char === '"') {
         quoted = false;
       } else {
         cell += char;
@@ -111,7 +111,7 @@ function parseCsv(content: string): string[][] {
       continue;
     }
 
-    if (char === """) {
+    if (char === '"') {
       quoted = true;
     } else if (char === ",") {
       row.push(cell);

@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - "feat/sif-adoption-layer-1.0.0"
+      - "feat/lara-os-reie-runtime-1.0.0"
       - "integration/**"
   pull_request:
     branches:
       - "feat/sif-core-1.0.0-knowledge-semantic"
+      - "feat/sif-adoption-layer-1.0.0"
       - "main"
   workflow_dispatch:
 

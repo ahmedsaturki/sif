@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFile } from "node:fs/promises";
 import { openReieWorkspace } from "./persistence.js";
 
 function usage(): never {
@@ -14,9 +15,22 @@ Commands:
   signals <journal> <entityId> [asOf]
   export <journal> <snapshot>
   import <journal> <snapshot>
+  ingest <journal> <file> <sourceId> [mediaType] [mappingJson]
+  opportunities <journal> [asOf]
 `);
   process.exit(2);
 }
+
+const mediaTypeForFile = (path: string, explicit?: string) => {
+  if (explicit) {
+    if (explicit === "application/json" || explicit === "text/csv" || explicit === "text/plain") return explicit;
+    throw new Error("mediaType must be application/json, text/csv, or text/plain");
+  }
+  const lower = path.toLowerCase();
+  if (lower.endsWith(".json")) return "application/json" as const;
+  if (lower.endsWith(".csv")) return "text/csv" as const;
+  return "text/plain" as const;
+};
 
 const [command, ...args] = process.argv.slice(2);
 if (!command) usage();
@@ -61,6 +75,34 @@ const main = async () => {
     case "import":
       if (!args[1]) usage();
       console.log(JSON.stringify(await store.importSnapshot(args[1]), null, 2));
+      return;
+    case "ingest": {
+      if (!args[1] || !args[2]) usage();
+      const file = args[1];
+      const sourceId = args[2];
+      const mediaType = mediaTypeForFile(file, args[3]);
+      let csvMapping: Record<string, unknown> | undefined;
+      if (mediaType === "text/csv") {
+        if (!args[4]) usage();
+        try {
+          csvMapping = JSON.parse(args[4]) as Record<string, unknown>;
+        } catch {
+          throw new Error("mappingJson must be valid JSON");
+        }
+      }
+      const content = await readFile(file, "utf8");
+      const result = await store.ingestDocument({
+        sourceId,
+        title: file,
+        observedAt: new Date().toISOString(),
+        content,
+        mediaType,
+      }, csvMapping as never);
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    case "opportunities":
+      console.log(JSON.stringify(store.opportunities(args[1] ?? new Date().toISOString()), null, 2));
       return;
     case "demo": {
       if (store.counts().entities > 0) {

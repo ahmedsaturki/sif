@@ -1,0 +1,21 @@
+{
+  "name": "lara-os-reie-host",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Governed composition host for the REIE operational platform.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "reie-host": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.1",
+    "typescript": "7.0.2"
+  }
+}

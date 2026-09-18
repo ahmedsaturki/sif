@@ -76,6 +76,14 @@ The current package remains `sif-core@0.5.0`. No registry publication, release t
 
 Non-canonical historical and maintenance refs remain in the repository; the available connector does not expose branch-ref deletion, so those refs are left untouched rather than removed through an unsafe workaround.
 
+## Repository Hardening — Application CI
+
+- Pinned application-layer `actions/checkout` and `actions/setup-node` references to immutable commit SHAs.
+- Pinned the REIE PostgreSQL CI service image to the verified PostgreSQL 16 digest already used by SIF Core CI.
+- Extended SIF Core pull-request verification to the canonical application line so Core verification executes before application promotion.
+- Verified the hardening candidate through Core, Adoption, REIE Local Core, REIE PostgreSQL Adapter, REIE Governed Host, and REIE Operational Platform CI before promotion.
+- Re-ran SIF Core and SIF Adoption CI on the merged canonical HEAD; both passed.
+
 ## Release Discipline
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
 

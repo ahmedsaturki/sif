@@ -22,7 +22,7 @@ export class ReiePublicSourceCollector {
       mediaType: "text/plain";
     }): Promise<unknown>;
   };
-  private readonly artifacts?: ReieSourceArtifactStore;
+  private readonly artifacts: ReieSourceArtifactStore | undefined;
 
   constructor(
     browser: ReiePlaywrightBrowserWorker,

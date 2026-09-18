@@ -4,7 +4,7 @@ import {
   InMemoryReieStore,
   LaraOsReieRuntime,
   ReieRuntimeError,
-} from "../dist/src/reie.js";
+} from "../dist/reie.js";
 
 const NOW = "2026-09-18T00:00:00.000Z";
 

@@ -312,3 +312,31 @@ test("OPS-013 SIF governance gate rejects an explicit policy deny", async () => 
     /policy denied agent research/i,
   );
 });
+
+test("OPS-014 REIE API maps client errors to non-500 statuses", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "reie-http-status-"));
+  const server = new ReieLocalServer({ journalPath: join(dir, "events.jsonl"), port: 0 });
+  const bound = await server.start();
+  const base = `http://${bound.host}:${bound.port}`;
+  try {
+    const badJson = await fetch(base + "/ingest", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{",
+    });
+    assert.equal(badJson.status, 400);
+
+    const missing = await fetch(base + "/artifacts/unknown");
+    assert.equal(missing.status, 404);
+
+    const badAgent = await fetch(base + "/agents/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ agents: ["does-not-exist"] }),
+    });
+    assert.equal(badAgent.status, 400);
+  } finally {
+    await server.stop();
+    await rm(dir, { recursive: true, force: true });
+  }
+});

@@ -214,15 +214,6 @@ export async function ingestReieDocument(
   if (!content.length) throw new ReieIngestionError("INVALID_DOCUMENT", "content must not be empty");
 
   const contentDigest = sha256(content);
-  workspace.ingestSource({
-    sourceId,
-    ...(document.uri ? { uri: document.uri.trim() } : {}),
-    ...(document.title ? { title: document.title.trim() } : {}),
-    ...(document.publisher ? { publisher: document.publisher.trim() } : {}),
-    observedAt,
-    contentDigest,
-  });
-
   const mediaType = document.mediaType ?? "text/plain";
   let records: ReieIngestionRecord[] = [];
   let parseMode: ReieIngestionResult["parseMode"] = "source-only";
@@ -254,10 +245,18 @@ export async function ingestReieDocument(
     };
   }
 
+  workspace.ingestSource({
+    sourceId,
+    ...(document.uri ? { uri: document.uri.trim() } : {}),
+    ...(document.title ? { title: document.title.trim() } : {}),
+    ...(document.publisher ? { publisher: document.publisher.trim() } : {}),
+    observedAt,
+    contentDigest,
+  });
+
   const entityIds: string[] = [];
   const claimIds: string[] = [];
   let recordsAccepted = 0;
-  let recordsSkipped = 0;
 
   for (const raw of records) {
     const record = normalizeRecord(raw, sourceId, observedAt);

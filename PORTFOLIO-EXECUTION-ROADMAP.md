@@ -2,71 +2,146 @@
 
 ## Purpose
 
-This document is the portfolio-level execution map for the Software Integration Foundation (SIF) and its consumers.
+This is the portfolio source of truth for execution, verification, release, and handoff across SIF and the connected products.
 
-It separates:
+Core rule:
 
-- platform capabilities owned by SIF
-- domain/business logic owned by consumer applications
-- infrastructure/runtime ownership
-- release and verification gates
-- intentionally gated or unavailable work
-
-The rule is simple:
-
-> Build a capability once at the correct boundary, then consume it through a stable contract.
+> Build a capability once at the correct boundary, consume it through a stable contract, and prove every final claim with current evidence.
 
 ## 1. Canonical architecture
 
 ```text
                          SIF
                           |
-          Stable platform/integration contracts
+          Stable platform / integration contracts
                           |
-        +-----------------+------------------+
-        |                 |                  |
-        v                 v                  v
-     Lara OS /          QADRIX         Sovereign Library
-       REIE              / QRX              ecosystem
-        |                 |                  |
-        +-----------------+------------------+
-                          |
-                  Domain business logic
-                          |
-             +------------+------------+
-             |            |            |
-             v            v            v
-         Supabase       Vercel       GitHub
+      +-------------------+----------------------+
+      |                   |                      |
+      v                   v                      v
+   Lara OS /           QADRIX /            Sovereign Library
+     REIE                 QRX                    |
+      |                    |                     |
+      +--------------------+---------------------+
+                           |
+                    Domain business logic
+                           |
+              +------------+-------------+
+              |            |             |
+              v            v             v
+          Supabase       Vercel        GitHub
 ```
 
 SIF owns reusable integration boundaries.
 
 Consumers own:
 
-- product/domain entities
+- domain entities
 - business workflows
 - decision rules
-- user-facing behavior
-- domain-specific persistence models
+- UX/API behavior
+- domain persistence
 - product KPIs
+- customer-facing semantics
 
-## 2. Current portfolio state
+## 2. Current verified portfolio state — 2026-09-18
 
-| System | Role | Current state | Next action |
-| --- | --- | --- | --- |
-| SIF | Integration foundation | Adoption boundary implemented and covered by tests | Consume; do not rebuild |
-| Lara OS / REIE | Real-estate intelligence consumer | Consumer repository is not present in the connected GitHub portfolio | Apply SIF boundary in the actual runtime source |
-| QADRIX / QRX | Business operations consumer | Consumer repository is not present in the connected GitHub portfolio | Apply SIF contracts when source is available |
-| Aqarat | Real-estate web/runtime surface | Production health verified; no open PR/issue | Keep stable; only change with evidence |
-| Sadat MLS | Real-estate marketplace | Production health verified; adapter hardening merged | Keep stable; monitor runtime signals |
-| Meta Operations Runtime | Reusable operations/agent runtime | Release engineering and core runtime qualification are substantially complete; deployment/live evidence remains explicitly separate | Continue only on evidence-backed deployment/live gates |
-| Sovereign Library | Standalone library/product qualification | PR #125 intentionally remains open under governance | Finish exact-head verification, then follow authorization gate |
-| Nabatatos / Ayar | Agricultural commerce surface | Production deployment responds successfully | Maintain; future work must be evidence-driven |
-| Nabatos Agri Platform | Agricultural platform | Production deployment responds successfully | Maintain; future work must be evidence-driven |
+| System | Current verified state | Action |
+| --- | --- | --- |
+| SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
+| ai-team-v1 | `main` advanced to `436eba05bd876ff54bf2c19fd1407b3759725b65`; legacy PR backlog consolidated into current-main waves; only PR #76 remains open | Finish CI/reconciliation before merge |
+| Sovereign Library | `main` is `8e60dc2bc280c49fe1ac546ce99fcb27626b1980`; PR #125 remains governed/open; Python, phase3, verify, release-engineering, Kotlin checks pass; security pipeline/CodeQL evidence is not terminal-green | Resolve security gate, then follow repository authorization |
+| Aqarat | Production previously verified healthy; no open PR/issue in connected repo state | Keep stable; modify only on evidence |
+| Sadat MLS | Production deployment previously verified; health endpoint returned 200; no open PR/issue | Keep stable; monitor and fix only evidence-backed defects |
+| Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |
+| Nabatos Agri Platform | Production deployment verified responding successfully | Keep stable |
+| Meta Operations Runtime | Core/repository qualification substantially complete; explicit live/deployment/effect gates remain | Advance only with real live evidence |
+| Lara OS / REIE | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
+| QADRIX / QRX | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 
-## 3. SIF adoption contract
+## 3. ai-team-v1 current-main execution state
 
-A consumer adoption must use this sequence:
+The active consolidation is **PR #76**:
+
+- Head branch: `feat/current-main-integration-wave`
+- Latest observed head: `3c81deaf68aacb986d1be4fa1462e9ddfa5b03f3`
+- Base: `main` at `436eba05bd876ff54bf2c19fd1407b3759725b65`
+- Semgrep: successful
+- Build check: repeatedly failing before useful job execution on the current workflow path; retries produced immediate workflow failure without actionable job steps/logs
+
+The wave contains the current-main versions of:
+
+- Project OS
+- Delivery OS
+- Enterprise CRM
+- Enterprise MLS
+- Enterprise Workforce Runtime hardening
+- platform RFC / architecture / release governance artifacts
+- reconciled workspace dependency entries
+
+The wave deliberately excludes the old simulated vertical-workforce scaffold.
+
+### ai-team-v1 business-logic hardening completed in the wave
+
+**Project OS**
+- execution is adapter-backed
+- no adapter means no execution
+- evidence and artifacts come from the adapter
+- successful execution ends in review
+- approval is explicit
+- delivery no longer creates implicit approval
+
+**Delivery OS**
+- dashboard health now derives from the customer-health calculation instead of fixed 0.8/0.3 constants
+
+**Workforce Runtime**
+- execution requires an injected adapter
+- terminal results are explicit `completed` / `failed`
+- request identity is required in execution results
+- approval is independent from completion
+- worker metrics and evidence remain tied to actual execution results
+
+**MLS**
+- domain-rich implementation was promoted into the integration wave
+- property, tenancy, deal, offer, matching, price-history, and decision-support concepts are represented in the richer domain model
+- decision-support naming is descriptive rather than claiming an actual model where the implementation is deterministic
+
+## 4. Sovereign Library current state
+
+PR #125 remains governed and open.
+
+Latest verified head:
+
+`b3e6ae5b5e64853530182bbd31e36dfd1b9c4ae1`
+
+Verified current-head workflows include successful:
+
+- Python ports
+- phase3 hardening
+- verify
+- release engineering
+- Kotlin/JVM
+- Node multi-platform
+- multi-region checks
+- performance checks
+- E2E checks
+- chaos probes
+- load checks
+- SBOM/licensing/API/backward-compatibility plans
+
+Android was still running in the latest observed check snapshot and had also produced prior successful completed runs.
+
+Security status is **not closed**:
+
+- the recorded CodeQL result reports 3 High and 2 Medium new alerts plus lower-severity findings
+- the separate security-pipeline workflow had a failure
+- the available GitHub Actions connector did not expose the required actionable job logs for that security run
+- a retry of that old security run was rejected by GitHub
+
+Therefore:
+
+> No merge, tag, or external publication is asserted as complete until a current security run is terminal-green and the repository's governance gate allows it.
+
+## 5. SIF adoption contract
 
 ```text
 consumer intent
@@ -86,123 +161,88 @@ tests + CI
 release
 ```
 
-Do not:
+Never:
 
 - copy SIF internals into consumers
-- duplicate policy engines
-- create consumer-specific forks of the same integration primitive
-- treat a passing unit test as live verification
-- publish or enable side effects without the required authorization/evidence boundary
+- duplicate integration primitives
+- silently replace a live dependency with a guessed implementation
+- treat unit-test success as live verification
+- claim external publication without publication evidence
 
-## 4. Definition of Done
+## 6. Definition of Done
 
-A capability is complete only when all applicable layers are satisfied:
+A capability is final only when applicable layers are all evidenced:
 
 1. Contract
 2. Implementation
 3. Business logic
 4. Persistence
 5. Security / authorization
-6. Error handling and recovery
-7. Unit/conformance tests
+6. Error handling / recovery
+7. Unit / conformance tests
 8. Integration tests
 9. CI
 10. Deployment
 11. Runtime verification
 12. Documentation
-13. Rollback/recovery path
+13. Rollback / recovery
 14. Release state
 
-A missing layer keeps the capability in the appropriate non-final state.
+A missing layer keeps the item in a non-final state.
 
-## 5. Release policy
+## 7. Product stability rule
 
-Releases must be evidence-backed.
+Healthy production products are changed only when there is evidence:
 
-Green CI alone does not automatically mean:
+- runtime error
+- failing test
+- security issue
+- broken business rule
+- measurable product requirement
+- verified deployment issue
 
-- production-ready
-- live-verified
-- authorized for side effects
-- authorized for external publication
+No aesthetic refactors or architecture replacement merely to consume time.
 
-For governed repositories, repository policy is the final gate.
-
-## 6. Consumer execution order
+## 8. Consumer waves
 
 ### Wave A — Lara OS / REIE
 
-Goal:
+Required when the source repository is connected:
 
-- install the SIF integration boundary
-- map REIE domain events/operations to SIF contracts
-- keep REIE entity resolution, crawling, research, opportunity logic, and business decisions in REIE
-- verify browser/agent/operator boundaries separately
-- establish production-safe adoption tests
-
-Exit condition:
-
-- real consumer code imports the intended SIF boundary
-- no duplicated integration primitive remains
-- tests prove the consumer contract
-- runtime evidence proves the deployed behavior
+- adopt SIF boundary
+- keep crawler/browser/entity-resolution/opportunity/business logic in REIE
+- prove authenticated browser/operator boundaries
+- establish integration and runtime evidence
 
 ### Wave B — QADRIX / QRX
 
-Goal:
+Required when the source repository is connected:
 
-- consume the same stable SIF primitives
-- keep workflow, CRM, sales stages, tasks, properties, roles, and business rules in QADRIX
-- preserve future multi-tenant/RBAC boundaries
-- verify multi-user behavior and failure recovery
+- consume SIF contracts
+- keep CRM/property/stage/task/RBAC logic in QADRIX
+- preserve multi-user and future multi-tenant semantics
+- verify failure recovery
 
-Exit condition:
+### Wave C — Sovereign interoperability
 
-- real application path uses SIF contracts
-- business logic remains consumer-owned
-- database and authorization semantics are explicitly tested
+- interoperability is optional
+- Cubes remain standalone and dependency-free
+- SIF cannot become an accidental runtime dependency of standalone Cubes
 
-### Wave C — Sovereign Library interoperability
+## 9. Intentional external gates
 
-Goal:
+These are explicit evidence or authorization gates, not forgotten TODOs:
 
-- use SIF patterns only where genuinely appropriate
-- preserve Cube independence and standalone packaging
-- never introduce SIF as an unwanted runtime dependency into standalone Cubes
-
-Exit condition:
-
-- interoperability is optional and explicit
-- standalone qualification remains dependency-free
-- governance and publication authorization remain intact
-
-## 7. Stable-product rule
-
-For already healthy deployed products:
-
-- do not refactor for aesthetics
-- do not redeploy without a reason
-- do not replace working architecture with speculative architecture
-- use runtime errors, failing tests, security findings, or measurable product requirements as change triggers
-
-## 8. Open gates that are intentionally not auto-closed
-
-Some gates require external evidence or explicit authorization:
-
-- human-operated authenticated browser verification
-- deployment-only database migration rehearsal
+- human authenticated browser verification
+- production database migration rehearsal
 - independent penetration testing
-- production backup/restore drill
+- backup / restore drill
 - provider-specific live qualification
-- controlled side effects
+- controlled external side effects
 - external package publication
 - governed release authorization
 
-These are not "forgotten TODOs"; they are explicit evidence/authorization gates.
-
-## 9. Portfolio operating loop
-
-Every active repository follows:
+## 10. Portfolio operating loop
 
 ```text
 DISCOVER
@@ -228,25 +268,24 @@ RELEASE / FREEZE
 NEXT VERIFIED GAP
 ```
 
-The next verified gap always outranks cosmetic or speculative work.
+## 11. Final handoff criteria
 
-## 10. Final handoff target
+Portfolio handoff is complete when:
 
-The portfolio is considered operationally complete when:
-
-- SIF is consumed rather than copied
-- each consumer has a real adoption path
-- business logic is explicit and testable
-- production systems are healthy
+- SIF is consumed instead of copied
+- every connected consumer has a real adoption path
+- business logic is explicit and tested
+- production surfaces are verified
 - governed repositories have closed evidence gates
-- release state matches the actual live state
-- documentation no longer contradicts implementation
-- no "unknown" is silently treated as "done"
+- release state matches actual live state
+- documentation matches implementation
+- no unknown is silently treated as done
+- stale PRs and conflicting branches no longer represent active work
 
----
+## 12. Current decision
 
-## Current decision
+SIF is frozen as a reusable foundation.
 
-SIF is now a **consumer-facing foundation**, not the next place for another broad rebuild.
+The active engineering focus is now consumer/product completion and evidence closure, not another SIF rebuild.
 
-The next engineering work belongs in the consumer runtime that can be verified from source. Where the source is unavailable in the connected environment, the state remains explicitly recorded rather than invented.
+For any repository whose source is not connected, the correct state is recorded explicitly rather than fabricated.

@@ -1,10 +1,18 @@
 import { canonicalJson, sha256 } from "./deterministic.js";
 import {
   type ReieClaim,
-  type ReieEntity,
   type ReieEntityType,
 } from "./reie.js";
-import { ReieWorkspace } from "./workspace.js";
+import type {
+  ReieEntity,
+  ReieSource,
+} from "./reie.js";
+
+export interface ReieIngestionTarget {
+  ingestSource(source: ReieSource): ReieSource | Promise<ReieSource>;
+  upsertEntity(entity: ReieEntity): ReieEntity | Promise<ReieEntity>;
+  recordClaim(claim: ReieClaim): ReieClaim | Promise<ReieClaim>;
+}
 
 export interface ReieIngestionDocument {
   readonly sourceId: string;
@@ -211,7 +219,7 @@ function normalizeRecord(record: ReieIngestionRecord, sourceId: string, observed
 }
 
 export async function ingestReieDocument(
-  workspace: ReieWorkspace,
+  target: ReieIngestionTarget,
   document: ReieIngestionDocument,
   csvMapping?: ReieCsvMapping,
 ): Promise<ReieIngestionResult> {
@@ -252,7 +260,7 @@ export async function ingestReieDocument(
     };
   }
 
-  workspace.ingestSource({
+  await target.ingestSource({
     sourceId,
     ...(document.uri ? { uri: document.uri.trim() } : {}),
     ...(document.title ? { title: document.title.trim() } : {}),
@@ -275,7 +283,7 @@ export async function ingestReieDocument(
         ...(record.location ? { location: record.location } : {}),
         aliases: [...(record.aliases ?? [])],
       };
-      workspace.upsertEntity(entity);
+      await target.upsertEntity(entity);
       entityIds.push(entity.entityId);
 
       for (const claim of record.claims ?? []) {
@@ -295,7 +303,7 @@ export async function ingestReieDocument(
           value,
           observedAt,
         };
-        workspace.recordClaim(saved);
+        await target.recordClaim(saved);
         claimIds.push(claimId);
       }
       recordsAccepted += 1;

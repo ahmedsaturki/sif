@@ -43,6 +43,7 @@ export interface ReieCsvMapping {
   readonly location?: string;
   readonly aliases?: string;
   readonly claims?: Readonly<Record<string, string>>;
+  readonly claimTypes?: Readonly<Record<string, "string" | "number" | "boolean" | "json">>;
   readonly entityId?: string;
 }
 
@@ -149,6 +150,40 @@ function parseCsv(content: string): string[][] {
   return rows.filter((x) => x.some((cell) => cell.trim().length > 0));
 }
 
+
+const ENTITY_TYPES: readonly ReieEntityType[] = ["property", "person", "company", "project", "location", "other"];
+
+function isEntityType(value: string): value is ReieEntityType {
+  return ENTITY_TYPES.includes(value as ReieEntityType);
+}
+
+function parseMappedValue(
+  field: string,
+  value: string,
+  kind: "string" | "number" | "boolean" | "json" | undefined,
+  rowIndex: number,
+): unknown {
+  if (!kind || kind === "string") return value;
+  if (kind === "number") {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      throw new ReieIngestionError("INVALID_RECORD", `CSV row ${rowIndex}: ${field} must be a finite number`);
+    }
+    return parsed;
+  }
+  if (kind === "boolean") {
+    const normalized = value.toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+    throw new ReieIngestionError("INVALID_RECORD", `CSV row ${rowIndex}: ${field} must be true or false`);
+  }
+  try {
+    return JSON.parse(value);
+  } catch {
+    throw new ReieIngestionError("INVALID_RECORD", `CSV row ${rowIndex}: ${field} contains invalid JSON`);
+  }
+}
+
 const splitAliases = (value: string | undefined): string[] =>
   value
     ? [...new Set(value.split(/[;|]/u).map((x) => x.trim()).filter(Boolean))].sort()
@@ -162,23 +197,32 @@ function rowToRecord(headers: string[], row: string[], mapping: ReieCsvMapping, 
     return value ? value : undefined;
   };
 
-  const entityType = read(mapping.entityType) as ReieEntityType | undefined;
+  const entityTypeValue = read(mapping.entityType);
   const canonicalName = read(mapping.canonicalName);
-  if (!entityType || !canonicalName) {
+  if (!entityTypeValue || !canonicalName) {
     throw new ReieIngestionError("INVALID_RECORD", `CSV row ${rowIndex}: entityType and canonicalName are required`);
+  }
+
+  if (!isEntityType(entityTypeValue)) {
+    throw new ReieIngestionError("INVALID_RECORD", `CSV row ${rowIndex}: unsupported entityType`);
   }
 
   const claims = Object.entries(mapping.claims ?? {})
     .map(([field, column]) => {
       const value = read(column);
-      return value === undefined ? null : { field: trimRequired("claim field", field), value };
+      return value === undefined
+        ? null
+        : {
+            field: trimRequired("claim field", field),
+            value: parseMappedValue(field, value, mapping.claimTypes?.[field], rowIndex),
+          };
     })
     .filter((x): x is { field: string; value: unknown } => x !== null);
 
   return {
     recordId: "csv:" + rowIndex,
     ...(read(mapping.entityId) ? { entityId: read(mapping.entityId) } : {}),
-    entityType,
+    entityType: entityTypeValue,
     canonicalName,
     ...(read(mapping.location) ? { location: read(mapping.location) } : {}),
     aliases: splitAliases(read(mapping.aliases)),
@@ -187,7 +231,10 @@ function rowToRecord(headers: string[], row: string[], mapping: ReieCsvMapping, 
 }
 
 function normalizeRecord(record: ReieIngestionRecord, sourceId: string, observedAt: string): ReieIngestionRecord {
-  const entityType = trimRequired("entityType", record.entityType) as ReieEntityType;
+  const entityType = trimRequired("entityType", record.entityType);
+  if (!isEntityType(entityType)) {
+    throw new ReieIngestionError("INVALID_RECORD", "Unsupported entityType: " + entityType);
+  }
   const canonicalName = trimRequired("canonicalName", record.canonicalName);
   const location = record.location?.trim();
   const aliases = [...new Set((record.aliases ?? []).map((alias) => trimRequired("alias", alias)))].sort();

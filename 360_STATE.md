@@ -5,10 +5,12 @@
 - Product: Sovereign Intelligence Fabric
 - Package baseline: `SIF Core 0.5.0`
 - Current promoted phase: Phase 9 — Sovereign Products
-- Canonical promoted preservation line: `feat/sif-core-1.0.0-knowledge-semantic`
-- Phase 9 implementation branch: `feat/sif-core-1.3.0-sovereign-products`
-- Phase 9 verified exact-head: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`
-- Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`
+- Historical canonical SIF Core preservation line: `feat/sif-core-1.0.0-knowledge-semantic`
+- Current canonical promoted application line: `feat/sif-adoption-layer-1.0.0`
+- Historical Phase 9 implementation branch: `feat/sif-core-1.3.0-sovereign-products`
+- Historical Phase 9 verified exact-head: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`
+- Historical Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`
+- Current REIE application release line: Governed Host 2.1.0 on `feat/sif-adoption-layer-1.0.0`
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`
 - Phase 7/9 cumulative promotion into Phase 6 line: `77a605a936115815c2e833f6c4667f0e353aefbd`
 - Implementation language: TypeScript
@@ -31,7 +33,7 @@ SIF Core preserves append-only events, optimistic concurrency, hash-chain integr
 ## Phase 9 — Sovereign Products
 Implemented capabilities include explicit, version-pinned product adapters for `LARA_OS_REIE`, `QADRIX`, and `SOVEREIGN_LIBRARY`; immutable descriptors; deterministic bounded requests and digests; fail-closed capability/authority/version/operation enforcement; explicit injected handlers with no hidden external I/O; bounded registry and deterministic listing; append-only hash-linked product evidence; and deterministic request/response replay verification. F9-001..F9-060 are executable acceptance coverage.
 
-The adapter boundary does not claim direct production integration with Lara OS/REIE, QADRIX, Sovereign Library, Supabase, PostgreSQL, GitHub, browser, queue, credentials, or external APIs. Product-facing work enters through explicit handlers only.
+The adapter boundary does not claim direct production integration with Lara OS/REIE, QADRIX, Sovereign Library, Supabase, PostgreSQL, GitHub, browser, queue, credentials, or external APIs. Product-facing work enters through explicit handlers only. REIE application realization is recorded separately on the current adoption line.
 
 ## Verification State
 The canonical preservation branch is the authoritative current source state. Its current HEAD is accepted as the final Phase 0–9 state only when a SIF Core CI run checks out that exact `head_sha` and every verification gate succeeds.
@@ -44,7 +46,7 @@ Dynamic CI run IDs, artifact IDs, artifact digests, and the current branch SHA a
 - Phase 9 implementation, verification, and promotion are complete.
 - Phase 8 implementation, verification, and promotion are complete.
 - Phase 7 implementation, verification, and promotion are complete.
-- The cumulative promoted tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic`.
+- The historical cumulative promoted SIF Core tree is preserved on `feat/sif-core-1.0.0-knowledge-semantic`; the current promoted application tree is on `feat/sif-adoption-layer-1.0.0`.
 - `sif-core` remains version `0.5.0`.
 - No merge to `main` has been made.
 - No registry publication has been made.

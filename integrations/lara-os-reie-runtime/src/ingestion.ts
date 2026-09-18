@@ -1,10 +1,8 @@
 import { canonicalJson, sha256 } from "./deterministic.js";
-import {
-  type ReieClaim,
-  type ReieEntityType,
-} from "./reie.js";
 import type {
+  ReieClaim,
   ReieEntity,
+  ReieEntityType,
   ReieSource,
 } from "./reie.js";
 

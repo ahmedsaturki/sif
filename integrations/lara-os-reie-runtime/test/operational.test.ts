@@ -14,7 +14,9 @@ test("REIE-LC007 research priority is deterministic and evidence-derived", () =>
       { claimId: "c1", entityId: "p1", sourceId: "s1", field: "price.amount", value: 100, observedAt: NOW },
       { claimId: "c2", entityId: "p1", sourceId: "s2", field: "price.amount", value: 120, observedAt: NOW },
       { claimId: "c3", entityId: "p1", sourceId: "s1", field: "location", value: "Sadat", observedAt: NOW },
-      { claimId: "c4", entityId: "p1", sourceId: "s2", field: "propertyType", value: "land", observedAt: NOW },
+      { claimId: "c4", entityId: "p1", sourceId: "s2", field: "location", value: "Sadat", observedAt: NOW },
+      { claimId: "c5", entityId: "p1", sourceId: "s1", field: "propertyType", value: "land", observedAt: NOW },
+      { claimId: "c6", entityId: "p1", sourceId: "s2", field: "propertyType", value: "land", observedAt: NOW },
     ],
     [
       { sourceId: "s1", observedAt: NOW, contentDigest: "d1" },

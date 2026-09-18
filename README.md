@@ -5,7 +5,7 @@ SIF is a sovereignty-first intelligence fabric whose implementation grows throug
 ## Current promoted line
 
 - Phase 2 Live PostgreSQL, Phase 3 Secure Federation, Phase 4 Policy & Governance, Phase 5 Evaluation & Observability, Phase 6 Knowledge / Semantic, Phase 7 Systemic / Ecological, Phase 8 Reflexive / Continuity, and Phase 9 Sovereign Products are preserved on dedicated branches.
-- The cumulative Phase 7–9 tree is promoted into the preserved Phase 6 line `feat/sif-core-1.0.0-knowledge-semantic`, which is the canonical cumulative preservation branch.
+- The cumulative Phase 7–9 tree is preserved in the historical Core line `feat/sif-core-1.0.0-knowledge-semantic`, the canonical cumulative Core preservation branch. The current promoted application line is `feat/sif-adoption-layer-1.0.0`.
 - Phase 9 exact implementation HEAD: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`.
 - Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`.
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.

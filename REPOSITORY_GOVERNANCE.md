@@ -32,6 +32,7 @@ These controls are repository-level settings; files in this repository cannot ac
 - SIF Core CI has explicit read-only workflow permissions.
 - CI runs on the pinned `ubuntu-24.04` label and has a finite 15-minute job timeout.
 - Build tooling is pinned through `package.json`, `package-lock.json`, and the CI Node/npm toolchain.
+- Application CI GitHub Actions are pinned to immutable commit SHAs, and the REIE PostgreSQL CI service image is pinned to a verified image digest.
 - The CI verifies exact candidate checkout identity before testing.
 
 ## Enforcement status

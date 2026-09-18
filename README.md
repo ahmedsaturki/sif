@@ -11,6 +11,7 @@ SIF is a sovereignty-first intelligence fabric whose implementation grows throug
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
 - Phase 7/9 cumulative promotion into the Phase 6 line: `77a605a936115815c2e833f6c4667f0e353aefbd`.
 - The package version remains `0.5.0`; preservation and promotion do not imply package publication.
+- REIE Operational Platform 2.0.0 is a separate product integration release on the isolated adoption line; it does not change the Core package version.
 
 ## Phase 9 Sovereign Products
 
@@ -21,6 +22,16 @@ The boundary provides immutable-to-callers descriptors, deterministic request no
 The adapter layer does not claim direct production integration, hidden network/database/browser/queue access, credential use, autonomous external actions, or automatic authority promotion. Product-specific work enters through explicit handlers only.
 
 F9-001..F9-060 are executable in `packages/sif-core/test/sovereign-products.test.ts`.
+
+## REIE Operational Product Release 2.0.0
+
+The Phase 9 sovereign-product adapter surface has now been exercised by a complete Lara OS / REIE operational application layer on the isolated adoption line.
+
+The promoted application line contains REIE Local Core 1.0.0, deterministic ingestion 1.1.0, and REIE Operational Platform 2.0.0. The operational release adds evidence-bearing extraction candidates, human review, durable operational state, explicit relations, price history, opportunity projection, governed agents, a loopback-only local API/dashboard, an optional Playwright browser worker, and an optional PostgreSQL adapter.
+
+Release commit: `b7b5d2298e3fe07d7c377b7715e4760ecbde6967` via PR #33.
+
+This is an application-layer promotion, not a new SIF roadmap phase. The frozen `sif-core@0.5.0` contract remains unchanged.
 
 ## Verification boundary
 
@@ -44,7 +55,7 @@ The connected GitHub administration surface currently reports no active Rulesets
 
 The current Phase 0–9 roadmap is closed. No Phase 10 is defined. No merge to `main`, package publication, release tag, production deployment, or direct external product integration is implied.
 
-All pull requests currently created in the repository are closed. PRs #9–#13 completed the later promotion/hardening chain; PRs #14 onward completed final documentation reconciliation and cleanup. PRs #1–#6 are retained only as closed historical candidate records.
+All pull requests currently created in the repository are closed. PR #33 promoted REIE Operational Platform 2.0.0 into the adoption line after exact-head verification. PRs #9–#13 completed the later promotion/hardening chain; PRs #14 onward completed final documentation reconciliation and cleanup. PRs #1–#6 are retained only as closed historical candidate records.
 
 ## Cleanup note
 

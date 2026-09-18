@@ -6,6 +6,7 @@ SIF is a sovereignty-first intelligence fabric whose implementation grows throug
 
 - Phase 2 Live PostgreSQL, Phase 3 Secure Federation, Phase 4 Policy & Governance, Phase 5 Evaluation & Observability, Phase 6 Knowledge / Semantic, Phase 7 Systemic / Ecological, Phase 8 Reflexive / Continuity, and Phase 9 Sovereign Products are preserved on dedicated branches.
 - The cumulative Phase 7–9 tree is preserved in the historical Core line `feat/sif-core-1.0.0-knowledge-semantic`, the canonical cumulative Core preservation branch. The current promoted application line is `feat/sif-adoption-layer-1.0.0`.
+- Final repository hardening: PR #39 pinned application CI GitHub Actions and the REIE PostgreSQL service image; PR #40 recorded the resulting enforcement/provenance state.
 - Phase 9 exact implementation HEAD: `e1a0b5d47caabd61016cad92b0bc31c83ef01693`.
 - Phase 9 promotion commit: `b9345786727cbd2692447d1ce53d472d7670b3df`.
 - Phase 8 promotion commit: `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
@@ -63,7 +64,7 @@ The connected GitHub administration surface currently reports no active Rulesets
 
 The current Phase 0–9 roadmap is closed. No Phase 10 is defined. No merge to `main`, package publication, release tag, production deployment, or direct external product integration is implied.
 
-All pull requests currently created in the repository are closed. PR #35 promoted REIE Governed Host 2.1.0 into the adoption line after exact-head verification. PR #33 promoted REIE Operational Platform 2.0.0 into the adoption line after exact-head verification. PRs #9–#13 completed the later promotion/hardening chain; PRs #14 onward completed final documentation reconciliation and cleanup. PRs #1–#6 are retained only as closed historical candidate records.
+All pull requests currently created in the repository are closed. PR #35 promoted REIE Governed Host 2.1.0 into the adoption line after exact-head verification. PR #33 promoted REIE Operational Platform 2.0.0 into the adoption line after exact-head verification. PRs #9–#13 completed the later promotion/hardening chain; PR #39 completed application CI supply-chain hardening; PR #40 recorded that final hardening in the canonical state documents. PRs #1–#6 are retained only as closed historical candidate records.
 
 ## Cleanup note
 

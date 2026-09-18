@@ -20,10 +20,11 @@
 ## Repository State
 - `main` remains the preserved Genesis line by deliberate release design.
 - Phases 2–9 are preserved on dedicated branches; the cumulative Phase 6 line contains the promoted Phase 7, Phase 8, and Phase 9 implementation.
-- All pull requests created so far are closed. PRs #9–#13 completed the later promotion/hardening chain; subsequent PRs completed final governance and documentation reconciliation.
+- All pull requests created so far are closed. PRs #9–#13 completed the later promotion/hardening chain; PR #39 completed application CI supply-chain hardening; PR #40 recorded that hardening in the canonical governance log.
 - Historical candidate PRs #1–#6 are all closed as superseded records; no implementation gate depends on them.
 - No open pull request or open issue remains in the current repository state.
 - The verified Phase 9 implementation branch remains available as exact source provenance.
+- The canonical application line received final CI supply-chain hardening: immutable GitHub Action pins, a verified PostgreSQL service-image digest, and Core verification on canonical application pull requests.
 - No unresolved repository issue or active promotion gate remains in the current Phase 0–9 roadmap.
 - Non-canonical historical and maintenance refs remain as inert repository refs. The available GitHub connector exposes branch creation/update but not branch-ref deletion, so they are intentionally preserved rather than removed through an unsafe workaround.
 
@@ -53,7 +54,7 @@ Dynamic CI run IDs, artifact IDs, artifact digests, and the current branch SHA a
 - No release tag has been created.
 - No production deployment or direct external product integration is claimed.
 - No production autonomous external action is claimed.
-- All pull requests created so far are closed. PRs #9–#13 completed the Phase 7→9 promotion/hardening chain; later pull requests were documentation/governance reconciliation only.
+- All pull requests created so far are closed. PRs #9–#13 completed the Phase 7→9 promotion/hardening chain; PR #39 completed application CI supply-chain hardening; PR #40 recorded the final hardening state.
 
 ## Explicit Unknown / Not Claimed
 - production distributed product-adapter deployment;

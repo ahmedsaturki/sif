@@ -5,6 +5,7 @@ on:
     branches:
       - "feat/sif-adoption-layer-1.0.0"
       - "feat/lara-os-reie-runtime-1.0.0"
+      - "feat/reie-ingestion-adapter-1.1.0"
       - "integration/**"
   pull_request:
     branches:

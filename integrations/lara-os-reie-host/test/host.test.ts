@@ -71,7 +71,7 @@ test("HOST-002 non-allowlisted agent fails through the SIF governance path", asy
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body[0].status, "FAILED");
-    assert.match(body[0].error, /Operation handler failed|not allowlisted|FAIL/);
+    assert.match(body[0].error, /SIF policy denied agent research/i);
   } finally {
     await host.server.stop();
     await rm(dir, { recursive: true, force: true });

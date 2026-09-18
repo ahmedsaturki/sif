@@ -68,7 +68,23 @@ test("REIE-ING002 text sources are preserved but not semantically guessed", asyn
   assert.equal(workspace.getState().entities.length, 0);
 });
 
-test("REIE-ING004 CSV requires explicit mapping", async () => {
+test("REIE-ING004 generated IDs stay source-scoped until resolution links them", async () => {
+  const content = JSON.stringify({
+    records: [{
+      entityType: "property",
+      canonicalName: "Galaxy Mall",
+      location: "Sadat City",
+      claims: [{ field: "propertyType", value: "mall" }]
+    }]
+  });
+  const a = new ReieWorkspace();
+  const b = new ReieWorkspace();
+  const ra = await ingestReieDocument(a, { sourceId: "s1", observedAt: NOW, mediaType: "application/json", content });
+  const rb = await ingestReieDocument(b, { sourceId: "s2", observedAt: NOW, mediaType: "application/json", content });
+  assert.notEqual(ra.entityIds[0], rb.entityIds[0]);
+});
+
+test("REIE-ING005 CSV requires explicit mapping", async () => {
   const workspace = new ReieWorkspace();
   await assert.rejects(
     () => ingestReieDocument(workspace, {
@@ -81,7 +97,7 @@ test("REIE-ING004 CSV requires explicit mapping", async () => {
   );
 });
 
-test("REIE-ING005 CSV mapping produces deterministic claims", async () => {
+test("REIE-ING006 CSV mapping produces deterministic claims", async () => {
   const workspace = new ReieWorkspace();
   const result = await ingestReieDocument(workspace, {
     sourceId: "csv-2",
@@ -104,7 +120,7 @@ test("REIE-ING005 CSV mapping produces deterministic claims", async () => {
   }), '{"canonicalName":"P","claims":[{"field":"x","value":1}],"entityType":"property"}');
 });
 
-test("REIE-ING006 generates evidence-linked research opportunities deterministically", async () => {
+test("REIE-ING007 generates evidence-linked research opportunities deterministically", async () => {
   const workspace = new ReieWorkspace();
   await ingestReieDocument(workspace, {
     sourceId: "s1",

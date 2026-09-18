@@ -242,9 +242,8 @@ test("OPS-010 governance identity changes when agent input changes", async () =>
   }};
   const orchestrator = new ReieAgentOrchestrator(governance);
   const agent = { id: "same", requestedCapabilities: [], run: () => ({ ok: true }) };
-  await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 1 } });
   const first = await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 1 } });
   const second = await orchestrator.run([agent], { workspace: new ReieWorkspace(), asOf: NOW, input: { value: 2 } });
-  assert.equal(calls.length, 4);
+  assert.equal(calls.length, 2);
   assert.notEqual(first[0]?.runId, second[0]?.runId);
 });

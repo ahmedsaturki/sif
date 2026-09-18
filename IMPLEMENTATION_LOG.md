@@ -59,7 +59,8 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 - The cumulative Phase 8+9 line was exact-head verified at `ec0a37072bca89313e15bd03a9902b145e3e801d` in Run `35255909084`, then promoted through PR #10 at merge commit `963a268e205fb0d2b0dcaf0e184a25ab91befd73`.
 - The cumulative Phase 7+8+9 line was exact-head verified at `963a268e205fb0d2b0dcaf0e184a25ab91befd73` in Run `35256086808`, then promoted through PR #9 into `feat/sif-core-1.0.0-knowledge-semantic` at merge commit `77a605a936115815c2e833f6c4667f0e353aefbd`.
 - Subsequent documentation reconciliations corrected current-state wording and historical evidence status without changing the verified Phase 0–9 implementation tree.
-- The canonical preservation branch `feat/sif-core-1.0.0-knowledge-semantic` is the authoritative current cumulative state.
+- The historical SIF Core preservation branch `feat/sif-core-1.0.0-knowledge-semantic` remains the authoritative frozen Core provenance.
+- The current promoted application line is `feat/sif-adoption-layer-1.0.0`.
 - Each promotion preserved the exact verified implementation tree; no merge to `main` was performed.
 - All pull requests created so far are closed. PRs #1–#6 remain superseded historical candidate records; PRs #9–#13 completed the later promotion/hardening chain; later pull requests were documentation/governance reconciliation only.
 
@@ -67,7 +68,7 @@ SIF Core progressed through the preserved kernel line, live PostgreSQL persisten
 
 The established SIF Core verification gate is exact checkout, strict build/tests, package acceptance coverage, live PostgreSQL integration, federated inbox crash-window characterization, PostgreSQL crash-window characterization, unpublished archive construction/verification, exact-head artifact provenance, upload, and cleanup.
 
-Earlier cumulative preservation heads were independently verified before promotion. The canonical preservation branch remains the authoritative current source state; its current HEAD is accepted as the final Phase 0–9 state only when the SIF Core CI run for that exact `head_sha` completes successfully.
+Earlier cumulative preservation heads were independently verified before promotion. The historical Core preservation branch remains the authoritative frozen Core source state, while `feat/sif-adoption-layer-1.0.0` is the authoritative promoted application source state. Each line is accepted only after its corresponding exact-head verification gate succeeds.
 
 Dynamic CI run IDs, artifact IDs, and the current branch SHA are deliberately not embedded in this mutable implementation log because doing so would require another state commit and invalidate the reference.
 
@@ -79,3 +80,13 @@ Non-canonical historical and maintenance refs remain in the repository; the avai
 `SPEC → IMPLEMENT → TEST → FIX → VERIFY → RELEASE → FREEZE → NEXT`
 
 Phase 0–9 is complete as the currently defined roadmap. No Phase 10 is currently defined.
+
+
+## Current Application Realization — REIE 2.1.0
+
+- REIE Operational Platform 2.0.0 and the Governed Host 2.1.0 were implemented above the SIF Adoption Layer without changing the frozen SIF Core.
+- PR #35 promoted the governed host and durable source-provenance boundary at merge commit `809d602542f26df38333fafded3e14227bca183d`.
+- PR #36 recorded and froze the release at merge commit `7ecca31ccabab009b1db56f8c76fa9f1a904dd7e`.
+- The current promoted application line is `feat/sif-adoption-layer-1.0.0`.
+- Post-merge SIF Core CI #821 and SIF Adoption Layer CI #94 both passed on `7ecca31ccabab009b1db56f8c76fa9f1a904dd7e`.
+- The current application release includes the governed REIE host, browser collection boundary, durable raw-source artifacts, governance-deny enforcement, client-error status mapping, and operational journal idempotency hardening.

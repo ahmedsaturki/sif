@@ -191,9 +191,16 @@ function normalizeRecord(record: ReieIngestionRecord, sourceId: string, observed
     throw new ReieIngestionError("INVALID_RECORD", "Claim field must not be empty");
   }
 
-  const generatedEntityId = "entity:" + sha256({ entityType, canonicalName, location: location ?? "" });
+  const generatedEntityId = "entity:" + sha256({
+    sourceId,
+    recordId: record.recordId ?? null,
+    entityType,
+    canonicalName,
+    location: location ?? "",
+  });
+  const normalizedRecordId = record.recordId ? trimRequired("recordId", record.recordId) : undefined;
   return {
-    ...(record.recordId ? { recordId: trimRequired("recordId", record.recordId) } : {}),
+    ...(normalizedRecordId ? { recordId: normalizedRecordId } : {}),
     entityId: record.entityId?.trim() || generatedEntityId,
     entityType,
     canonicalName,

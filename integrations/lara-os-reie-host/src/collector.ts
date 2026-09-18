@@ -10,9 +10,23 @@ export interface ReiePublicCollectionResult {
 }
 
 export class ReiePublicSourceCollector {
+  private readonly browser: ReiePlaywrightBrowserWorker;
+  private readonly workspace: {
+    ingestDocument(document: {
+      sourceId: string;
+      uri: string;
+      title: string;
+      publisher?: string;
+      observedAt: string;
+      content: string;
+      mediaType: "text/plain";
+    }): Promise<unknown>;
+  };
+  private readonly artifacts?: ReieSourceArtifactStore;
+
   constructor(
-    private readonly browser: ReiePlaywrightBrowserWorker,
-    private readonly workspace: {
+    browser: ReiePlaywrightBrowserWorker,
+    workspace: {
       ingestDocument(document: {
         sourceId: string;
         uri: string;
@@ -23,8 +37,12 @@ export class ReiePublicSourceCollector {
         mediaType: "text/plain";
       }): Promise<unknown>;
     },
-    private readonly artifacts?: ReieSourceArtifactStore,
-  ) {}
+    artifacts?: ReieSourceArtifactStore,
+  ) {
+    this.browser = browser;
+    this.workspace = workspace;
+    this.artifacts = artifacts;
+  }
 
   async collect(sourceId: string, uri: string): Promise<ReiePublicCollectionResult> {
     if (!sourceId.trim()) throw new Error("sourceId must not be empty");

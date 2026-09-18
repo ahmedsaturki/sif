@@ -1,49 +1,69 @@
-# Lara OS / REIE Runtime
+# Lara OS / REIE Runtime 1.0.0
 
-Local-first, dependency-free foundation for Real Estate Intelligence & Entity research.
+Local-first Real Estate Intelligence & Entity research runtime with an explicit SIF governance boundary.
 
-## Scope
+## Delivered capability
 
-The runtime currently provides deterministic local primitives for:
-
-- source registration with content digests
-- canonical entity upsert and collision detection
-- claim storage with source provenance
+- append-only JSONL persistence with hash-chain verification
+- deterministic canonical JSON and SHA-256 identity utilities
+- source registration with provenance/content digests
+- canonical entity upsert and collision protection
+- claim recording with source references
 - deterministic knowledge queries
-- deterministic corroboration/confidence evaluation
-- an explicit SIF invocation boundary for policy, knowledge, and evaluation operations
-
-It does not scrape websites, automate browsers, store credentials, call paid AI APIs, or perform external side effects.
+- evidence-bearing entity resolution candidates; no automatic merge
+- corroboration, missing-field, freshness, and observed price-change signals
+- research-priority signal generation
+- optional public HTTP(S) text/JSON source fetch with size and timeout limits
+- snapshot export and validated import
+- zero-dependency Node CLI
+- SIF policy, knowledge, evaluation, systemic, and continuity invocation boundaries
 
 ## Architecture
 
 ```text
-Local source/entity/claim data
-            |
-            v
-      REIE Runtime
-            |
-            v
-     explicit SIF bridge
-            |
-            v
-       SIF Adoption
-            |
-            v
-         SIF Core
+Local / public source adapter
+          |
+          v
+    REIE Local Core
+          |
+     provenance +
+ deterministic state
+          |
+          v
+    SIF Adoption Layer
+          |
+          v
+       SIF Core
 ```
 
-The runtime is intentionally useful without SIF for local research, while SIF remains the authority boundary when governed operations are requested.
+SIF remains the authority boundary for governed operations. REIE does not silently obtain credentials, broaden authority, merge entities automatically, or perform external side effects.
 
-## Build
+## CLI
 
-The only build-time tool is the TypeScript compiler already provided by the SIF Core workspace.
+After building:
 
 ```sh
 ./packages/sif-core/node_modules/.bin/tsc -p integrations/lara-os-reie-runtime/tsconfig.json
-node --test integrations/lara-os-reie-runtime/dist/test/*.test.js
+node integrations/lara-os-reie-runtime/dist/cli.js init ./reie-data/events.jsonl
+node integrations/lara-os-reie-runtime/dist/cli.js demo ./reie-data/events.jsonl
+node integrations/lara-os-reie-runtime/dist/cli.js health ./reie-data/events.jsonl
+node integrations/lara-os-reie-runtime/dist/cli.js query ./reie-data/events.jsonl "Galaxy Sadat"
+node integrations/lara-os-reie-runtime/dist/cli.js evaluate ./reie-data/events.jsonl demo-property-1
+node integrations/lara-os-reie-runtime/dist/cli.js signals ./reie-data/events.jsonl demo-property-1
 ```
 
-## Next expansion
+## Data model
 
-Future adapters can add browser/source ingestion, PostgreSQL persistence, entity extraction, deduplication, price history, opportunity detection, and agent workers without changing the local core contract.
+`Source -> Entity -> Claim -> Evidence-derived signal`
+
+A claim always references an entity and a registered source. Source content identity is represented by a SHA-256 digest.
+
+## Safety and boundaries
+
+The Local Core does not include browser automation, credential storage, paid AI APIs, autonomous external actions, or automatic entity merging.
+
+The public fetch adapter accepts only HTTP(S) URLs and textual responses, uses bounded reads/timeouts, sends no credentials, and does not expose a crawler.
+
+## Future adapters
+
+Browser workers, PostgreSQL persistence, model inference, entity extraction, and agent orchestration can be added above this core without changing the provenance and authority contracts.

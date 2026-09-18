@@ -90,7 +90,7 @@ const iso = (name: string, value: string): string => {
 };
 
 const stableTokens = (value: string): string[] =>
-  [...new Set(value.toLocaleLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean))].sort();
+  [...new Set(value.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean))].sort();
 
 const clone = <T>(value: T): T => structuredClone(value);
 
@@ -131,6 +131,17 @@ export class InMemoryReieStore {
     const indexed = this.canonicalIndex.get(key);
     if (indexed && indexed !== entityId) {
       throw new ReieRuntimeError("CONFLICT", "Canonical entity already maps to " + indexed);
+    }
+    const previous = this.entities.get(entityId);
+    if (previous) {
+      const previousKey = this.canonicalKey(
+        previous.entityType,
+        previous.canonicalName,
+        previous.location ?? "",
+      );
+      if (previousKey !== key && this.canonicalIndex.get(previousKey) === entityId) {
+        this.canonicalIndex.delete(previousKey);
+      }
     }
     const value: ReieEntity = {
       entityId,
@@ -315,6 +326,44 @@ export class LaraOsReieRuntime {
       "evaluation.run",
       ["sif.evaluation.run"],
       ["product:lara:execute"],
+      payload,
+      requestId,
+      evidenceIds,
+      requestedAt,
+      correlationId,
+    );
+  }
+
+  async systemicQuery(
+    payload: unknown,
+    requestId: string,
+    evidenceIds: readonly string[],
+    requestedAt: string,
+    correlationId = requestId,
+  ): Promise<ReieSifResultLike> {
+    return this.callSif(
+      "systemic.query",
+      ["sif.systemic.query"],
+      ["product:lara:read"],
+      payload,
+      requestId,
+      evidenceIds,
+      requestedAt,
+      correlationId,
+    );
+  }
+
+  async continuityRead(
+    payload: unknown,
+    requestId: string,
+    evidenceIds: readonly string[],
+    requestedAt: string,
+    correlationId = requestId,
+  ): Promise<ReieSifResultLike> {
+    return this.callSif(
+      "continuity.read",
+      ["sif.continuity.read"],
+      ["product:lara:read"],
       payload,
       requestId,
       evidenceIds,

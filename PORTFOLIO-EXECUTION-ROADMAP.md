@@ -54,7 +54,7 @@ Consumers own:
 | Sadat MLS | `main` is `d479181268185fd2558bff98b223b8be4467dd60`; no open PRs/issues; Vercel production deployment `dpl_G39fyD8yi9My4otqFmiZg4AX2NHr` is READY on that main commit; live `/api/health`, `/api/properties`, and `/en/explore` checks returned HTTP 200 on 2026-09-19; no runtime errors in the last 24h | Keep stable; CI runner-admission failures remain infrastructure/account evidence, not application failures |
 | Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |
 | Nabatos Agri Platform | Production deployment verified responding successfully | Keep stable |
-| Meta Operations Runtime | `main` is `fa180570495f6bf824a20a393af5481127679571`; no open PRs/issues; Self-hosted Full Qualification #7 and Workflow Health Monitor #544 succeed; hosted-only gates still show runner-admission failures before steps | Keep stable; remaining production/live items stay explicitly external and gated |
+| Meta Operations Runtime | `main` is `8429a0bc40ae9cc98cc06eedb99f66019c94360f`; no open PRs/issues; Self-hosted Full Qualification #7 and Workflow Health Monitor #544 succeed; the latest main change is documentation reconciliation; hosted-only gates still show runner-admission failures before steps | Keep stable; remaining production/live items stay explicitly external and gated |
 | Lara OS / REIE | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 | QADRIX / QRX | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 

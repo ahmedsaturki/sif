@@ -48,7 +48,7 @@ Consumers own:
 | System | Current verified state | Action |
 | --- | --- | --- |
 | SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
-| ai-team-v1 | PR #76 remains open at `b330e7056202cd52c31b4b7a5c0d9d1a29c60646`; CRM cross-account contract/meeting ownership invariants were hardened and tests added; source hardening is present; repeated CI runs fail before runner allocation (`runner_id=0`, empty runner, zero steps) | Restore GitHub Actions runner admission before merge |
+| ai-team-v1 | PR #76 remains open at `102e58d67ebe1e632abfc8edfa758769cc6579cb`; CRM cross-account contract/meeting invariants plus complete-proposal validation were hardened with regression tests; source hardening is present; repeated CI runs fail before runner allocation (`runner_id=0`, empty runner, zero steps) | Restore GitHub Actions runner admission before merge |
 | Sovereign Library | `main` is `9e5267dc2b1d86350b529e1955c3993603ab3f5a`; PR #125/#128/#130/#131/#132 are merged; control-plane state and verified release inventory are reconciled | Maintain release/evidence truth; next Cube remains governance-gated |
 | Aqarat | Current Vercel production deployment `dpl_3Fp3hBNzKFeYvrSToiCqd5LmKtLm` is READY on `main` commit `3d2d3aaf6b2f7fb9d73a68da9d2c30aebadcdeda`; no current runtime errors on that deployment; older 2026-09-18 failures were tied to prior deployments and are not evidence of a current outage | Keep stable; historical error clusters remain documented |
 | Sadat MLS | `main` is `9f05ccf275c30a588f91f902fb5db3c2ecd1973f`; PR #17 is merged; Vercel production deployment `dpl_FJbXDR2jgtcYQrog3suJEJgVEF9c` is READY on that main commit; prior `/api/health` and `/en/explore` smoke checks returned HTTP 200 on 2026-09-19 | Keep stable; CI runner admission remains an infrastructure/account gate rather than a reason to revert |
@@ -67,7 +67,7 @@ Sovereign Library currently reports 74 published, non-draft, non-prerelease GitH
 The active consolidation is **PR #76**:
 
 - Head branch: `feat/current-main-integration-wave`
-- Latest observed head: `b330e7056202cd52c31b4b7a5c0d9d1a29c60646`
+- Latest observed head: `102e58d67ebe1e632abfc8edfa758769cc6579cb`
 - Base: `main` at `436eba05bd876ff54bf2c19fd1407b3759725b65`
 - Semgrep: successful
 - Build check: repeatedly failing before useful job execution on the current workflow path; retries produced immediate workflow failure without actionable job steps/logs

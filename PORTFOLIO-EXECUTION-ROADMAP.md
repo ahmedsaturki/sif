@@ -48,8 +48,8 @@ Consumers own:
 | System | Current verified state | Action |
 | --- | --- | --- |
 | SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
-| ai-team-v1 | PR #76 is still open at `5f642f72722a4c8cdcfd6f00081dbd3a10c3ffc2`; source hardening is present, but GitHub Actions fails before any step/runner execution (`runner_id=0`, empty runner, zero steps) | Restore CI admission before merge |
-| Sovereign Library | `main` is `eb1a2e52f106f14b351e9575119413a19a15398a`; PR #125 and PR #128 are merged; PR #130 is open for release-inventory reconciliation; verify/security/phase3 are green and release-engineering has one queued macOS job | Finish PR #130 CI, then keep release state synchronized |
+| ai-team-v1 | PR #76 remains open at `5f642f72722a4c8cdcfd6f00081dbd3a10c3ffc2`; source hardening is present; repeated CI runs fail before runner allocation (`runner_id=0`, empty runner, zero steps) | Restore GitHub Actions runner admission before merge |
+| Sovereign Library | `main` is `e92bfbad885d9615c96d971a45b1487b17fe18a4`; PR #125/#128/#130/#131 are merged; control-plane state is reconciled; verified release inventory is 74 published GitHub Release objects with 8 uploaded `.tgz` asset-backed releases and 66 without assets | Maintain release/evidence truth; next Cube remains governance-gated |
 | Aqarat | Production previously verified healthy; no open PR/issue in connected repo state | Keep stable; modify only on evidence |
 | Sadat MLS | `main` is `b44325cf07f9451528874e0e24164a3123d4ba1f` after merged PR #16; live `/api/health` and `/en/explore` returned HTTP 200 on 2026-09-19; PR #17 documents source-vs-production state and is awaiting CI | Complete CI before merging documentation reconciliation |
 | Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |

@@ -48,10 +48,10 @@ Consumers own:
 | System | Current verified state | Action |
 | --- | --- | --- |
 | SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
-| ai-team-v1 | PR #76 remains open at `5f642f72722a4c8cdcfd6f00081dbd3a10c3ffc2`; source hardening is present; repeated CI runs fail before runner allocation (`runner_id=0`, empty runner, zero steps) | Restore GitHub Actions runner admission before merge |
+| ai-team-v1 | PR #76 remains open at `b330e7056202cd52c31b4b7a5c0d9d1a29c60646`; CRM cross-account contract/meeting ownership invariants were hardened and tests added; source hardening is present; repeated CI runs fail before runner allocation (`runner_id=0`, empty runner, zero steps) | Restore GitHub Actions runner admission before merge |
 | Sovereign Library | `main` is `9e5267dc2b1d86350b529e1955c3993603ab3f5a`; PR #125/#128/#130/#131/#132 are merged; control-plane state and verified release inventory are reconciled | Maintain release/evidence truth; next Cube remains governance-gated |
-| Aqarat | Production previously verified healthy; no open PR/issue in connected repo state | Keep stable; modify only on evidence |
-| Sadat MLS | `main` is `b44325cf07f9451528874e0e24164a3123d4ba1f` after merged PR #16; live `/api/health` and `/en/explore` returned HTTP 200 on 2026-09-19; PR #17 documents source-vs-production state and is awaiting CI | Complete CI before merging documentation reconciliation |
+| Aqarat | Current Vercel production deployment `dpl_3Fp3hBNzKFeYvrSToiCqd5LmKtLm` is READY on `main` commit `3d2d3aaf6b2f7fb9d73a68da9d2c30aebadcdeda`; no current runtime errors on that deployment; older 2026-09-18 failures were tied to prior deployments and are not evidence of a current outage | Keep stable; historical error clusters remain documented |
+| Sadat MLS | `main` is `9f05ccf275c30a588f91f902fb5db3c2ecd1973f`; PR #17 is merged; Vercel production deployment `dpl_FJbXDR2jgtcYQrog3suJEJgVEF9c` is READY on that main commit; prior `/api/health` and `/en/explore` smoke checks returned HTTP 200 on 2026-09-19 | Keep stable; CI runner admission remains an infrastructure/account gate rather than a reason to revert |
 | Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |
 | Nabatos Agri Platform | Production deployment verified responding successfully | Keep stable |
 | Meta Operations Runtime | PR #70 is open at `c39642fe8d0d7ee973d50a01b2f5d95266486f65` with guarded Facebook read-only capabilities; CI/Security Gate still fail before workflow step/runner execution (`runner_id=0`, zero steps) | Restore CI admission, then qualify live evidence before promotion |
@@ -67,7 +67,7 @@ Sovereign Library currently reports 74 published, non-draft, non-prerelease GitH
 The active consolidation is **PR #76**:
 
 - Head branch: `feat/current-main-integration-wave`
-- Latest observed head: `2550250da1da3e80076809fd0d5bca3fd2dc8562`
+- Latest observed head: `b330e7056202cd52c31b4b7a5c0d9d1a29c60646`
 - Base: `main` at `436eba05bd876ff54bf2c19fd1407b3759725b65`
 - Semgrep: successful
 - Build check: repeatedly failing before useful job execution on the current workflow path; retries produced immediate workflow failure without actionable job steps/logs
@@ -111,11 +111,11 @@ The wave deliberately excludes the old simulated vertical-workforce scaffold.
 
 ## 4. Sovereign Library current state
 
-PR #125 is merged. Current `main` is `eb1a2e52f106f14b351e9575119413a19a15398a`; PR #130 is the active release-state documentation reconciliation.
+PR #125/#128/#130/#131/#132 are merged. Current `main` is `9e5267dc2b1d86350b529e1955c3993603ab3f5a`; release-state inventory is reconciled.
 
 Latest merged main head:
 
-`eb1a2e52f106f14b351e9575119413a19a15398a`
+`9e5267dc2b1d86350b529e1955c3993603ab3f5a`
 
 Verified current-head workflows include successful:
 
@@ -137,7 +137,7 @@ Android was still running in the latest observed check snapshot and had also pro
 Release-state status is **under reconciliation**:
 
 - PR #125's exact-head security/verification wave completed successfully before merge.
-- PR #130 has successful security-pipeline, phase3, and verify runs; one release-engineering macOS job remained queued during the latest poll.
+- Current release/evidence state is reconciled after the PR #132 merge epoch; four canonical workflows on the pre-merge exact head had terminal success before the documentation-only epoch reconciliation.
 - The verified release inventory is 74 published GitHub Release objects, 8 with uploaded `.tgz` assets and 66 without assets.
 
 Therefore:

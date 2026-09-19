@@ -49,7 +49,7 @@ Consumers own:
 | --- | --- | --- |
 | SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
 | ai-team-v1 | PR #76 remains open at `5f642f72722a4c8cdcfd6f00081dbd3a10c3ffc2`; source hardening is present; repeated CI runs fail before runner allocation (`runner_id=0`, empty runner, zero steps) | Restore GitHub Actions runner admission before merge |
-| Sovereign Library | `main` is `e92bfbad885d9615c96d971a45b1487b17fe18a4`; PR #125/#128/#130/#131 are merged; control-plane state is reconciled; verified release inventory is 74 published GitHub Release objects with 8 uploaded `.tgz` asset-backed releases and 66 without assets | Maintain release/evidence truth; next Cube remains governance-gated |
+| Sovereign Library | `main` is `9e5267dc2b1d86350b529e1955c3993603ab3f5a`; PR #125/#128/#130/#131/#132 are merged; control-plane state and verified release inventory are reconciled | Maintain release/evidence truth; next Cube remains governance-gated |
 | Aqarat | Production previously verified healthy; no open PR/issue in connected repo state | Keep stable; modify only on evidence |
 | Sadat MLS | `main` is `b44325cf07f9451528874e0e24164a3123d4ba1f` after merged PR #16; live `/api/health` and `/en/explore` returned HTTP 200 on 2026-09-19; PR #17 documents source-vs-production state and is awaiting CI | Complete CI before merging documentation reconciliation |
 | Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |

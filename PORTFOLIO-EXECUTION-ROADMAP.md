@@ -43,20 +43,24 @@ Consumers own:
 - product KPIs
 - customer-facing semantics
 
-## 2. Current verified portfolio state — 2026-09-18
+## 2. Current verified portfolio state — 2026-09-19
 
 | System | Current verified state | Action |
 | --- | --- | --- |
 | SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
-| ai-team-v1 | `main` remains `436eba05bd876ff54bf2c19fd1407b3759725b65`; legacy PR backlog consolidated; only PR #76 remains open with current-main product/governance wave; latest wave HEAD `2550250da1da3e80076809fd0d5bca3fd2dc8562` includes Project/Delivery/MLS/Workforce hardening | Finish CI/reconciliation before merge |
-| Sovereign Library | `main` is `8e60dc2bc280c49fe1ac546ce99fcb27626b1980`; PR #125 remains governed/open; current PR head `5f9913af91218948fb9493cabce4905cac2f2015`; phase3 is green and the refreshed verification wave is active; security workflow fails before creating job steps | Resolve workflow/security gate, then follow repository authorization |
+| ai-team-v1 | PR #76 is still open at `5f642f72722a4c8cdcfd6f00081dbd3a10c3ffc2`; source hardening is present, but GitHub Actions fails before any step/runner execution (`runner_id=0`, empty runner, zero steps) | Restore CI admission before merge |
+| Sovereign Library | `main` is `eb1a2e52f106f14b351e9575119413a19a15398a`; PR #125 and PR #128 are merged; PR #130 is open for release-inventory reconciliation; verify/security/phase3 are green and release-engineering has one queued macOS job | Finish PR #130 CI, then keep release state synchronized |
 | Aqarat | Production previously verified healthy; no open PR/issue in connected repo state | Keep stable; modify only on evidence |
-| Sadat MLS | Production deployment previously verified; health endpoint returned 200; no open PR/issue | Keep stable; monitor and fix only evidence-backed defects |
+| Sadat MLS | `main` is `b44325cf07f9451528874e0e24164a3123d4ba1f` after merged PR #16; live `/api/health` and `/en/explore` returned HTTP 200 on 2026-09-19; PR #17 documents source-vs-production state and is awaiting CI | Complete CI before merging documentation reconciliation |
 | Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |
 | Nabatos Agri Platform | Production deployment verified responding successfully | Keep stable |
-| Meta Operations Runtime | Core/repository qualification substantially complete; PR #70 HEAD `698df7d3fdba7fd9ce4e7fd0b9ba7f1b70220c82` adds Facebook page/profile/media read-only capability implementation and registry dispatch; live evidence and side-effect gates remain separate | Finish CI on PR #70, then promote only with authorized live evidence |
+| Meta Operations Runtime | PR #70 is open at `c39642fe8d0d7ee973d50a01b2f5d95266486f65` with guarded Facebook read-only capabilities; CI/Security Gate still fail before workflow step/runner execution (`runner_id=0`, zero steps) | Restore CI admission, then qualify live evidence before promotion |
 | Lara OS / REIE | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 | QADRIX / QRX | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
+
+## 2A. Verified release inventory signal — 2026-09-19
+
+Sovereign Library currently reports 74 published, non-draft, non-prerelease GitHub Release objects. Eight have uploaded `.tgz` assets; 66 have no release assets. The first two authorized candidates are asset-backed. A Release object without an uploaded artifact is not treated as complete package-distribution evidence.
 
 ## 3. ai-team-v1 current-main execution state
 
@@ -107,11 +111,11 @@ The wave deliberately excludes the old simulated vertical-workforce scaffold.
 
 ## 4. Sovereign Library current state
 
-PR #125 remains governed and open.
+PR #125 is merged. Current `main` is `eb1a2e52f106f14b351e9575119413a19a15398a`; PR #130 is the active release-state documentation reconciliation.
 
-Latest verified head:
+Latest merged main head:
 
-`5f9913af91218948fb9493cabce4905cac2f2015`
+`eb1a2e52f106f14b351e9575119413a19a15398a`
 
 Verified current-head workflows include successful:
 
@@ -130,16 +134,15 @@ Verified current-head workflows include successful:
 
 Android was still running in the latest observed check snapshot and had also produced prior successful completed runs.
 
-Security status is **not closed**:
+Release-state status is **under reconciliation**:
 
-- the recorded CodeQL result reports 3 High and 2 Medium new alerts plus lower-severity findings
-- the separate security-pipeline workflow had a failure
-- the available GitHub Actions connector did not expose the required actionable job logs for that security run
-- a retry of that old security run was rejected by GitHub
+- PR #125's exact-head security/verification wave completed successfully before merge.
+- PR #130 has successful security-pipeline, phase3, and verify runs; one release-engineering macOS job remained queued during the latest poll.
+- The verified release inventory is 74 published GitHub Release objects, 8 with uploaded `.tgz` assets and 66 without assets.
 
 Therefore:
 
-> No merge, tag, or external publication is asserted as complete until a current security run is terminal-green and the repository's governance gate allows it.
+> Release objects and artifact-backed distribution are tracked separately; external ecosystem publication remains a distinct gate.
 
 ## 5. SIF adoption contract
 

@@ -48,13 +48,13 @@ Consumers own:
 | System | Current verified state | Action |
 | --- | --- | --- |
 | SIF | Adoption boundary complete; tests and portfolio roadmap present on `main` | Freeze foundation; consume it |
-| ai-team-v1 | PR #76 remains open at `102e58d67ebe1e632abfc8edfa758769cc6579cb`; CRM cross-account contract/meeting invariants plus complete-proposal validation were hardened with regression tests; source hardening is present; repeated CI runs fail before runner allocation (`runner_id=0`, empty runner, zero steps) | Restore GitHub Actions runner admission before merge |
-| Sovereign Library | `main` is `9e5267dc2b1d86350b529e1955c3993603ab3f5a`; PR #125/#128/#130/#131/#132 are merged; control-plane state and verified release inventory are reconciled | Maintain release/evidence truth; next Cube remains governance-gated |
+| ai-team-v1 | `main` is `4e6d0a51a91794ccefb8f9894613cd12da9023ac`; PR #76 has been merged and the latest main CI run is successful; no open PRs/issues | Keep stable; take the next product requirement only when evidence exists |
+| Sovereign Library | `main` is `9e5267dc2b1d86350b529e1955c3993603ab3f5a`; no open PRs/issues; active `protect-main-required-ci` ruleset protects `main` with PR review, deletion/force-push prevention, and the Ubuntu/Windows/macOS-15-Intel verify matrix | Maintain release/evidence truth; next Cube remains governance-gated |
 | Aqarat | Current Vercel production deployment `dpl_3Fp3hBNzKFeYvrSToiCqd5LmKtLm` is READY on `main` commit `3d2d3aaf6b2f7fb9d73a68da9d2c30aebadcdeda`; no current runtime errors on that deployment; older 2026-09-18 failures were tied to prior deployments and are not evidence of a current outage | Keep stable; historical error clusters remain documented |
-| Sadat MLS | `main` is `9f05ccf275c30a588f91f902fb5db3c2ecd1973f`; PR #17 is merged; Vercel production deployment `dpl_FJbXDR2jgtcYQrog3suJEJgVEF9c` is READY on that main commit; prior `/api/health` and `/en/explore` smoke checks returned HTTP 200 on 2026-09-19 | Keep stable; CI runner admission remains an infrastructure/account gate rather than a reason to revert |
+| Sadat MLS | `main` is `d479181268185fd2558bff98b223b8be4467dd60`; no open PRs/issues; Vercel production deployment `dpl_G39fyD8yi9My4otqFmiZg4AX2NHr` is READY on that main commit; live `/api/health`, `/api/properties`, and `/en/explore` checks returned HTTP 200 on 2026-09-19; no runtime errors in the last 24h | Keep stable; CI runner-admission failures remain infrastructure/account evidence, not application failures |
 | Nabatatos / Ayar | Production deployment verified responding successfully | Keep stable |
 | Nabatos Agri Platform | Production deployment verified responding successfully | Keep stable |
-| Meta Operations Runtime | PR #70 is open at `c39642fe8d0d7ee973d50a01b2f5d95266486f65` with guarded Facebook read-only capabilities; CI/Security Gate still fail before workflow step/runner execution (`runner_id=0`, zero steps) | Restore CI admission, then qualify live evidence before promotion |
+| Meta Operations Runtime | `main` is `fa180570495f6bf824a20a393af5481127679571`; no open PRs/issues; Self-hosted Full Qualification #7 and Workflow Health Monitor #544 succeed; hosted-only gates still show runner-admission failures before steps | Keep stable; remaining production/live items stay explicitly external and gated |
 | Lara OS / REIE | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 | QADRIX / QRX | No direct connected source repo found | Do not invent implementation; integrate when source is actually connected |
 
@@ -64,13 +64,7 @@ Sovereign Library currently reports 74 published, non-draft, non-prerelease GitH
 
 ## 3. ai-team-v1 current-main execution state
 
-The active consolidation is **PR #76**:
-
-- Head branch: `feat/current-main-integration-wave`
-- Latest observed head: `102e58d67ebe1e632abfc8edfa758769cc6579cb`
-- Base: `main` at `436eba05bd876ff54bf2c19fd1407b3759725b65`
-- Semgrep: successful
-- Build check: repeatedly failing before useful job execution on the current workflow path; retries produced immediate workflow failure without actionable job steps/logs
+PR #76 has been merged. Current `main` is `4e6d0a51a91794ccefb8f9894613cd12da9023ac` and the latest main CI run (#235) succeeded. No PRs or issues remain open.
 
 The wave contains the current-main versions of:
 
@@ -132,12 +126,12 @@ Verified current-head workflows include successful:
 - load checks
 - SBOM/licensing/API/backward-compatibility plans
 
-Android was still running in the latest observed check snapshot and had also produced prior successful completed runs.
+Current-head verification runs are successful; no in-progress Android run is treated as pending from this reconciliation snapshot.
 
-Release-state status is **under reconciliation**:
+Release-state status is **reconciled**:
 
 - PR #125's exact-head security/verification wave completed successfully before merge.
-- Current release/evidence state is reconciled after the PR #132 merge epoch; four canonical workflows on the pre-merge exact head had terminal success before the documentation-only epoch reconciliation.
+- Current release/evidence state is reconciled after the PR #132 merge epoch; the current verification, phase3, release-engineering, and security-pipeline runs are terminally successful.
 - The verified release inventory is 74 published GitHub Release objects, 8 with uploaded `.tgz` assets and 66 without assets.
 
 Therefore:
@@ -287,7 +281,7 @@ Portfolio handoff is complete when:
 
 ## 12. Current decision
 
-SIF is frozen as a reusable foundation.
+SIF is frozen as a reusable foundation, and this roadmap was reconciled against connected repository state on 2026-09-19.
 
 The active engineering focus is now consumer/product completion and evidence closure, not another SIF rebuild.
 
